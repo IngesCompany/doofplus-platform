@@ -5,7 +5,12 @@
     import java.math.BigDecimal;
     import java.util.regex.Pattern;
 
-    @Embeddable
+    /**
+     * Value object representing a Quantity.
+     *
+     * @param value the quantity value
+     * @param unit  the unit of measurement
+     */
     public record Quantity(BigDecimal value, String unit) {
         private static final int MAX_LENGTH = 10;
         private static final Pattern ALLOWED_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]+$");
