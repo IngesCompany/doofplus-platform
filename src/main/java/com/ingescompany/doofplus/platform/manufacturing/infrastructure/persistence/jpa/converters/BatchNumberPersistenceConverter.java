@@ -5,7 +5,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter
-public class BatchNumberAttributeConverter implements AttributeConverter<BatchNumber, String> {
+public class BatchNumberPersistenceConverter implements AttributeConverter<BatchNumber, String> {
     @Override
     public String convertToDatabaseColumn(BatchNumber attribute) {
         return attribute == null ? null : attribute.value();
