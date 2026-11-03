@@ -1,24 +1,18 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects;
 
-import java.util.regex.Pattern;
+import org.jspecify.annotations.NotNull;
 
 /**
- * Value object representing a device ID.
- *
- * @param value the device ID value
+ * Value object representing a device identifier
  */
-public record DeviceId(String value) {
-    private static final int MAX_LENGTH = 128;
-    private static final Pattern ALLOWED_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]+$");
-    private static final String NOT_BLANK_MESSAGE_KEY = "monitoring.sensor.error.deviceId.notBlank";
-    private static final String SIZE_MESSAGE_KEY = "monitoring.sensor.error.deviceId.size";
-    private static final String PATTERN_MESSAGE_KEY = "monitoring.sensor.error.deviceId.pattern";
-
+@NullMMarked
+public record DeviceId(Long deviceId) {
+    /**
+     * Compact constructor
+     */
     public DeviceId {
-        if (value == null || value.isBlank()) { throw new IllegalArgumentException(NOT_BLANK_MESSAGE_KEY); }
-
-        if (value.length() > MAX_LENGTH) { throw new IllegalArgumentException(SIZE_MESSAGE_KEY); }
-
-        if (!ALLOWED_PATTERN.matcher(value).matches()) { throw new IllegalArgumentException(PATTERN_MESSAGE_KEY); }
+        if (deviceId == null || deviceId < 1) {
+            throw new IllegalArgumentException("Device id cannot be null or less than 1");
+        }
     }
 }
