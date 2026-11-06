@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.queries;
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.AlertCode;
+
 /**
  * Query to retrieve a monitoring alert by alert code.
  *
