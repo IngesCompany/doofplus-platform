@@ -1,7 +1,5 @@
     package com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects;
 
-    import jakarta.persistence.Embeddable;
-
     import java.math.BigDecimal;
     import java.util.regex.Pattern;
 
