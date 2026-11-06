@@ -44,9 +44,8 @@ public class Incident {
      * Constructor for Incident.
      * @param description The description of the incident.
      * @param severity The severity level of the incident.
-     * @param status The current status of the incident.
      */
-    public Incident(String description, IncidentSeverity severity, IncidentStatus status) {
+    public Incident(String description, IncidentSeverity severity) {
         this.description = Objects.requireNonNull(description, "description must not be null");
         this.severity = Objects.requireNonNull(severity, "severity must not be null");
         this.status = IncidentStatus.OPEN;
