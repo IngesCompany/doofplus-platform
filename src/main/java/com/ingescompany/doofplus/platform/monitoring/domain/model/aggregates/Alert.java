@@ -3,71 +3,48 @@ package com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.AlertCode;
-import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.Instant;
+import java.util.Objects;
+
 /**
- * Represents an alert raised when a telemetry reading exceeds acceptable limits
- * or equipment monitoring anomalies are detected.
+ * Alert Aggregate Root.
+ *
+ * <p>Represents an alert raised when a telemetry reading exceeds acceptable limits
+ * or equipment monitoring anomalies are detected. Follows Domain-Driven Design principles
+ * with zero persistence or framework annotations. Persistence concerns are handled
+ * exclusively by {@code AlertPersistenceEntity}.</p>
  */
 @Getter
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "alerts", uniqueConstraints = { @UniqueConstraint(columnNames = { "code" }, name = Alert.ALERT_CODE_UNIQUE_CONSTRAINT) } )
-
 public class Alert {
-    public static final String ALERT_CODE_UNIQUE_CONSTRAINT = "uk_alert_code";
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    @Convert(converter = AlertCodeAttributeConverter.class)
     private AlertCode code;
-    @Column(nullable = false)
     private String sensorCode;
-    @Column(nullable = false)
     private String equipmentCode;
-    @Column(nullable = false)
     private String severity;
-    @Column(nullable = false)
     private String status;
-    @Column(nullable = false)
     private String title;
-    @Column(length = 1000)
     private String detail;
-    @Column
     private String batchCode;
-    @Column
     private String acknowledgedBy;
-    @Column
     private String acknowledgedAt;
-    @Column(length = 1000)
     private String responseNote;
-    @Column
     private String linkedRecord;
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
-    protected Alert() {}
+
     /**
      * Creates an alert aggregate from a create command.
      *
      * @param command creation command
      */
     public Alert(CreateAlertCommand command) {
-        this.code = command.code();
-        this.sensorCode = command.sensorCode();
-        this.equipmentCode = command.equipmentCode();
-        this.severity = command.severity() != null ? command.severity() : "warning";
-        this.status = command.status() != null ? command.status() : "open";
-        this.title = command.title();
-        this.detail = command.detail();
+        this.code = Objects.requireNonNull(command.code(), "Alert code must not be null");
+        this.sensorCode = command.sensorCode() != null ? command.sensorCode() : "";
+        this.equipmentCode = command.equipmentCode() != null ? command.equipmentCode() : "";
+        this.severity = (command.severity() != null && !command.severity().isBlank()) ? command.severity() : "warning";
+        this.status = (command.status() != null && !command.status().isBlank()) ? command.status() : "open";
+        this.title = Objects.requireNonNull(command.title(), "Alert title must not be null");
+        this.detail = command.detail() != null ? command.detail() : "";
         this.batchCode = command.batchCode() != null ? command.batchCode() : "";
         this.acknowledgedBy = command.acknowledgedBy() != null ? command.acknowledgedBy() : "";
         this.acknowledgedAt = command.acknowledgedAt() != null ? command.acknowledgedAt() : "";
@@ -76,12 +53,56 @@ public class Alert {
     }
 
     /**
+     * Reconstitutes an existing Alert aggregate from persistent state.
+     *
+     * @param id persistent ID
+     * @param code alert code
+     * @param sensorCode sensor code
+     * @param equipmentCode equipment code
+     * @param severity severity level
+     * @param status alert status
+     * @param title alert title
+     * @param detail alert detail
+     * @param batchCode batch code
+     * @param acknowledgedBy who acknowledged
+     * @param acknowledgedAt when acknowledged
+     * @param responseNote corrective actions
+     * @param linkedRecord linked deviation or CAPA
+     * @return reconstituted Alert aggregate
+     */
+    public static Alert reconstitute(
+            Long id,
+            AlertCode code,
+            String sensorCode,
+            String equipmentCode,
+            String severity,
+            String status,
+            String title,
+            String detail,
+            String batchCode,
+            String acknowledgedBy,
+            String acknowledgedAt,
+            String responseNote,
+            String linkedRecord
+    ) {
+        var alert = new Alert(new CreateAlertCommand(
+                code, sensorCode, equipmentCode, severity, status, title, detail, batchCode,
+                acknowledgedBy, acknowledgedAt, responseNote, linkedRecord
+        ));
+        alert.id = id;
+        return alert;
+    }
+
+    /**
      * Updates this alert aggregate from an update command.
      *
      * @param command update command
-     * @return updated alert
+     * @return this updated aggregate
      */
     public Alert update(UpdateAlertCommand command) {
+        if (command.code() != null) this.code = command.code();
+        if (command.sensorCode() != null) this.sensorCode = command.sensorCode();
+        if (command.equipmentCode() != null) this.equipmentCode = command.equipmentCode();
         if (command.severity() != null) this.severity = command.severity();
         if (command.status() != null) this.status = command.status();
         if (command.title() != null) this.title = command.title();

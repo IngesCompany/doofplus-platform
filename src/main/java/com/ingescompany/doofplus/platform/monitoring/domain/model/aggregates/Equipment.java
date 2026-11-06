@@ -5,90 +5,101 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.Updat
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.CalibrationStatus;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.EquipmentCode;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.Facility;
-import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.CalibrationStatusAttributeConverter;
-import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.EquipmentCodeAttributeConverter;
-import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.FacilityAttributeConverter;
-import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.Instant;
+
+import java.util.Objects;
+
 /**
- * Represents a piece of manufacturing or laboratory equipment with its calibration
- * and preventive maintenance status.
+ * Equipment Aggregate Root.
+ *
+ * <p>Represents a piece of manufacturing or laboratory equipment with its calibration
+ * and preventive maintenance status. Follows Domain-Driven Design principles with zero
+ * persistence or framework annotations. Persistence concerns are handled exclusively by
+ * {@code EquipmentPersistenceEntity}.</p>
  */
 @Getter
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "equipment", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "code" }, name = Equipment.EQUIPMENT_CODE_UNIQUE_CONSTRAINT)
-})
-
 public class Equipment {
-    public static final String EQUIPMENT_CODE_UNIQUE_CONSTRAINT = "uk_equipment_code";
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    @Convert(converter = EquipmentCodeAttributeConverter.class)
     private EquipmentCode code;
-    @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
     private String model;
-    @Column(nullable = false)
-    @Convert(converter = FacilityAttributeConverter.class)
     private Facility location;
-    @Column(nullable = false)
-    @Convert(converter = CalibrationStatusAttributeConverter.class)
     private CalibrationStatus calibrationStatus;
-    @Column(nullable = false)
     private String calibrationDue;
-    @Column(nullable = false)
     private String certificate;
-    @Column(nullable = false)
     private String nextMaintenance;
     private String maintenanceOwner;
-    @Column
     private String workOrder;
-    @Column
     private String healthNote;
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
-    protected Equipment() {}
+
     /**
-     * Creates an equipment aggregate from a create command.
+     * Creates a new Equipment aggregate from a create command.
      *
      * @param command creation command
      */
     public Equipment(CreateEquipmentCommand command) {
-        this.code = command.code();
-        this.name = command.name();
-        this.model = command.model();
-        this.location = command.location();
+        this.code = Objects.requireNonNull(command.code(), "Equipment code must not be null");
+        this.name = Objects.requireNonNull(command.name(), "Equipment name must not be null");
+        this.model = Objects.requireNonNull(command.model(), "Equipment model must not be null");
+        this.location = Objects.requireNonNull(command.location(), "Equipment location must not be null");
         this.calibrationStatus = command.calibrationStatus() != null ? command.calibrationStatus() : CalibrationStatus.FIT;
-        this.calibrationDue = command.calibrationDue();
-        this.certificate = command.certificate();
-        this.nextMaintenance = command.nextMaintenance();
-        this.maintenanceOwner = command.maintenanceOwner();
+        this.calibrationDue = command.calibrationDue() != null ? command.calibrationDue() : "";
+        this.certificate = command.certificate() != null ? command.certificate() : "";
+        this.nextMaintenance = command.nextMaintenance() != null ? command.nextMaintenance() : "";
+        this.maintenanceOwner = command.maintenanceOwner() != null ? command.maintenanceOwner() : "";
         this.workOrder = command.workOrder() != null ? command.workOrder() : "";
         this.healthNote = command.healthNote() != null ? command.healthNote() : "";
     }
 
     /**
-     * Updates this equipment aggregate from an update command.
+     * Reconstitutes an existing Equipment aggregate from persistent state.
+     *
+     * @param id persistent ID
+     * @param code equipment code
+     * @param name equipment name
+     * @param model equipment model
+     * @param location equipment location
+     * @param calibrationStatus calibration status
+     * @param calibrationDue calibration due date
+     * @param certificate certificate code
+     * @param nextMaintenance next maintenance date
+     * @param maintenanceOwner maintenance owner
+     * @param workOrder work order code
+     * @param healthNote health note
+     * @return reconstituted Equipment aggregate
+     */
+    public static Equipment reconstitute(
+            Long id,
+            EquipmentCode code,
+            String name,
+            String model,
+            Facility location,
+            CalibrationStatus calibrationStatus,
+            String calibrationDue,
+            String certificate,
+            String nextMaintenance,
+            String maintenanceOwner,
+            String workOrder,
+            String healthNote
+    ) {
+        var equipment = new Equipment(new CreateEquipmentCommand(
+                code, name, model, location, calibrationStatus, calibrationDue, certificate,
+                nextMaintenance, maintenanceOwner, workOrder, healthNote
+        ));
+        equipment.id = id;
+        return equipment;
+    }
+
+    /**
+     * Updates equipment details from an update command.
      *
      * @param command update command
-     * @return updated equipment
+     * @return this updated aggregate
      */
     public Equipment update(UpdateEquipmentCommand command) {
-        if (command.name() != null) this.name = command.name();
-        if (command.model() != null) this.model = command.model();
+        if (command.code() != null) this.code = command.code();
+        if (command.name() != null && !command.name().isBlank()) this.name = command.name();
+        if (command.model() != null && !command.model().isBlank()) this.model = command.model();
         if (command.location() != null) this.location = command.location();
         if (command.calibrationStatus() != null) this.calibrationStatus = command.calibrationStatus();
         if (command.calibrationDue() != null) this.calibrationDue = command.calibrationDue();
@@ -101,9 +112,31 @@ public class Equipment {
     }
 
     /**
-     * Checks whether the equipment is fit for production use.
+     * Records a new calibration, marking the equipment fit for use.
      *
-     * @return {@code true} when calibrationStatus is fit
+     * @param calibrationDue next due date (ISO 8601)
+     * @param certificate calibration certificate code
+     */
+    public void recordCalibration(String calibrationDue, String certificate) {
+        this.calibrationStatus = CalibrationStatus.FIT;
+        this.calibrationDue = calibrationDue != null ? calibrationDue : "";
+        this.certificate = certificate != null ? certificate : "";
+    }
+
+    /**
+     * Records preventive maintenance for this equipment.
+     *
+     * @param nextMaintenance next maintenance date (ISO 8601)
+     */
+    public void recordMaintenance(String nextMaintenance) {
+        this.nextMaintenance = nextMaintenance != null ? nextMaintenance : "";
+        this.workOrder = "";
+    }
+
+    /**
+     * Checks whether the equipment is fit for operation.
+     *
+     * @return true if fit
      */
     public boolean isFitForUse() {
         return this.calibrationStatus == CalibrationStatus.FIT;

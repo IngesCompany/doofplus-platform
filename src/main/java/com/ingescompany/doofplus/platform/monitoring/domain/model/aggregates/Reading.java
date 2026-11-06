@@ -1,55 +1,65 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateReadingCommand;
-import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.Instant;
+import java.util.Objects;
+
 /**
- * Represents a single IoT telemetry reading captured automatically from ThingsBoard.
+ * Reading Aggregate Root.
+ *
+ * <p>Represents a single IoT telemetry reading captured automatically from ThingsBoard.
+ * Follows Domain-Driven Design principles with zero persistence or framework annotations.
+ * Persistence concerns are handled exclusively by {@code ReadingPersistenceEntity}.</p>
  */
 @Getter
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "readings")
-
 public class Reading {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
     private String sensorCode;
-    @Column
     private String batchCode;
-    @Column(nullable = false)
     private Double value;
-    @Column(nullable = false)
     private String recordedAt;
-    @Column(nullable = false)
     private String source;
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
-    protected Reading() {}
+
     /**
-     * Creates a telemetry reading from a create command.
+     * Creates a new Reading aggregate from a create command.
      *
      * @param command creation command
      */
     public Reading(CreateReadingCommand command) {
-        this.sensorCode = command.sensorCode();
+        this.sensorCode = Objects.requireNonNull(command.sensorCode(), "Sensor code must not be null");
         this.batchCode = command.batchCode() != null ? command.batchCode() : "";
-        this.value = command.value();
+        this.value = Objects.requireNonNull(command.value(), "Reading value must not be null");
         this.recordedAt = (command.recordedAt() != null && !command.recordedAt().isBlank())
                 ? command.recordedAt()
                 : Instant.now().toString();
         this.source = (command.source() != null && !command.source().isBlank())
                 ? command.source()
                 : "ThingsBoard";
+    }
+
+    /**
+     * Reconstitutes an existing Reading aggregate from persistent state.
+     *
+     * @param id persistent ID
+     * @param sensorCode sensor code
+     * @param batchCode batch code
+     * @param value measured value
+     * @param recordedAt time recorded (ISO 8601)
+     * @param source source system
+     * @return reconstituted Reading aggregate
+     */
+    public static Reading reconstitute(
+            Long id,
+            String sensorCode,
+            String batchCode,
+            Double value,
+            String recordedAt,
+            String source
+    ) {
+        var reading = new Reading(new CreateReadingCommand(sensorCode, batchCode, value, recordedAt, source));
+        reading.id = id;
+        return reading;
     }
 }

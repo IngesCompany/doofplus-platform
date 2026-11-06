@@ -4,83 +4,90 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.Creat
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateSensorCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.DeviceId;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.SensorCode;
-import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.DeviceIdAttributeConverter;
-import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.SensorCodeAttributeConverter;
-import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.Instant;
+
+import java.util.Objects;
 
 /**
- * Represents an IoT telemetry sensor registered with ThingsBoard and installed on equipment.
+ * Sensor Aggregate Root.
+ *
+ * <p>Represents an IoT telemetry sensor registered with ThingsBoard and installed on equipment.
+ * Follows Domain-Driven Design principles with zero persistence or framework annotations.
+ * Persistence concerns are handled exclusively by {@code SensorPersistenceEntity}.</p>
  */
 @Getter
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "sensors", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "code" }, name = Sensor.SENSOR_CODE_UNIQUE_CONSTRAINT),
-        @UniqueConstraint(columnNames = { "device_id" }, name = Sensor.DEVICE_ID_UNIQUE_CONSTRAINT)
-})
-
 public class Sensor {
-    public static final String SENSOR_CODE_UNIQUE_CONSTRAINT = "uk_sensor_code";
-    public static final String DEVICE_ID_UNIQUE_CONSTRAINT = "uk_sensor_device_id";
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    @Convert(converter = SensorCodeAttributeConverter.class)
     private SensorCode code;
-    @Column(nullable = false)
-    @Convert(converter = DeviceIdAttributeConverter.class)
     private DeviceId deviceId;
-    @Column(nullable = false)
     private String type;
-    @Column(nullable = false)
     private String unit;
-    @Column(nullable = false)
     private String equipmentCode;
-    @Column(nullable = false)
     private Double lowerLimit;
-    @Column(nullable = false)
     private Double upperLimit;
-    @Column(nullable = false)
     private String status;
-    @Column
     private String assignedBatch;
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
-    protected Sensor() {}
+
     /**
-     * Creates a sensor aggregate from a create command.
+     * Creates a new Sensor aggregate from a create command.
      *
      * @param command creation command
      */
     public Sensor(CreateSensorCommand command) {
-        this.code = command.code();
-        this.deviceId = command.deviceId();
-        this.type = command.type();
-        this.unit = command.unit();
-        this.equipmentCode = command.equipmentCode();
-        this.lowerLimit = command.lowerLimit();
-        this.upperLimit = command.upperLimit();
-        this.status = command.status() != null ? command.status() : "active";
+        this.code = Objects.requireNonNull(command.code(), "Sensor code must not be null");
+        this.deviceId = Objects.requireNonNull(command.deviceId(), "Device ID must not be null");
+        this.type = Objects.requireNonNull(command.type(), "Sensor type must not be null");
+        this.unit = command.unit() != null ? command.unit() : "";
+        this.equipmentCode = command.equipmentCode() != null ? command.equipmentCode() : "";
+        this.lowerLimit = command.lowerLimit() != null ? command.lowerLimit() : 0.0;
+        this.upperLimit = command.upperLimit() != null ? command.upperLimit() : 100.0;
+        this.status = (command.status() != null && !command.status().isBlank()) ? command.status() : "active";
         this.assignedBatch = command.assignedBatch() != null ? command.assignedBatch() : "";
+    }
+
+    /**
+     * Reconstitutes an existing Sensor aggregate from persistent state.
+     *
+     * @param id persistent ID
+     * @param code sensor code
+     * @param deviceId ThingsBoard device ID
+     * @param type measurement type
+     * @param unit unit of measurement
+     * @param equipmentCode installed equipment code
+     * @param lowerLimit lower threshold
+     * @param upperLimit upper threshold
+     * @param status sensor status
+     * @param assignedBatch active batch code
+     * @return reconstituted Sensor aggregate
+     */
+    public static Sensor reconstitute(
+            Long id,
+            SensorCode code,
+            DeviceId deviceId,
+            String type,
+            String unit,
+            String equipmentCode,
+            Double lowerLimit,
+            Double upperLimit,
+            String status,
+            String assignedBatch
+    ) {
+        var sensor = new Sensor(new CreateSensorCommand(
+                code, deviceId, type, unit, equipmentCode, lowerLimit, upperLimit, status, assignedBatch
+        ));
+        sensor.id = id;
+        return sensor;
     }
 
     /**
      * Updates this sensor aggregate from an update command.
      *
      * @param command update command
-     * @return updated sensor
+     * @return this updated aggregate
      */
     public Sensor update(UpdateSensorCommand command) {
+        if (command.code() != null) this.code = command.code();
+        if (command.deviceId() != null) this.deviceId = command.deviceId();
         if (command.type() != null) this.type = command.type();
         if (command.unit() != null) this.unit = command.unit();
         if (command.equipmentCode() != null) this.equipmentCode = command.equipmentCode();
@@ -92,10 +99,10 @@ public class Sensor {
     }
 
     /**
-     * Checks whether a telemetry reading value is out of the acceptable range.
+     * Checks whether a telemetry reading value is out of acceptable limits.
      *
      * @param value measured value
-     * @return {@code true} when below lowerLimit or above upperLimit
+     * @return true when below lowerLimit or above upperLimit
      */
     public boolean isOutOfRange(Double value) {
         if (value == null) return false;
