@@ -1,0 +1,49 @@
+package com.ingescompany.doofplus.platform.monitoring.application.internal.commandservices;
+
+import com.ingescompany.doofplus.platform.monitoring.application.commandservices.EquipmentCommandService;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Equipment;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateEquipmentCommand;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateEquipmentCommand;
+import com.ingescompany.doofplus.platform.monitoring.domain.repositories.EquipmentRepository;
+import com.ingescompany.doofplus.platform.shared.application.result.Result;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Implementation of {@link EquipmentCommandService}.
+ */
+@Service
+@Transactional
+public class EquipmentCommandServiceImpl implements EquipmentCommandService {
+
+    private final EquipmentRepository equipmentRepository;
+
+    public EquipmentCommandServiceImpl(EquipmentRepository equipmentRepository) {
+        this.equipmentRepository = equipmentRepository;
+    }
+
+    @Override
+    public Result<Equipment, String> handle(CreateEquipmentCommand command) {
+        if (equipmentRepository.existsByCode(command.code())) {
+            return Result.failure("Equipment with code " + command.code().value() + " already exists");
+        }
+        var equipment = new Equipment(command);
+        var savedEquipment = equipmentRepository.save(equipment);
+        return Result.success(savedEquipment);
+    }
+
+    @Override
+    public Result<Equipment, String> handle(UpdateEquipmentCommand command) {
+        var existingEquipmentOpt = equipmentRepository.findById(command.id());
+        if (existingEquipmentOpt.isEmpty()) {
+            return Result.failure("Equipment with id " + command.id() + " not found");
+        }
+        var equipment = existingEquipmentOpt.get();
+        if (command.code() != null && !command.code().equals(equipment.getCode()) && equipmentRepository.existsByCode(command.code())) {
+            return Result.failure("Equipment with code " + command.code().value() + " already exists");
+        }
+        equipment.update(command);
+        var updatedEquipment = equipmentRepository.save(equipment);
+        return Result.success(updatedEquipment);
+    }
+}
