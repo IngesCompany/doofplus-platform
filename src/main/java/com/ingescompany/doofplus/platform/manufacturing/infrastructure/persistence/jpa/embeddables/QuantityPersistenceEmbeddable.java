@@ -1,12 +1,15 @@
 package com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.embeddables;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import java.math.BigDecimal;
 
 /**
  * Persistence representation of a quantity, used for database storage and retrieval.
  */
+
+@Embeddable
 public class QuantityPersistenceEmbeddable {
 
     @Column(name="quantity_value")
