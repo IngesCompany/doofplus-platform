@@ -1,18 +1,14 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects;
 
-import org.jspecify.annotations.NotNull;
-
 /**
- * Value object representing a device identifier
+ * Value object representing a ThingsBoard device identifier.
+ *
+ * @param value ThingsBoard device identifier string
  */
-@NullMMarked
-public record DeviceId(Long deviceId) {
-    /**
-     * Compact constructor
-     */
+public record DeviceId(String value) {
     public DeviceId {
-        if (deviceId == null || deviceId < 1) {
-            throw new IllegalArgumentException("Device id cannot be null or less than 1");
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("monitoring.sensor.error.deviceId.notBlank");
         }
     }
 }

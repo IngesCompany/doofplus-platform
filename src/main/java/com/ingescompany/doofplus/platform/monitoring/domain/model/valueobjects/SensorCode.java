@@ -15,10 +15,14 @@ public record SensorCode(String value) {
     private static final String PATTERN_MESSAGE_KEY = "monitoring.sensor.error.code.pattern";
 
     public SensorCode {
-        if (value == null || value.isBlank()) { throw new IllegalArgumentException(NOT_BLANK_MESSAGE_KEY);    }
-
-        if (value.length() > MAX_LENGTH) { throw new IllegalArgumentException(SIZE_MESSAGE_KEY); }
-
-        if (!ALLOWED_PATTERN.matcher(value).matches()) { throw new IllegalArgumentException(PATTERN_MESSAGE_KEY); }
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(NOT_BLANK_MESSAGE_KEY);
+        }
+        if (value.length() > MAX_LENGTH) {
+            throw new IllegalArgumentException(SIZE_MESSAGE_KEY);
+        }
+        if (!ALLOWED_PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException(PATTERN_MESSAGE_KEY);
+        }
     }
 }

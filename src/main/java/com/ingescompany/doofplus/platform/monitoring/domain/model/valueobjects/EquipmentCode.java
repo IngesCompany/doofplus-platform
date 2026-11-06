@@ -15,10 +15,14 @@ public record EquipmentCode(String value) {
     private static final String PATTERN_MESSAGE_KEY = "monitoring.equipment.error.code.pattern";
 
     public EquipmentCode {
-        if (value == null || value.isBlank()) { throw new IllegalArgumentException(NOT_BLANK_MESSAGE_KEY); }
-
-        if (value.length() > MAX_LENGTH) { throw new IllegalArgumentException(SIZE_MESSAGE_KEY); }
-
-        if (!ALLOWED_PATTERN.matcher(value).matches()) { throw new IllegalArgumentException(PATTERN_MESSAGE_KEY); }
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(NOT_BLANK_MESSAGE_KEY);
+        }
+        if (value.length() > MAX_LENGTH) {
+            throw new IllegalArgumentException(SIZE_MESSAGE_KEY);
+        }
+        if (!ALLOWED_PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException(PATTERN_MESSAGE_KEY);
+        }
     }
 }
