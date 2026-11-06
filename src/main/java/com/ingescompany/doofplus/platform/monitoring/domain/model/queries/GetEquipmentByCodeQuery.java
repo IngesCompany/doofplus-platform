@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.queries;
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.EquipmentCode;
+
 /**
  * Query to retrieve equipment by equipment code.
  *
