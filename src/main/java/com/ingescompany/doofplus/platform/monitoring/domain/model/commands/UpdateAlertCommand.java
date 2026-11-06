@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.commands;
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.AlertCode;
+
 /**
  * Command to update a monitoring alert.
  */
@@ -19,4 +20,9 @@ public record UpdateAlertCommand(
         String responseNote,
         String linkedRecord
 ) {
+    public UpdateAlertCommand {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Alert ID must be positive");
+        }
+    }
 }
