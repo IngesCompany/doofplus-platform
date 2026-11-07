@@ -1,4 +1,4 @@
-package com.ingescompany.doofplus.platform.manufacturing.domain.model;
+package com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
@@ -12,8 +12,7 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobject
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.IncidentSeverity;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import lombok.Getter;
-import org.springframework.data.domain.AbstractAggregateRoot;
-
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ import java.util.Objects;
  * </p>
  */
 @Getter
-public class ProductionBatch extends AbstractAggregateRoot<ProductionBatch> {
+public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch> {
     /**
      * Unique identifier for the production batch.
      */

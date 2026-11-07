@@ -1,6 +1,6 @@
 package com.ingescompany.doofplus.platform.manufacturing.domain.repositories;
 
-import com.ingescompany.doofplus.platform.manufacturing.domain.model.ProductionBatch;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.ProductionBatch;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
 
 import java.util.List;

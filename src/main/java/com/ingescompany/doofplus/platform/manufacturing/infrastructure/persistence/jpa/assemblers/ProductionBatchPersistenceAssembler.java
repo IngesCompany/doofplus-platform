@@ -1,6 +1,6 @@
 package com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.assemblers;
 
-import com.ingescompany.doofplus.platform.manufacturing.domain.model.ProductionBatch;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.ProductionBatch;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.embeddables.QuantityPersistenceEmbeddable;
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.entities.ProductionBatchPersistenceEntity;
