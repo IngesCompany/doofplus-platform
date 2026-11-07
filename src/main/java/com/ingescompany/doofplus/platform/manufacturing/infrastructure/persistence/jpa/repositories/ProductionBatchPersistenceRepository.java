@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.repositories;
 
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.entities.ProductionBatchPersistenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.Optional;
 public interface ProductionBatchPersistenceRepository extends
         JpaRepository<ProductionBatchPersistenceEntity, Long> {
 
-    Optional<ProductionBatchPersistenceEntity> findByBatchNumber(String batchNumber);
+    Optional<ProductionBatchPersistenceEntity> findByBatchNumber(BatchNumber batchNumber);
 
-    boolean existsByBatchNumber(String batchNumber);
+    boolean existsByBatchNumber(BatchNumber batchNumber);
 }
