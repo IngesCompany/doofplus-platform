@@ -12,7 +12,7 @@
 	<artifactId>platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>IngesCompany-Backend</name>
-	<description>IngesCompany-Backend</description>
+	<description>RESTful API of DoofPlus, the quality management and batch traceability platform for pharmaceutical laboratories.</description>
 	<url/>
 	<licenses>
 		<license/>
