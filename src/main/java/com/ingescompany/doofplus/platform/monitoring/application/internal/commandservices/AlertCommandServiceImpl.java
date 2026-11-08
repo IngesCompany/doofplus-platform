@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Ale
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.repositories.AlertRepository;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,9 +24,9 @@ public class AlertCommandServiceImpl implements AlertCommandService {
     }
 
     @Override
-    public Result<Alert, String> handle(CreateAlertCommand command) {
+    public Result<Alert, ApplicationError> handle(CreateAlertCommand command) {
         if (alertRepository.existsByCode(command.code())) {
-            return Result.failure("Alert with code " + command.code().value() + " already exists");
+            return Result.failure(ApplicationError.conflict("Alert", "Alert with code " + command.code().value() + " already exists"));
         }
         var alert = new Alert(command);
         var savedAlert = alertRepository.save(alert);
@@ -33,14 +34,14 @@ public class AlertCommandServiceImpl implements AlertCommandService {
     }
 
     @Override
-    public Result<Alert, String> handle(UpdateAlertCommand command) {
+    public Result<Alert, ApplicationError> handle(UpdateAlertCommand command) {
         var existingAlertOpt = alertRepository.findById(command.id());
         if (existingAlertOpt.isEmpty()) {
-            return Result.failure("Alert with id " + command.id() + " not found");
+            return Result.failure(ApplicationError.notFound("Alert", command.id().toString()));
         }
         var alert = existingAlertOpt.get();
         if (command.code() != null && !command.code().equals(alert.getCode()) && alertRepository.existsByCode(command.code())) {
-            return Result.failure("Alert with code " + command.code().value() + " already exists");
+            return Result.failure(ApplicationError.conflict("Alert", "Alert with code " + command.code().value() + " already exists"));
         }
         alert.update(command);
         var updatedAlert = alertRepository.save(alert);

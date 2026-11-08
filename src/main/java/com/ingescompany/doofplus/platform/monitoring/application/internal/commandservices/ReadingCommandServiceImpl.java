@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.monitoring.application.commandservices
 import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Reading;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateReadingCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.repositories.ReadingRepository;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ public class ReadingCommandServiceImpl implements ReadingCommandService {
     }
 
     @Override
-    public Result<Reading, String> handle(CreateReadingCommand command) {
+    public Result<Reading, ApplicationError> handle(CreateReadingCommand command) {
         var reading = new Reading(command);
         var savedReading = readingRepository.save(reading);
         return Result.success(savedReading);
