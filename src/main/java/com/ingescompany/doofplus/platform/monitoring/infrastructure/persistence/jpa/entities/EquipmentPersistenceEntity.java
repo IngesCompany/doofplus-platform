@@ -6,32 +6,25 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.F
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.CalibrationStatusAttributeConverter;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.EquipmentCodeAttributeConverter;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.FacilityAttributeConverter;
+import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
 
 /**
  * JPA persistence entity for Equipment.
+ *
+ * <p>Extends {@link AuditableAbstractPersistenceEntity} for ID and auditing timestamps.</p>
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "equipment", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"code"}, name = "uk_equipment_code")
 })
-public class EquipmentPersistenceEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class EquipmentPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
     @Column(nullable = false, unique = true, length = 64)
     @Convert(converter = EquipmentCodeAttributeConverter.class)
@@ -68,12 +61,4 @@ public class EquipmentPersistenceEntity {
 
     @Column
     private String healthNote;
-
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
 }

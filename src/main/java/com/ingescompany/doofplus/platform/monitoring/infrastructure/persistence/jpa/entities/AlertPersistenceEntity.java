@@ -2,32 +2,25 @@ package com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.AlertCode;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.AlertCodeAttributeConverter;
+import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
 
 /**
  * JPA persistence entity for Alert.
+ *
+ * <p>Extends {@link AuditableAbstractPersistenceEntity} for ID and auditing timestamps.</p>
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "alerts", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"code"}, name = "uk_alert_code")
 })
-public class AlertPersistenceEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class AlertPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
     @Column(nullable = false, unique = true, length = 64)
     @Convert(converter = AlertCodeAttributeConverter.class)
@@ -65,12 +58,4 @@ public class AlertPersistenceEntity {
 
     @Column
     private String linkedRecord;
-
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
 }

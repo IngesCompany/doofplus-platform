@@ -4,33 +4,26 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.D
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.SensorCode;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.DeviceIdAttributeConverter;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.converters.SensorCodeAttributeConverter;
+import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
 
 /**
  * JPA persistence entity for Sensor.
+ *
+ * <p>Extends {@link AuditableAbstractPersistenceEntity} for ID and auditing timestamps.</p>
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "sensors", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"code"}, name = "uk_sensor_code"),
         @UniqueConstraint(columnNames = {"device_id"}, name = "uk_sensor_device_id")
 })
-public class SensorPersistenceEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class SensorPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
     @Column(nullable = false, unique = true, length = 64)
     @Convert(converter = SensorCodeAttributeConverter.class)
@@ -60,12 +53,4 @@ public class SensorPersistenceEntity {
 
     @Column
     private String assignedBatch;
-
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
 }
