@@ -3,6 +3,7 @@ package com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateAlertCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.AlertCode;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -11,13 +12,12 @@ import java.util.Objects;
 /**
  * Alert Aggregate Root.
  *
- * <p>Represents an alert raised when a telemetry reading exceeds acceptable limits
- * or equipment monitoring anomalies are detected. Follows Domain-Driven Design principles
- * with zero persistence or framework annotations. Persistence concerns are handled
- * exclusively by {@code AlertPersistenceEntity}.</p>
+ * <p>Extends {@link AbstractDomainAggregateRoot} to gain domain event registration support.
+ * Follows Domain-Driven Design principles with zero persistence or framework annotations.
+ * Persistence concerns are handled exclusively by {@code AlertPersistenceEntity}.</p>
  */
 @Getter
-public class Alert {
+public class Alert extends AbstractDomainAggregateRoot<Alert> {
     private Long id;
     private AlertCode code;
     private String sensorCode;

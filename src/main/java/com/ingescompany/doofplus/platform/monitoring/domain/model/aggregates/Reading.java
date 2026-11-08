@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateReadingCommand;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -9,12 +10,12 @@ import java.util.Objects;
 /**
  * Reading Aggregate Root.
  *
- * <p>Represents a single IoT telemetry reading captured automatically from ThingsBoard.
+ * <p>Extends {@link AbstractDomainAggregateRoot} to gain domain event registration support.
  * Follows Domain-Driven Design principles with zero persistence or framework annotations.
  * Persistence concerns are handled exclusively by {@code ReadingPersistenceEntity}.</p>
  */
 @Getter
-public class Reading {
+public class Reading extends AbstractDomainAggregateRoot<Reading> {
     private Long id;
     private String sensorCode;
     private String batchCode;

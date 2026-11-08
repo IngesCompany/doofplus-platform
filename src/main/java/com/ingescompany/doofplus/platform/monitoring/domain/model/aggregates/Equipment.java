@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.Updat
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.CalibrationStatus;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.EquipmentCode;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.Facility;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -12,13 +13,12 @@ import java.util.Objects;
 /**
  * Equipment Aggregate Root.
  *
- * <p>Represents a piece of manufacturing or laboratory equipment with its calibration
- * and preventive maintenance status. Follows Domain-Driven Design principles with zero
- * persistence or framework annotations. Persistence concerns are handled exclusively by
- * {@code EquipmentPersistenceEntity}.</p>
+ * <p>Extends {@link AbstractDomainAggregateRoot} to gain domain event registration support.
+ * Follows Domain-Driven Design principles with zero persistence or framework annotations.
+ * Persistence concerns are handled exclusively by {@code EquipmentPersistenceEntity}.</p>
  */
 @Getter
-public class Equipment {
+public class Equipment extends AbstractDomainAggregateRoot<Equipment> {
     private Long id;
     private EquipmentCode code;
     private String name;

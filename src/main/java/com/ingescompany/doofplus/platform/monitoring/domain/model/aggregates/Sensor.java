@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.Creat
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.UpdateSensorCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.DeviceId;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.SensorCode;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.util.Objects;
@@ -11,12 +12,12 @@ import java.util.Objects;
 /**
  * Sensor Aggregate Root.
  *
- * <p>Represents an IoT telemetry sensor registered with ThingsBoard and installed on equipment.
+ * <p>Extends {@link AbstractDomainAggregateRoot} to gain domain event registration support.
  * Follows Domain-Driven Design principles with zero persistence or framework annotations.
  * Persistence concerns are handled exclusively by {@code SensorPersistenceEntity}.</p>
  */
 @Getter
-public class Sensor {
+public class Sensor extends AbstractDomainAggregateRoot<Sensor> {
     private Long id;
     private SensorCode code;
     private DeviceId deviceId;
