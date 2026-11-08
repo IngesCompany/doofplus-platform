@@ -12,6 +12,9 @@ import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.U
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.AlertResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.CreateAlertCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.UpdateAlertCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller that exposes monitoring alert resources and lifecycle management endpoints.
@@ -89,8 +91,9 @@ public class AlertsController {
     ) {
         var alertOpt = alertQueryService.handle(new GetAlertByIdQuery(id));
         if (alertOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("code", "ALERT_NOT_FOUND", "message", "Alert with id " + id + " not found"));
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Alert", id.toString())
+            );
         }
         var resource = AlertResourceFromEntityAssembler.toResourceFromEntity(alertOpt.get());
         return ResponseEntity.ok(resource);
@@ -113,11 +116,10 @@ public class AlertsController {
     public ResponseEntity<?> createAlert(@RequestBody CreateAlertResource resource) {
         var command = CreateAlertCommandFromResourceAssembler.toCommandFromResource(resource);
         var result = alertCommandService.handle(command);
-        return result.fold(
-                alert -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(AlertResourceFromEntityAssembler.toResourceFromEntity(alert)),
-                error -> ResponseEntity.status(error.contains("already exists") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                AlertResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.CREATED
         );
     }
 
@@ -142,10 +144,10 @@ public class AlertsController {
     ) {
         var command = UpdateAlertCommandFromResourceAssembler.toCommandFromResource(id, resource);
         var result = alertCommandService.handle(command);
-        return result.fold(
-                alert -> ResponseEntity.ok(AlertResourceFromEntityAssembler.toResourceFromEntity(alert)),
-                error -> ResponseEntity.status(error.contains("not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                AlertResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.OK
         );
     }
 }

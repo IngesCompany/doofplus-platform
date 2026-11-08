@@ -11,6 +11,9 @@ import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.U
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.CreateSensorCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.SensorResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.UpdateSensorCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller that exposes sensor resources and IoT telemetry configuration endpoints.
@@ -84,8 +86,9 @@ public class SensorsController {
     ) {
         var sensorOpt = sensorQueryService.handle(new GetSensorByIdQuery(id));
         if (sensorOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("code", "SENSOR_NOT_FOUND", "message", "Sensor with id " + id + " not found"));
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Sensor", id.toString())
+            );
         }
         var resource = SensorResourceFromEntityAssembler.toResourceFromEntity(sensorOpt.get());
         return ResponseEntity.ok(resource);
@@ -108,11 +111,10 @@ public class SensorsController {
     public ResponseEntity<?> createSensor(@RequestBody CreateSensorResource resource) {
         var command = CreateSensorCommandFromResourceAssembler.toCommandFromResource(resource);
         var result = sensorCommandService.handle(command);
-        return result.fold(
-                sensor -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(SensorResourceFromEntityAssembler.toResourceFromEntity(sensor)),
-                error -> ResponseEntity.status(error.contains("already") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                SensorResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.CREATED
         );
     }
 
@@ -137,10 +139,10 @@ public class SensorsController {
     ) {
         var command = UpdateSensorCommandFromResourceAssembler.toCommandFromResource(id, resource);
         var result = sensorCommandService.handle(command);
-        return result.fold(
-                sensor -> ResponseEntity.ok(SensorResourceFromEntityAssembler.toResourceFromEntity(sensor)),
-                error -> ResponseEntity.status(error.contains("not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                SensorResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.OK
         );
     }
 }

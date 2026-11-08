@@ -10,6 +10,9 @@ import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.U
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.CreateEquipmentCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.EquipmentResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.UpdateEquipmentCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller that exposes equipment resources and administration endpoints.
@@ -79,8 +81,9 @@ public class EquipmentController {
         var query = new GetEquipmentByIdQuery(id);
         var equipmentOpt = equipmentQueryService.handle(query);
         if (equipmentOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("code", "EQUIPMENT_NOT_FOUND", "message", "Equipment with id " + id + " not found"));
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Equipment", id.toString())
+            );
         }
         var resource = EquipmentResourceFromEntityAssembler.toResourceFromEntity(equipmentOpt.get());
         return ResponseEntity.ok(resource);
@@ -103,11 +106,10 @@ public class EquipmentController {
     public ResponseEntity<?> createEquipment(@RequestBody CreateEquipmentResource resource) {
         var command = CreateEquipmentCommandFromResourceAssembler.toCommandFromResource(resource);
         var result = equipmentCommandService.handle(command);
-        return result.fold(
-                equipment -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(EquipmentResourceFromEntityAssembler.toResourceFromEntity(equipment)),
-                error -> ResponseEntity.status(error.contains("already exists") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                EquipmentResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.CREATED
         );
     }
 
@@ -132,10 +134,10 @@ public class EquipmentController {
     ) {
         var command = UpdateEquipmentCommandFromResourceAssembler.toCommandFromResource(id, resource);
         var result = equipmentCommandService.handle(command);
-        return result.fold(
-                equipment -> ResponseEntity.ok(EquipmentResourceFromEntityAssembler.toResourceFromEntity(equipment)),
-                error -> ResponseEntity.status(error.contains("not found") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                EquipmentResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.OK
         );
     }
 }

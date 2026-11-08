@@ -10,6 +10,9 @@ import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.C
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.ReadingResource;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.CreateReadingCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.ReadingResourceFromEntityAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller that exposes telemetry reading resources and ingestion endpoints.
@@ -87,8 +89,9 @@ public class ReadingsController {
     ) {
         var readingOpt = readingQueryService.handle(new GetReadingByIdQuery(id));
         if (readingOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("code", "READING_NOT_FOUND", "message", "Reading with id " + id + " not found"));
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Reading", id.toString())
+            );
         }
         var resource = ReadingResourceFromEntityAssembler.toResourceFromEntity(readingOpt.get());
         return ResponseEntity.ok(resource);
@@ -110,10 +113,10 @@ public class ReadingsController {
     public ResponseEntity<?> createReading(@RequestBody CreateReadingResource resource) {
         var command = CreateReadingCommandFromResourceAssembler.toCommandFromResource(resource);
         var result = readingCommandService.handle(command);
-        return result.fold(
-                reading -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(ReadingResourceFromEntityAssembler.toResourceFromEntity(reading)),
-                error -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", error))
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                ReadingResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.CREATED
         );
     }
 }
