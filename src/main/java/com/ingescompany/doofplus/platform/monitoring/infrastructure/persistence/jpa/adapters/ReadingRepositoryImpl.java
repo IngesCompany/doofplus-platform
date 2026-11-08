@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Rea
 import com.ingescompany.doofplus.platform.monitoring.domain.repositories.ReadingRepository;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.assemblers.ReadingPersistenceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.repositories.ReadingPersistenceRepository;
+import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,16 +17,21 @@ import java.util.Optional;
 public class ReadingRepositoryImpl implements ReadingRepository {
 
     private final ReadingPersistenceRepository readingPersistenceRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
-    public ReadingRepositoryImpl(ReadingPersistenceRepository readingPersistenceRepository) {
+    public ReadingRepositoryImpl(ReadingPersistenceRepository readingPersistenceRepository,
+                                 DomainEventPublisher domainEventPublisher) {
         this.readingPersistenceRepository = readingPersistenceRepository;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
     public Reading save(Reading reading) {
         var persistenceEntity = ReadingPersistenceAssembler.toPersistenceFromDomain(reading);
         var savedEntity = readingPersistenceRepository.save(persistenceEntity);
-        return ReadingPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        var savedDomain = ReadingPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        domainEventPublisher.publishAndClearEvents(reading);
+        return savedDomain;
     }
 
     @Override

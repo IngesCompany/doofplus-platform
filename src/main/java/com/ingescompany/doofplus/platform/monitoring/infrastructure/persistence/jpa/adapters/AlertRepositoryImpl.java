@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.A
 import com.ingescompany.doofplus.platform.monitoring.domain.repositories.AlertRepository;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.assemblers.AlertPersistenceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.repositories.AlertPersistenceRepository;
+import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,16 +18,21 @@ import java.util.Optional;
 public class AlertRepositoryImpl implements AlertRepository {
 
     private final AlertPersistenceRepository alertPersistenceRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
-    public AlertRepositoryImpl(AlertPersistenceRepository alertPersistenceRepository) {
+    public AlertRepositoryImpl(AlertPersistenceRepository alertPersistenceRepository,
+                               DomainEventPublisher domainEventPublisher) {
         this.alertPersistenceRepository = alertPersistenceRepository;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
     public Alert save(Alert alert) {
         var persistenceEntity = AlertPersistenceAssembler.toPersistenceFromDomain(alert);
         var savedEntity = alertPersistenceRepository.save(persistenceEntity);
-        return AlertPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        var savedDomain = AlertPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        domainEventPublisher.publishAndClearEvents(alert);
+        return savedDomain;
     }
 
     @Override

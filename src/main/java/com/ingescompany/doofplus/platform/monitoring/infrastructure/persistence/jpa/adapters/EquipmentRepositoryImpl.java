@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.monitoring.domain.model.valueobjects.E
 import com.ingescompany.doofplus.platform.monitoring.domain.repositories.EquipmentRepository;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.assemblers.EquipmentPersistenceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.infrastructure.persistence.jpa.repositories.EquipmentPersistenceRepository;
+import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,16 +18,21 @@ import java.util.Optional;
 public class EquipmentRepositoryImpl implements EquipmentRepository {
 
     private final EquipmentPersistenceRepository equipmentPersistenceRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
-    public EquipmentRepositoryImpl(EquipmentPersistenceRepository equipmentPersistenceRepository) {
+    public EquipmentRepositoryImpl(EquipmentPersistenceRepository equipmentPersistenceRepository,
+                                   DomainEventPublisher domainEventPublisher) {
         this.equipmentPersistenceRepository = equipmentPersistenceRepository;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
     public Equipment save(Equipment equipment) {
         var persistenceEntity = EquipmentPersistenceAssembler.toPersistenceFromDomain(equipment);
         var savedEntity = equipmentPersistenceRepository.save(persistenceEntity);
-        return EquipmentPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        var savedDomain = EquipmentPersistenceAssembler.toDomainFromPersistence(savedEntity);
+        domainEventPublisher.publishAndClearEvents(equipment);
+        return savedDomain;
     }
 
     @Override
