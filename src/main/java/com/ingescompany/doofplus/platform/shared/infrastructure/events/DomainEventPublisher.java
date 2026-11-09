@@ -32,7 +32,7 @@ public class DomainEventPublisher {
      * @param aggregate the domain aggregate root whose events are to be published
      * @param <T> the aggregate root type
      */
-    public <T extends AbstractDomainAggregateRoot<T>> void publishAndClearEvents(@Nullable T aggregate) {
+    public void publishAndClearEvents(@Nullable AbstractDomainAggregateRoot<?> aggregate) {
         if (aggregate == null) {
             return;
         }
