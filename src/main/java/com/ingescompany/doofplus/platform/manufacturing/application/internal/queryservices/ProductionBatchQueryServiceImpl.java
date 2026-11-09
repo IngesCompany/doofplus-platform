@@ -6,6 +6,7 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.Get
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetBatchByIdQuery;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetBatchByNumberQuery;
 import com.ingescompany.doofplus.platform.manufacturing.domain.repositories.ProductionBatchRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.Optional;
 /**
  * Implementation of ProductionBatchQueryService that executes queries related to production batches.
  */
+@Service
 public class ProductionBatchQueryServiceImpl implements ProductionBatchQueryService {
 
     private final ProductionBatchRepository productionBatchRepository;

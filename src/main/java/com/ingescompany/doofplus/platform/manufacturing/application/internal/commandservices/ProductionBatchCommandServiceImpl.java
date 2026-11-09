@@ -9,10 +9,12 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.In
 import com.ingescompany.doofplus.platform.manufacturing.domain.repositories.ProductionBatchRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
+import org.springframework.stereotype.Service;
 
 /**
  * Application service that executes production batch commands.
  */
+@Service
 public class ProductionBatchCommandServiceImpl implements ProductionBatchCommandService {
     private final ProductionBatchRepository productionBatchRepository;
 
