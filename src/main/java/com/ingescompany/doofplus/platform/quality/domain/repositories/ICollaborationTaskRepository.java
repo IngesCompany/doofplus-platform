@@ -4,12 +4,16 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Collab
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ICollaborationTaskRepository {
+
     CollaborationTask save(CollaborationTask task);
-    Optional<CollaborationTask> findById(UUID id);
+
+    Optional<CollaborationTask> findById(Long id);
+
     List<CollaborationTask> findAll();
-    List<CollaborationTask> findByAssignedTo(String assignedTo);
-    void deleteById(UUID id);
+
+    List<CollaborationTask> findByAssignedTo(Long assignedTo);
+
+    List<CollaborationTask> findByRelatedDeviationId(Long deviationId);
 }
