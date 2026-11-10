@@ -26,31 +26,31 @@ public class CapaPlanRepositoryImpl implements ICapaPlanRepository {
     @Override
     public CapaPlan save(CapaPlan capaPlan) {
         var saved = persistenceRepository.save(
-                CapaPlanPersistenceAssembler.toPersistenceFromDomain(capaPlan)
+                CapaPlanPersistenceAssembler.toEntity(capaPlan)
         );
 
         domainEventPublisher.publishAndClearEvents(capaPlan);
 
-        return CapaPlanPersistenceAssembler.toDomainFromPersistence(saved);
+        return CapaPlanPersistenceAssembler.toDomain(saved);
     }
 
     @Override
     public Optional<CapaPlan> findById(Long id) {
         return persistenceRepository.findById(id)
-                .map(CapaPlanPersistenceAssembler::toDomainFromPersistence);
+                .map(CapaPlanPersistenceAssembler::toDomain);
     }
 
     @Override
     public List<CapaPlan> findAll() {
         return persistenceRepository.findAll().stream()
-                .map(CapaPlanPersistenceAssembler::toDomainFromPersistence)
+                .map(CapaPlanPersistenceAssembler::toDomain)
                 .toList();
     }
 
     @Override
     public List<CapaPlan> findByDeviationId(Long deviationId) {
         return persistenceRepository.findByDeviationId(deviationId).stream()
-                .map(CapaPlanPersistenceAssembler::toDomainFromPersistence)
+                .map(CapaPlanPersistenceAssembler::toDomain)
                 .toList();
     }
 }

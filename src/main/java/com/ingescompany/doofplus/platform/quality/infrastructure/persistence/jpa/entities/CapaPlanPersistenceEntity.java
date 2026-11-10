@@ -21,27 +21,26 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CapaPlanPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(name = "deviation_id", nullable = false)
+    @Column(nullable = false)
     private Long deviationId;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     private CapaStatus status;
 
-    @Column(name = "due_date")
     private LocalDate dueDate;
 
-    private Long responsible;
+    @Column(nullable = false)
+    private String responsible;
 
-    @Column(name = "created_at")
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "completed_at")
     private LocalDateTime completedAt;
 }
