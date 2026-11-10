@@ -4,13 +4,16 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Eviden
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IEvidenceRepository {
+
     Evidence save(Evidence evidence);
-    Optional<Evidence> findById(UUID id);
+
+    Optional<Evidence> findById(Long id);
+
     List<Evidence> findAll();
-    List<Evidence> findByDeviationId(UUID deviationId);
-    List<Evidence> findByAuditId(UUID auditId);
-    void deleteById(UUID id);
+
+    List<Evidence> findByDeviationId(Long deviationId);
+
+    List<Evidence> findByDocumentId(Long documentId);
 }
