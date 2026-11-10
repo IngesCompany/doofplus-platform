@@ -4,12 +4,14 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Analyt
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IAnalyticalResultRepository {
-    AnalyticalResult save(AnalyticalResult result);
-    Optional<AnalyticalResult> findById(UUID id);
+
+    AnalyticalResult save(AnalyticalResult analyticalResult);
+
+    Optional<AnalyticalResult> findById(Long id);
+
     List<AnalyticalResult> findAll();
-    List<AnalyticalResult> findByBatchId(UUID batchId);
-    void deleteById(UUID id);
+
+    List<AnalyticalResult> findByBatchId(Long batchId);
 }
