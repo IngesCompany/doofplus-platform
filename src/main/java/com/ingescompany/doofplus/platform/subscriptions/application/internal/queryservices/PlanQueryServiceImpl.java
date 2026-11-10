@@ -4,7 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.application.queryservice
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Plan;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetAllPlansQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetPlanByIdQuery;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.PlanRepository;
+import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

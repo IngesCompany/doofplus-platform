@@ -2,73 +2,32 @@ package com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates
 
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.*;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.converters.BillingEmailAttributeConverter;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.converters.OrganizationIdAttributeConverter;
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 /**
  * Subscription of an organization to a plan. It starts as pending, becomes active when the
  * payment is authorized and keeps the access until the end of the paid period when cancelled.
+ * The aggregate has no persistence annotations; it is stored through {@code SubscriptionPersistenceEntity}.
  */
 @Getter
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Subscription {
+public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     private static final String NOT_PENDING_MESSAGE = "Only a pending subscription can be activated";
     private static final String NOT_ACTIVE_MESSAGE = "Only an active subscription can be renewed or cancelled";
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    @Convert(converter = OrganizationIdAttributeConverter.class)
     private OrganizationId organizationId;
-
-    @Column(nullable = false)
     private Long planId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 16)
     private BillingCycle billingCycle;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 16)
     private SubscriptionStatus status;
-
-    @Column(nullable = false)
     private boolean autoRenew;
-
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "brand", column = @Column(name = "card_brand", nullable = false)),
-            @AttributeOverride(name = "last4", column = @Column(name = "card_last4", nullable = false, length = 4)),
-            @AttributeOverride(name = "expiry", column = @Column(name = "card_expiry", nullable = false, length = 7))
-    })
     private PaymentCard paymentCard;
-
-    @Column(nullable = false)
-    @Convert(converter = BillingEmailAttributeConverter.class)
     private BillingEmail billingEmail;
-
     private LocalDate currentPeriodEnd;
 
-    @Column(nullable = false, updatable = false)
-    @CreatedDate
-    private Instant createdAt;
-
-    @Column(nullable = false)
-    @LastModifiedDate
-    private Instant updatedAt;
-
-    protected Subscription() {}
+    private Subscription() {}
 
     /**
      * Creates a pending subscription from a create command (US51).
@@ -83,6 +42,27 @@ public class Subscription {
         this.billingEmail = command.billingEmail();
         this.status = SubscriptionStatus.PENDING;
         this.autoRenew = true;
+    }
+
+    /**
+     * Rebuilds a stored subscription.
+     *
+     * @return the subscription with its persistent identifier
+     */
+    public static Subscription reconstitute(Long id, OrganizationId organizationId, Long planId, BillingCycle billingCycle,
+                                            SubscriptionStatus status, boolean autoRenew, PaymentCard paymentCard,
+                                            BillingEmail billingEmail, LocalDate currentPeriodEnd) {
+        var subscription = new Subscription();
+        subscription.id = id;
+        subscription.organizationId = organizationId;
+        subscription.planId = planId;
+        subscription.billingCycle = billingCycle;
+        subscription.status = status;
+        subscription.autoRenew = autoRenew;
+        subscription.paymentCard = paymentCard;
+        subscription.billingEmail = billingEmail;
+        subscription.currentPeriodEnd = currentPeriodEnd;
+        return subscription;
     }
 
     /**

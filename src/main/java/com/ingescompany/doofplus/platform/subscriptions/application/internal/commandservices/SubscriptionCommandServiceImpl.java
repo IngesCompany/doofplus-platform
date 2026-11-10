@@ -6,8 +6,8 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.Ac
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.SubscriptionStatus;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.PlanRepository;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.SubscriptionRepository;
+import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
+import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.SubscriptionRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import lombok.extern.slf4j.Slf4j;

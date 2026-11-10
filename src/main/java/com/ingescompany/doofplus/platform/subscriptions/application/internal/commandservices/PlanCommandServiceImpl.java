@@ -3,7 +3,7 @@ package com.ingescompany.doofplus.platform.subscriptions.application.internal.co
 import com.ingescompany.doofplus.platform.subscriptions.application.commandservices.PlanCommandService;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Plan;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreatePlanCommand;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.PlanRepository;
+import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Plan.PLAN_KEY_UNIQUE_CONSTRAINT;
+import static com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.entities.PlanPersistenceEntity.PLAN_KEY_UNIQUE_CONSTRAINT;
 
 /**
  * Application service for plan command operations.

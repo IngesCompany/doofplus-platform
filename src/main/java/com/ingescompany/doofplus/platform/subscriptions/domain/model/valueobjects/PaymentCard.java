@@ -1,6 +1,5 @@
 package com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects;
 
-import jakarta.persistence.Embeddable;
 
 import java.util.regex.Pattern;
 
@@ -12,7 +11,6 @@ import java.util.regex.Pattern;
  * @param last4  last four digits of the card
  * @param expiry expiry date in {@code MM/yyyy} format
  */
-@Embeddable
 public record PaymentCard(String brand, String last4, String expiry) {
     private static final Pattern LAST4_PATTERN = Pattern.compile("^\\d{4}$");
     private static final Pattern EXPIRY_PATTERN = Pattern.compile("^(0[1-9]|1[0-2])/\\d{4}$");

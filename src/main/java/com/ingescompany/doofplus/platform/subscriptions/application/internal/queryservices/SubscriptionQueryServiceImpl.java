@@ -4,7 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.application.queryservice
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetAllSubscriptionsByOrganizationIdQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetSubscriptionByIdQuery;
-import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.SubscriptionRepository;
+import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.SubscriptionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
