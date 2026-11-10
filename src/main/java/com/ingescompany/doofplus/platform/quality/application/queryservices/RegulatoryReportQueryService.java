@@ -1,4 +1,10 @@
 package com.ingescompany.doofplus.platform.quality.application.queryservices;
 
-public class RegulatoryReportQueryService {
+import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.RegulatoryReport;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllRegulatoryReportsQuery;
+
+import java.util.List;
+
+public interface RegulatoryReportQueryService {
+    List<RegulatoryReport> handle(GetAllRegulatoryReportsQuery query);
 }
