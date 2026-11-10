@@ -4,12 +4,16 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.BatchR
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IBatchReleaseRepository {
+
     BatchRelease save(BatchRelease batchRelease);
-    Optional<BatchRelease> findById(UUID id);
+
+    Optional<BatchRelease> findById(Long id);
+
+    Optional<BatchRelease> findByBatchId(Long batchId);
+
     List<BatchRelease> findAll();
-    Optional<BatchRelease> findByBatchId(UUID batchId);
-    void deleteById(UUID id);
+
+    boolean existsByBatchId(Long batchId);
 }
