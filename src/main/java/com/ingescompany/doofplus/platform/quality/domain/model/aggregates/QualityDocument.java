@@ -1,62 +1,79 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.QualityDocumentStatus;
-import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "quality_documents")
-@NoArgsConstructor
-public class QualityDocument {
+public class QualityDocument extends AbstractDomainAggregateRoot<QualityDocument> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false, unique = true)
+    private Long id;
     private String code;
-
-    @Column(nullable = false)
     private String title;
-
     private String description;
-
-    @Column(nullable = false)
     private String documentType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private QualityDocumentStatus status;
-
     private String fileReference;
-
-    private String createdBy;
-
-    private LocalDateTime createdAt;
+    private String version;
+    private QualityDocumentStatus status;
+    private Long ownerId;
+    private LocalDateTime approvedAt;
 
     public QualityDocument(String code, String title, String description,
                            String documentType, String fileReference,
-                           String createdBy) {
+                           String version, Long ownerId) {
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException("Document code is required");
+        }
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Document title is required");
+        }
+
         this.code = code;
         this.title = title;
         this.description = description;
         this.documentType = documentType;
         this.fileReference = fileReference;
-        this.createdBy = createdBy;
+        this.version = version;
+        this.ownerId = ownerId;
         this.status = QualityDocumentStatus.DRAFT;
-        this.createdAt = LocalDateTime.now();
     }
 
-    public void updateStatus(QualityDocumentStatus status) {
-        this.status = status;
+    public static QualityDocument reconstitute(
+            Long id, String code, String title, String description,
+            String documentType, String fileReference, String version,
+            QualityDocumentStatus status, Long ownerId, LocalDateTime approvedAt) {
+
+        QualityDocument document = new QualityDocument(
+                code, title, description, documentType,
+                fileReference, version, ownerId
+        );
+        document.id = id;
+        document.status = status;
+        document.approvedAt = approvedAt;
+        return document;
     }
 
-    public void updateFileReference(String fileReference) {
-        this.fileReference = fileReference;
+    public void submitForReview() {
+        if (status != QualityDocumentStatus.DRAFT) {
+            throw new IllegalStateException("Only draft documents can be submitted");
+        }
+        status = QualityDocumentStatus.UNDER_REVIEW;
+    }
+
+    public void approve() {
+        if (status != QualityDocumentStatus.UNDER_REVIEW) {
+            throw new IllegalStateException("Document must be under review");
+        }
+        status = QualityDocumentStatus.APPROVED;
+        approvedAt = LocalDateTime.now();
+    }
+
+    public void markObsolete() {
+        if (status != QualityDocumentStatus.APPROVED) {
+            throw new IllegalStateException("Only approved documents can become obsolete");
+        }
+        status = QualityDocumentStatus.OBSOLETE;
     }
 }

@@ -1,54 +1,80 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "quality_evidence")
-@NoArgsConstructor
-public class Evidence {
+public class Evidence extends AbstractDomainAggregateRoot<Evidence> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false)
+    private Long id;
     private String title;
-
     private String description;
-
-    @Column(nullable = false)
+    private EvidenceType type;
     private String fileReference;
-
-    private String evidenceType;
-
-    private UUID deviationId;
-
-    private UUID auditId;
-
-    private String uploadedBy;
-
+    private Long deviationId;
+    private Long documentId;
+    private Long uploadedBy;
+    private EvidenceStatus status;
     private LocalDateTime uploadedAt;
+    private LocalDateTime verifiedAt;
 
-    public Evidence(String title, String description, String fileReference,
-                    String evidenceType, UUID deviationId,
-                    UUID auditId, String uploadedBy) {
+    public Evidence(String title, String description, EvidenceType type,
+                    String fileReference, Long deviationId,
+                    Long documentId, Long uploadedBy) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Evidence title is required");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("Evidence type is required");
+        }
+        if (fileReference == null || fileReference.isBlank()) {
+            throw new IllegalArgumentException("Evidence file reference is required");
+        }
+
         this.title = title;
         this.description = description;
+        this.type = type;
         this.fileReference = fileReference;
-        this.evidenceType = evidenceType;
         this.deviationId = deviationId;
-        this.auditId = auditId;
+        this.documentId = documentId;
         this.uploadedBy = uploadedBy;
+        this.status = EvidenceStatus.PENDING;
         this.uploadedAt = LocalDateTime.now();
     }
 
-    public void updateFileReference(String fileReference) {
-        this.fileReference = fileReference;
+    public static Evidence reconstitute(
+            Long id, String title, String description, EvidenceType type,
+            String fileReference, Long deviationId, Long documentId,
+            Long uploadedBy, EvidenceStatus status,
+            LocalDateTime uploadedAt, LocalDateTime verifiedAt) {
+
+        Evidence evidence = new Evidence(
+                title, description, type, fileReference,
+                deviationId, documentId, uploadedBy
+        );
+        evidence.id = id;
+        evidence.status = status;
+        evidence.uploadedAt = uploadedAt;
+        evidence.verifiedAt = verifiedAt;
+        return evidence;
+    }
+
+    public void verify() {
+        if (status != EvidenceStatus.PENDING) {
+            throw new IllegalStateException("Only pending evidence can be verified");
+        }
+        status = EvidenceStatus.VERIFIED;
+        verifiedAt = LocalDateTime.now();
+    }
+
+    public void reject() {
+        if (status != EvidenceStatus.PENDING) {
+            throw new IllegalStateException("Only pending evidence can be rejected");
+        }
+        status = EvidenceStatus.REJECTED;
     }
 }
