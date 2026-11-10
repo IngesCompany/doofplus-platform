@@ -2,70 +2,103 @@ package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DeviationSeverity;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DeviationStatus;
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Objects;
 
 @Getter
-@Entity
-@Table(name = "quality_deviations")
-@NoArgsConstructor
-public class Deviation {
+public class Deviation extends AbstractDomainAggregateRoot<Deviation> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false, unique = true)
+    private Long id;
     private String code;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(length = 2000)
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private DeviationSeverity severity;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private DeviationStatus status;
-
-    private UUID batchId;
-
+    private Long batchId;
     private String assignedTo;
-
-    @Column(nullable = false)
     private LocalDateTime detectedAt;
+    private LocalDateTime closedAt;
 
     public Deviation(
             String code,
             String title,
             String description,
             DeviationSeverity severity,
-            UUID batchId,
+            Long batchId,
             String assignedTo
     ) {
-        this.code = code;
-        this.title = title;
-        this.description = description;
-        this.severity = severity;
-        this.batchId = batchId;
+        this.code = Objects.requireNonNull(code);
+        this.title = Objects.requireNonNull(title);
+        this.description = Objects.requireNonNull(description);
+        this.severity = Objects.requireNonNull(severity);
+        this.batchId = Objects.requireNonNull(batchId);
         this.assignedTo = assignedTo;
         this.status = DeviationStatus.OPEN;
         this.detectedAt = LocalDateTime.now();
     }
 
-    public void updateStatus(DeviationStatus status) {
-        this.status = status;
+    public static Deviation reconstitute(
+            Long id,
+            String code,
+            String title,
+            String description,
+            DeviationSeverity severity,
+            DeviationStatus status,
+            Long batchId,
+            String assignedTo,
+            LocalDateTime detectedAt,
+            LocalDateTime closedAt
+    ) {
+        Deviation deviation = new Deviation(
+                code, title, description, severity, batchId, assignedTo
+        );
+
+        deviation.id = id;
+        deviation.status = status;
+        deviation.detectedAt = detectedAt;
+        deviation.closedAt = closedAt;
+
+        return deviation;
     }
 
     public void assignTo(String assignedTo) {
-        this.assignedTo = assignedTo;
+        this.assignedTo = Objects.requireNonNull(assignedTo);
+    }
+
+    public void startInvestigation() {
+        if (status != DeviationStatus.OPEN) {
+            throw new IllegalStateException("quality.error.deviation.invalidInvestigation");
+        }
+
+        status = DeviationStatus.UNDER_INVESTIGATION;
+    }
+
+    public void requireCapa() {
+        if (status != DeviationStatus.UNDER_INVESTIGATION) {
+            throw new IllegalStateException("quality.error.deviation.invalidCapa");
+        }
+
+        status = DeviationStatus.CAPA_REQUIRED;
+    }
+
+    public void disposition() {
+        if (status != DeviationStatus.UNDER_INVESTIGATION
+                && status != DeviationStatus.CAPA_REQUIRED) {
+            throw new IllegalStateException("quality.error.deviation.invalidDisposition");
+        }
+
+        status = DeviationStatus.DISPOSITIONED;
+    }
+
+    public void close() {
+        if (status != DeviationStatus.DISPOSITIONED) {
+            throw new IllegalStateException("quality.error.deviation.notDispositioned");
+        }
+
+        status = DeviationStatus.CLOSED;
+        closedAt = LocalDateTime.now();
     }
 }

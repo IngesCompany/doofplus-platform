@@ -1,76 +1,91 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.BatchReleaseStatus;
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Objects;
 
 @Getter
-@Entity
-@Table(name = "quality_batch_releases")
-@NoArgsConstructor
-public class BatchRelease {
+public class BatchRelease extends AbstractDomainAggregateRoot<BatchRelease> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false)
-    private UUID batchId;
-
-    @Column(nullable = false)
+    private Long id;
+    private Long batchId;
     private String batchCode;
-
-    @Column(nullable = false)
     private String requestedBy;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private BatchReleaseStatus status;
-
     private String decision;
-
     private String signatureReference;
-
+    private String signedBy;
     private LocalDateTime signedAt;
-
-    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    public BatchRelease(
-            UUID batchId,
-            String batchCode,
-            String requestedBy
-    ) {
-        this.batchId = batchId;
-        this.batchCode = batchCode;
-        this.requestedBy = requestedBy;
+    public BatchRelease(Long batchId, String batchCode, String requestedBy) {
+        this.batchId = Objects.requireNonNull(batchId);
+        this.batchCode = Objects.requireNonNull(batchCode);
+        this.requestedBy = Objects.requireNonNull(requestedBy);
         this.status = BatchReleaseStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
 
-    public void approve(String decision, String signatureReference) {
-        this.decision = decision;
-        this.signatureReference = signatureReference;
+    public static BatchRelease reconstitute(
+            Long id,
+            Long batchId,
+            String batchCode,
+            String requestedBy,
+            BatchReleaseStatus status,
+            String decision,
+            String signatureReference,
+            String signedBy,
+            LocalDateTime signedAt,
+            LocalDateTime createdAt
+    ) {
+        BatchRelease release = new BatchRelease(batchId, batchCode, requestedBy);
+
+        release.id = id;
+        release.status = status;
+        release.decision = decision;
+        release.signatureReference = signatureReference;
+        release.signedBy = signedBy;
+        release.signedAt = signedAt;
+        release.createdAt = createdAt;
+
+        return release;
+    }
+
+    public void approve(
+            String decision,
+            String signatureReference,
+            String signedBy
+    ) {
+        if (status != BatchReleaseStatus.PENDING) {
+            throw new IllegalStateException("quality.error.batchRelease.invalidApproval");
+        }
+
+        this.decision = Objects.requireNonNull(decision);
+        this.signatureReference = Objects.requireNonNull(signatureReference);
+        this.signedBy = Objects.requireNonNull(signedBy);
         this.signedAt = LocalDateTime.now();
         this.status = BatchReleaseStatus.APPROVED;
     }
 
-    public void reject(String decision) {
-        this.decision = decision;
+    public void reject(String decision, String signedBy) {
+        if (status != BatchReleaseStatus.PENDING) {
+            throw new IllegalStateException("quality.error.batchRelease.invalidRejection");
+        }
+
+        this.decision = Objects.requireNonNull(decision);
+        this.signedBy = Objects.requireNonNull(signedBy);
+        this.signedAt = LocalDateTime.now();
         this.status = BatchReleaseStatus.REJECTED;
     }
 
     public void release() {
-        if (this.status != BatchReleaseStatus.APPROVED) {
-            throw new IllegalStateException(
-                    "The batch must be approved before release"
-            );
+        if (status != BatchReleaseStatus.APPROVED) {
+            throw new IllegalStateException("quality.error.batchRelease.notApproved");
         }
 
-        this.status = BatchReleaseStatus.RELEASED;
+        status = BatchReleaseStatus.RELEASED;
     }
 }
