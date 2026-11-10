@@ -1,59 +1,88 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.RegulatoryReportStatus;
-import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "regulatory_reports")
-@NoArgsConstructor
-public class RegulatoryReport {
+public class RegulatoryReport extends AbstractDomainAggregateRoot<RegulatoryReport> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false, unique = true)
+    private Long id;
     private String code;
-
-    @Column(nullable = false)
     private String title;
-
-    private String authority;
-
     private String description;
-
+    private String regulatoryAuthority;
     private String fileReference;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    private LocalDate dueDate;
     private RegulatoryReportStatus status;
+    private Long preparedBy;
+    private LocalDateTime submittedAt;
 
-    private String createdBy;
+    public RegulatoryReport(String code, String title, String description,
+                            String regulatoryAuthority, String fileReference,
+                            LocalDate dueDate, Long preparedBy) {
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException("Report code is required");
+        }
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Report title is required");
+        }
 
-    private LocalDateTime createdAt;
-
-    public RegulatoryReport(String code, String title, String authority,
-                            String description, String createdBy) {
         this.code = code;
         this.title = title;
-        this.authority = authority;
         this.description = description;
-        this.createdBy = createdBy;
-        this.status = RegulatoryReportStatus.DRAFT;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public void updateStatus(RegulatoryReportStatus status) {
-        this.status = status;
-    }
-
-    public void attachFile(String fileReference) {
+        this.regulatoryAuthority = regulatoryAuthority;
         this.fileReference = fileReference;
+        this.dueDate = dueDate;
+        this.preparedBy = preparedBy;
+        this.status = RegulatoryReportStatus.DRAFT;
+    }
+
+    public static RegulatoryReport reconstitute(
+            Long id, String code, String title, String description,
+            String regulatoryAuthority, String fileReference,
+            LocalDate dueDate, RegulatoryReportStatus status,
+            Long preparedBy, LocalDateTime submittedAt) {
+
+        RegulatoryReport report = new RegulatoryReport(
+                code, title, description, regulatoryAuthority,
+                fileReference, dueDate, preparedBy
+        );
+        report.id = id;
+        report.status = status;
+        report.submittedAt = submittedAt;
+        return report;
+    }
+
+    public void submitForReview() {
+        if (status != RegulatoryReportStatus.DRAFT) {
+            throw new IllegalStateException("Only draft reports can be submitted for review");
+        }
+        status = RegulatoryReportStatus.UNDER_REVIEW;
+    }
+
+    public void approve() {
+        if (status != RegulatoryReportStatus.UNDER_REVIEW) {
+            throw new IllegalStateException("Report must be under review");
+        }
+        status = RegulatoryReportStatus.APPROVED;
+    }
+
+    public void submit() {
+        if (status != RegulatoryReportStatus.APPROVED) {
+            throw new IllegalStateException("Only approved reports can be submitted");
+        }
+        status = RegulatoryReportStatus.SUBMITTED;
+        submittedAt = LocalDateTime.now();
+    }
+
+    public void reject() {
+        if (status != RegulatoryReportStatus.UNDER_REVIEW) {
+            throw new IllegalStateException("Only reports under review can be rejected");
+        }
+        status = RegulatoryReportStatus.REJECTED;
     }
 }
