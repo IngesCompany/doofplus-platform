@@ -1,53 +1,52 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.AuditFindingSeverity;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "audit_findings")
-@NoArgsConstructor
-public class AuditFinding {
+public class AuditFinding extends AbstractDomainAggregateRoot<AuditFinding> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false)
-    private UUID auditId;
-
-    @Column(nullable = false)
+    private Long id;
+    private Long auditId;
+    private String title;
     private String description;
+    private AuditFindingSeverity severity;
+    private Long relatedDeviationId;
+    private LocalDateTime identifiedAt;
 
-    private String requirement;
+    public AuditFinding(Long auditId, String title, String description,
+                        AuditFindingSeverity severity, Long relatedDeviationId) {
+        if (auditId == null) {
+            throw new IllegalArgumentException("Audit identifier is required");
+        }
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Finding title is required");
+        }
+        if (severity == null) {
+            throw new IllegalArgumentException("Finding severity is required");
+        }
 
-    private String severity;
-
-    private String correctiveAction;
-
-    private boolean resolved;
-
-    private LocalDateTime createdAt;
-
-    public AuditFinding(UUID auditId, String description,
-                        String requirement, String severity) {
         this.auditId = auditId;
+        this.title = title;
         this.description = description;
-        this.requirement = requirement;
         this.severity = severity;
-        this.resolved = false;
-        this.createdAt = LocalDateTime.now();
+        this.relatedDeviationId = relatedDeviationId;
+        this.identifiedAt = LocalDateTime.now();
     }
 
-    public void assignCorrectiveAction(String correctiveAction) {
-        this.correctiveAction = correctiveAction;
-    }
+    public static AuditFinding reconstitute(
+            Long id, Long auditId, String title, String description,
+            AuditFindingSeverity severity, Long relatedDeviationId,
+            LocalDateTime identifiedAt) {
 
-    public void resolve() {
-        this.resolved = true;
+        AuditFinding finding = new AuditFinding(
+                auditId, title, description, severity, relatedDeviationId
+        );
+        finding.id = id;
+        finding.identifiedAt = identifiedAt;
+        return finding;
     }
 }

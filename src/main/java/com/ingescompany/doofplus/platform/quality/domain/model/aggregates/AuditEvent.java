@@ -1,45 +1,51 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "quality_audit_events")
-@NoArgsConstructor
-public class AuditEvent {
+public class AuditEvent extends AbstractDomainAggregateRoot<AuditEvent> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false)
-    private String entityType;
-
-    @Column(nullable = false)
-    private UUID entityId;
-
-    @Column(nullable = false)
-    private String action;
-
-    private String performedBy;
-
-    @Column(length = 2000)
-    private String details;
-
+    private Long id;
+    private String aggregateType;
+    private Long aggregateId;
+    private String eventType;
+    private String description;
+    private Long performedBy;
     private LocalDateTime occurredAt;
 
-    public AuditEvent(String entityType, UUID entityId,
-                      String action, String performedBy, String details) {
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.action = action;
+    public AuditEvent(String aggregateType, Long aggregateId,
+                      String eventType, String description, Long performedBy) {
+        if (aggregateType == null || aggregateType.isBlank()) {
+            throw new IllegalArgumentException("Aggregate type is required");
+        }
+        if (aggregateId == null) {
+            throw new IllegalArgumentException("Aggregate identifier is required");
+        }
+        if (eventType == null || eventType.isBlank()) {
+            throw new IllegalArgumentException("Event type is required");
+        }
+
+        this.aggregateType = aggregateType;
+        this.aggregateId = aggregateId;
+        this.eventType = eventType;
+        this.description = description;
         this.performedBy = performedBy;
-        this.details = details;
         this.occurredAt = LocalDateTime.now();
+    }
+
+    public static AuditEvent reconstitute(
+            Long id, String aggregateType, Long aggregateId,
+            String eventType, String description, Long performedBy,
+            LocalDateTime occurredAt) {
+
+        AuditEvent event = new AuditEvent(
+                aggregateType, aggregateId, eventType, description, performedBy
+        );
+        event.id = id;
+        event.occurredAt = occurredAt;
+        return event;
     }
 }
