@@ -41,7 +41,7 @@ public class DeviationPersistenceEntity extends AuditableAbstractPersistenceEnti
     private Long batchId;
 
     @Column(name = "assigned_to")
-    private String assignedTo;
+    private Long assignedTo;
 
     @Column(nullable = false)
     private LocalDateTime detectedAt;

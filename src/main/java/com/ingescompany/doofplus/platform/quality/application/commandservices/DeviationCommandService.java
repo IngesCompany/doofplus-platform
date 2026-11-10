@@ -6,6 +6,5 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 
 public interface DeviationCommandService {
-
     Result<Deviation, ApplicationError> handle(CreateDeviationCommand command);
 }

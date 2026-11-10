@@ -18,7 +18,7 @@ public class Deviation extends AbstractDomainAggregateRoot<Deviation> {
     private DeviationSeverity severity;
     private DeviationStatus status;
     private Long batchId;
-    private String assignedTo;
+    private Long assignedTo;
     private LocalDateTime detectedAt;
     private LocalDateTime closedAt;
 
@@ -28,7 +28,7 @@ public class Deviation extends AbstractDomainAggregateRoot<Deviation> {
             String description,
             DeviationSeverity severity,
             Long batchId,
-            String assignedTo
+            Long assignedTo
     ) {
         this.code = Objects.requireNonNull(code);
         this.title = Objects.requireNonNull(title);
@@ -48,7 +48,7 @@ public class Deviation extends AbstractDomainAggregateRoot<Deviation> {
             DeviationSeverity severity,
             DeviationStatus status,
             Long batchId,
-            String assignedTo,
+            Long assignedTo,
             LocalDateTime detectedAt,
             LocalDateTime closedAt
     ) {
@@ -64,7 +64,7 @@ public class Deviation extends AbstractDomainAggregateRoot<Deviation> {
         return deviation;
     }
 
-    public void assignTo(String assignedTo) {
+    public void assignTo(Long assignedTo) {
         this.assignedTo = Objects.requireNonNull(assignedTo);
     }
 
