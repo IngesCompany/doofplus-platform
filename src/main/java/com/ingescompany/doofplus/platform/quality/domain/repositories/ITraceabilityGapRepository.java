@@ -4,12 +4,14 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Tracea
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ITraceabilityGapRepository {
-    TraceabilityGap save(TraceabilityGap gap);
-    Optional<TraceabilityGap> findById(UUID id);
+
+    TraceabilityGap save(TraceabilityGap traceabilityGap);
+
+    Optional<TraceabilityGap> findById(Long id);
+
     List<TraceabilityGap> findAll();
-    List<TraceabilityGap> findByBatchId(UUID batchId);
-    void deleteById(UUID id);
+
+    List<TraceabilityGap> findByBatchId(Long batchId);
 }
