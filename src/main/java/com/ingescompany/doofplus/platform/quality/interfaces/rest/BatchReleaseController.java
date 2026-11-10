@@ -2,8 +2,6 @@ package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
 import com.ingescompany.doofplus.platform.quality.application.commandservices.BatchReleaseCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.BatchReleaseQueryService;
-import com.ingescompany.doofplus.platform.quality.domain.model.commands.ApproveBatchReleaseCommand;
-import com.ingescompany.doofplus.platform.quality.domain.model.commands.RejectBatchReleaseCommand;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllBatchReleasesQuery;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetBatchReleaseByBatchIdQuery;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetBatchReleaseByIdQuery;
@@ -65,7 +63,7 @@ public class BatchReleaseController {
             @RequestBody ApproveBatchReleaseResource resource) {
 
         var command = ApproveBatchReleaseCommandFromResourceAssembler
-                .toCommandFromResource(releaseId, resource);
+                .toCommandFromResource(resource);
 
         var result = commandService.handle(command);
 
@@ -83,7 +81,7 @@ public class BatchReleaseController {
             @RequestBody RejectBatchReleaseResource resource) {
 
         var command = RejectBatchReleaseCommandFromResourceAssembler
-                .toCommandFromResource(releaseId, resource);
+                .toCommandFromResource(resource);
 
         var result = commandService.handle(command);
 
