@@ -25,6 +25,7 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     private boolean autoRenew;
     private PaymentCard paymentCard;
     private BillingEmail billingEmail;
+    private LocalDate currentPeriodStart;
     private LocalDate currentPeriodEnd;
 
     private Subscription() {}
@@ -51,7 +52,8 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
      */
     public static Subscription reconstitute(Long id, OrganizationId organizationId, Long planId, BillingCycle billingCycle,
                                             SubscriptionStatus status, boolean autoRenew, PaymentCard paymentCard,
-                                            BillingEmail billingEmail, LocalDate currentPeriodEnd) {
+                                            BillingEmail billingEmail, LocalDate currentPeriodStart,
+                                            LocalDate currentPeriodEnd) {
         var subscription = new Subscription();
         subscription.id = id;
         subscription.organizationId = organizationId;
@@ -61,6 +63,7 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
         subscription.autoRenew = autoRenew;
         subscription.paymentCard = paymentCard;
         subscription.billingEmail = billingEmail;
+        subscription.currentPeriodStart = currentPeriodStart;
         subscription.currentPeriodEnd = currentPeriodEnd;
         return subscription;
     }
@@ -73,7 +76,8 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     public void activate() {
         if (status != SubscriptionStatus.PENDING) throw new IllegalStateException(NOT_PENDING_MESSAGE);
         status = SubscriptionStatus.ACTIVE;
-        currentPeriodEnd = billingCycle.nextPeriodEnd(LocalDate.now());
+        currentPeriodStart = LocalDate.now();
+        currentPeriodEnd = billingCycle.nextPeriodEnd(currentPeriodStart);
     }
 
     /**
@@ -83,7 +87,8 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
      */
     public void renew() {
         if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE);
-        currentPeriodEnd = billingCycle.nextPeriodEnd(currentPeriodEnd);
+        currentPeriodStart = currentPeriodEnd;
+        currentPeriodEnd = billingCycle.nextPeriodEnd(currentPeriodStart);
     }
 
     /**

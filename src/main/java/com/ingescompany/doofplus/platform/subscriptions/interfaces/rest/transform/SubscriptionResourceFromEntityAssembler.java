@@ -26,6 +26,7 @@ public class SubscriptionResourceFromEntityAssembler {
                 entity.getPaymentCard().last4(),
                 entity.getPaymentCard().expiry(),
                 entity.getBillingEmail().value(),
+                entity.getCurrentPeriodStart(),
                 entity.getCurrentPeriodEnd());
     }
 }

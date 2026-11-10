@@ -22,6 +22,7 @@ public final class SubscriptionPersistenceAssembler {
                 entity.isAutoRenew(),
                 new PaymentCard(entity.getCardBrand(), entity.getCardLast4(), entity.getCardExpiry()),
                 entity.getBillingEmail(),
+                entity.getCurrentPeriodStart(),
                 entity.getCurrentPeriodEnd());
     }
 
@@ -37,6 +38,7 @@ public final class SubscriptionPersistenceAssembler {
         entity.setCardLast4(domain.getPaymentCard().last4());
         entity.setCardExpiry(domain.getPaymentCard().expiry());
         entity.setBillingEmail(domain.getBillingEmail());
+        entity.setCurrentPeriodStart(domain.getCurrentPeriodStart());
         entity.setCurrentPeriodEnd(domain.getCurrentPeriodEnd());
         return entity;
     }

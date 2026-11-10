@@ -39,6 +39,8 @@ public class SubscriptionPersistenceEntity extends AuditableAbstractPersistenceE
     @Column(nullable = false, length = 20)
     private SubscriptionStatus status;
 
+    private LocalDate currentPeriodStart;
+
     private LocalDate currentPeriodEnd;
 
     @Column(nullable = false)

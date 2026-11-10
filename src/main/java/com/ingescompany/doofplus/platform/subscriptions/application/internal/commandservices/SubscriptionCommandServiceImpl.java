@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.SubscriptionStatus;
 import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
 import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.SubscriptionRepository;
@@ -69,6 +70,12 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     /**
      * {@inheritDoc}
      */
+    @Override
+    @Transactional
+    public Result<Subscription, ApplicationError> handle(RenewSubscriptionCommand command) {
+        return transition(command.subscriptionId(), Subscription::renew);
+    }
+
     @Override
     @Transactional
     public Result<Subscription, ApplicationError> handle(CancelSubscriptionCommand command) {

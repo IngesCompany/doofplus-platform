@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.application.commandservi
 import com.ingescompany.doofplus.platform.subscriptions.application.queryservices.SubscriptionQueryService;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetAllSubscriptionsByOrganizationIdQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetSubscriptionByIdQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.OrganizationId;
@@ -94,6 +95,28 @@ public class SubscriptionsController {
     public ResponseEntity<?> activateSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/activation", id);
         var result = subscriptionCommandService.handle(new ActivateSubscriptionCommand(id));
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
+    }
+
+    /**
+     * Renews an active subscription for one more billing period (US53).
+     *
+     * @param id Subscription ID
+     * @return the renewed subscription, not found, or a business rule violation when it is not active
+     */
+    @Operation(summary = "Renew a subscription", description = "Extends an ACTIVE subscription for one more billing period")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Subscription renewed",
+                    content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
+            @ApiResponse(responseCode = "404", description = "Subscription not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not active",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @PostMapping("{id}/renewal")
+    public ResponseEntity<?> renewSubscription(@PathVariable Long id) {
+        log.debug("POST /api/v1/subscriptions/{}/renewal", id);
+        var result = subscriptionCommandService.handle(new RenewSubscriptionCommand(id));
         return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 

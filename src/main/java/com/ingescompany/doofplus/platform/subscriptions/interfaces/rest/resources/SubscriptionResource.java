@@ -21,5 +21,6 @@ public record SubscriptionResource(
         @Schema(description = "Last four digits of the card", example = "4242") String cardLast4,
         @Schema(description = "Card expiry", example = "08/2028") String cardExpiry,
         @Schema(description = "Email that receives the invoices", example = "billing@andinos.com.pe") String billingEmail,
+        @Schema(description = "Start of the current billing period", example = "2026-10-27") LocalDate currentPeriodStart,
         @Schema(description = "End of the current billing period", example = "2026-11-27") LocalDate currentPeriodEnd) {
 }

@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 
@@ -28,6 +29,14 @@ public interface SubscriptionCommandService {
      * @return the active subscription, or a failure when it does not exist or is not pending
      */
     Result<Subscription, ApplicationError> handle(ActivateSubscriptionCommand command);
+
+    /**
+     * Handles the renewal of an active subscription for one more billing period (US53).
+     *
+     * @param command renew command
+     * @return the renewed subscription, or a failure when it does not exist or is not active
+     */
+    Result<Subscription, ApplicationError> handle(RenewSubscriptionCommand command);
 
     /**
      * Handles the cancellation of an active subscription (US53).
