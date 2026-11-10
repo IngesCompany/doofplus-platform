@@ -21,8 +21,8 @@ import java.time.LocalDate;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Subscription {
-    private static final String NOT_PENDING_MESSAGE_KEY = "subscription.error.state.notPending";
-    private static final String NOT_ACTIVE_MESSAGE_KEY = "subscription.error.state.notActive";
+    private static final String NOT_PENDING_MESSAGE = "Only a pending subscription can be activated";
+    private static final String NOT_ACTIVE_MESSAGE = "Only an active subscription can be renewed or cancelled";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,7 +91,7 @@ public class Subscription {
      * @throws IllegalStateException when the subscription is not pending
      */
     public void activate() {
-        if (status != SubscriptionStatus.PENDING) throw new IllegalStateException(NOT_PENDING_MESSAGE_KEY);
+        if (status != SubscriptionStatus.PENDING) throw new IllegalStateException(NOT_PENDING_MESSAGE);
         status = SubscriptionStatus.ACTIVE;
         currentPeriodEnd = billingCycle.nextPeriodEnd(LocalDate.now());
     }
@@ -102,7 +102,7 @@ public class Subscription {
      * @throws IllegalStateException when the subscription is not active
      */
     public void renew() {
-        if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE_KEY);
+        if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE);
         currentPeriodEnd = billingCycle.nextPeriodEnd(currentPeriodEnd);
     }
 
@@ -112,7 +112,7 @@ public class Subscription {
      * @throws IllegalStateException when the subscription is not active
      */
     public void cancel() {
-        if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE_KEY);
+        if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE);
         status = SubscriptionStatus.CANCELLED;
         autoRenew = false;
     }

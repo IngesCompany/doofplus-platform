@@ -10,9 +10,10 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobject
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.CreateSubscriptionResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.SubscriptionResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.CreateSubscriptionCommandFromResourceAssembler;
-import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.ResponseEntityFromSubscriptionCommandResultAssembler;
-import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.ResponseEntityFromSubscriptionsQueryResultAssembler;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.SubscriptionResourceFromEntityAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -23,7 +24,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -44,14 +44,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class SubscriptionsController {
     private final SubscriptionCommandService subscriptionCommandService;
     private final SubscriptionQueryService subscriptionQueryService;
-    private final MessageSource messageSource;
 
     public SubscriptionsController(SubscriptionCommandService subscriptionCommandService,
-                                   SubscriptionQueryService subscriptionQueryService,
-                                   MessageSource messageSource) {
+                                   SubscriptionQueryService subscriptionQueryService) {
         this.subscriptionCommandService = subscriptionCommandService;
         this.subscriptionQueryService = subscriptionQueryService;
-        this.messageSource = messageSource;
     }
 
     /**
@@ -75,14 +72,14 @@ public class SubscriptionsController {
     public ResponseEntity<?> createSubscription(@Valid @RequestBody CreateSubscriptionResource resource) {
         log.debug("POST /api/v1/subscriptions - organizationId={}, planId={}", resource.organizationId(), resource.planId());
         var result = subscriptionCommandService.handle(CreateSubscriptionCommandFromResourceAssembler.toCommandFromResource(resource));
-        return ResponseEntityFromSubscriptionCommandResultAssembler.toResponseEntityFromResult(result, HttpStatus.CREATED, messageSource);
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.CREATED);
     }
 
     /**
      * Activates a pending subscription once the payment is authorized (US52).
      *
      * @param id Subscription ID
-     * @return the active subscription, not found, or conflict when it is not pending
+     * @return the active subscription, not found, or a business rule violation when it is not pending
      */
     @Operation(summary = "Activate a subscription", description = "Activates a PENDING subscription once the payment is authorized")
     @ApiResponses(value = {
@@ -90,21 +87,21 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
             @ApiResponse(responseCode = "404", description = "Subscription not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not pending",
+            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not pending",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/activation")
     public ResponseEntity<?> activateSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/activation", id);
         var result = subscriptionCommandService.handle(new ActivateSubscriptionCommand(id));
-        return ResponseEntityFromSubscriptionCommandResultAssembler.toResponseEntityFromResult(result, HttpStatus.OK, messageSource);
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 
     /**
      * Cancels an active subscription (US53).
      *
      * @param id Subscription ID
-     * @return the cancelled subscription, not found, or conflict when it is not active
+     * @return the cancelled subscription, not found, or a business rule violation when it is not active
      */
     @Operation(summary = "Cancel a subscription", description = "Cancels an ACTIVE subscription; the access stays until the end of the paid period")
     @ApiResponses(value = {
@@ -112,14 +109,14 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
             @ApiResponse(responseCode = "404", description = "Subscription not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not active",
+            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not active",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/cancellation")
     public ResponseEntity<?> cancelSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/cancellation", id);
         var result = subscriptionCommandService.handle(new CancelSubscriptionCommand(id));
-        return ResponseEntityFromSubscriptionCommandResultAssembler.toResponseEntityFromResult(result, HttpStatus.OK, messageSource);
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 
     /**
@@ -140,9 +137,10 @@ public class SubscriptionsController {
         log.debug("GET /api/v1/subscriptions/{}", id);
         var subscription = subscriptionQueryService.handle(new GetSubscriptionByIdQuery(id));
         if (subscription.isEmpty()) {
-            return ResponseEntityFromSubscriptionsQueryResultAssembler.notFound(messageSource, "subscription.error.notFoundById", id);
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Subscription", id.toString()));
         }
-        return ResponseEntityFromSubscriptionsQueryResultAssembler.ok(subscription.get(), SubscriptionResourceFromEntityAssembler::toResourceFromEntity);
+        return ResponseEntity.ok(SubscriptionResourceFromEntityAssembler.toResourceFromEntity(subscription.get()));
     }
 
     /**
@@ -164,10 +162,11 @@ public class SubscriptionsController {
             @RequestParam Long organizationId) {
         log.debug("GET /api/v1/subscriptions?organizationId={}", organizationId);
         if (organizationId <= 0) {
-            return ResponseEntityFromSubscriptionsQueryResultAssembler.badRequest(messageSource, "subscription.error.organizationId.invalid");
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.validationError("organizationId", "organizationId must be greater than 0"));
         }
         var subscriptions = subscriptionQueryService.handle(
                 new GetAllSubscriptionsByOrganizationIdQuery(new OrganizationId(organizationId)));
-        return ResponseEntityFromSubscriptionsQueryResultAssembler.okList(subscriptions, SubscriptionResourceFromEntityAssembler::toResourceFromEntity);
+        return ResponseEntity.ok(subscriptions.stream().map(SubscriptionResourceFromEntityAssembler::toResourceFromEntity).toList());
     }
 }

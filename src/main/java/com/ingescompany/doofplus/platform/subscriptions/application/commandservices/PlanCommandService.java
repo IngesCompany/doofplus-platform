@@ -2,6 +2,7 @@ package com.ingescompany.doofplus.platform.subscriptions.application.commandserv
 
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Plan;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreatePlanCommand;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 
 /**
@@ -17,5 +18,5 @@ public interface PlanCommandService {
      * @return success when the plan is created, failure when the plan key already exists
      * @see CreatePlanCommand
      */
-    Result<Plan, PlanCommandFailure> handle(CreatePlanCommand command);
+    Result<Plan, ApplicationError> handle(CreatePlanCommand command);
 }

@@ -1,10 +1,10 @@
 package com.ingescompany.doofplus.platform.subscriptions.application.internal.commandservices;
 
-import com.ingescompany.doofplus.platform.subscriptions.application.commandservices.PlanCommandFailure;
 import com.ingescompany.doofplus.platform.subscriptions.application.commandservices.PlanCommandService;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Plan;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreatePlanCommand;
 import com.ingescompany.doofplus.platform.subscriptions.infrastructure.persistence.jpa.PlanRepository;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,10 +34,10 @@ public class PlanCommandServiceImpl implements PlanCommandService {
      */
     @Override
     @Transactional
-    public Result<Plan, PlanCommandFailure> handle(CreatePlanCommand command) {
+    public Result<Plan, ApplicationError> handle(CreatePlanCommand command) {
         if (planRepository.existsByPlanKey(command.planKey())) {
             log.warn("Duplicate plan detected (pre-check): planKey={}", command.planKey().value());
-            return Result.failure(new PlanCommandFailure.Duplicate());
+            return Result.failure(duplicatePlan(command));
         }
         try {
             var createdPlan = planRepository.save(new Plan(command));
@@ -46,7 +46,7 @@ public class PlanCommandServiceImpl implements PlanCommandService {
         } catch (DataIntegrityViolationException exception) {
             if (isDuplicatePlanViolation(exception)) {
                 log.warn("Duplicate plan detected (constraint violation): planKey={}", command.planKey().value());
-                return Result.failure(new PlanCommandFailure.Duplicate());
+                return Result.failure(duplicatePlan(command));
             }
             log.error("Unexpected data integrity violation saving plan: planKey={}", command.planKey().value(), exception);
             throw exception;
@@ -59,6 +59,10 @@ public class PlanCommandServiceImpl implements PlanCommandService {
      * @param exception persistence exception raised during save
      * @return {@code true} when the exception chain contains the constraint name
      */
+    private static ApplicationError duplicatePlan(CreatePlanCommand command) {
+        return ApplicationError.conflict("Plan", "A plan with key %s already exists".formatted(command.planKey().value()));
+    }
+
     private boolean isDuplicatePlanViolation(DataIntegrityViolationException exception) {
         Throwable violationCause = exception;
         while (violationCause != null) {

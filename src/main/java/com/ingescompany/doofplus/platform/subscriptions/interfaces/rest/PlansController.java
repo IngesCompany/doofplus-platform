@@ -8,8 +8,9 @@ import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resource
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.PlanResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.CreatePlanCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.PlanResourceFromEntityAssembler;
-import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.ResponseEntityFromPlanCommandResultAssembler;
-import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.ResponseEntityFromSubscriptionsQueryResultAssembler;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,12 +40,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class PlansController {
     private final PlanCommandService planCommandService;
     private final PlanQueryService planQueryService;
-    private final MessageSource messageSource;
 
-    public PlansController(PlanCommandService planCommandService, PlanQueryService planQueryService, MessageSource messageSource) {
+    public PlansController(PlanCommandService planCommandService, PlanQueryService planQueryService) {
         this.planCommandService = planCommandService;
         this.planQueryService = planQueryService;
-        this.messageSource = messageSource;
     }
 
     /**
@@ -66,7 +65,7 @@ public class PlansController {
     public ResponseEntity<?> createPlan(@Valid @RequestBody CreatePlanResource resource) {
         log.debug("POST /api/v1/plans - planKey={}", resource.planKey());
         var result = planCommandService.handle(CreatePlanCommandFromResourceAssembler.toCommandFromResource(resource));
-        return ResponseEntityFromPlanCommandResultAssembler.toResponseEntityFromResult(result, messageSource);
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, PlanResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.CREATED);
     }
 
     /**
@@ -83,7 +82,7 @@ public class PlansController {
     public ResponseEntity<?> getAllPlans() {
         log.debug("GET /api/v1/plans");
         var plans = planQueryService.handle(new GetAllPlansQuery());
-        return ResponseEntityFromSubscriptionsQueryResultAssembler.okList(plans, PlanResourceFromEntityAssembler::toResourceFromEntity);
+        return ResponseEntity.ok(plans.stream().map(PlanResourceFromEntityAssembler::toResourceFromEntity).toList());
     }
 
     /**
@@ -104,8 +103,9 @@ public class PlansController {
         log.debug("GET /api/v1/plans/{}", id);
         var plan = planQueryService.handle(new GetPlanByIdQuery(id));
         if (plan.isEmpty()) {
-            return ResponseEntityFromSubscriptionsQueryResultAssembler.notFound(messageSource, "plan.error.notFoundById", id);
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                    ApplicationError.notFound("Plan", id.toString()));
         }
-        return ResponseEntityFromSubscriptionsQueryResultAssembler.ok(plan.get(), PlanResourceFromEntityAssembler::toResourceFromEntity);
+        return ResponseEntity.ok(PlanResourceFromEntityAssembler.toResourceFromEntity(plan.get()));
     }
 }

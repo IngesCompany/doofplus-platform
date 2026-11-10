@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 
 /**
@@ -18,7 +19,7 @@ public interface SubscriptionCommandService {
      * @param command create command
      * @return the pending subscription, or a failure when the plan does not exist or the organization is already subscribed
      */
-    Result<Subscription, SubscriptionCommandFailure> handle(CreateSubscriptionCommand command);
+    Result<Subscription, ApplicationError> handle(CreateSubscriptionCommand command);
 
     /**
      * Handles the activation of a pending subscription once the payment is authorized (US52).
@@ -26,7 +27,7 @@ public interface SubscriptionCommandService {
      * @param command activate command
      * @return the active subscription, or a failure when it does not exist or is not pending
      */
-    Result<Subscription, SubscriptionCommandFailure> handle(ActivateSubscriptionCommand command);
+    Result<Subscription, ApplicationError> handle(ActivateSubscriptionCommand command);
 
     /**
      * Handles the cancellation of an active subscription (US53).
@@ -34,5 +35,5 @@ public interface SubscriptionCommandService {
      * @param command cancel command
      * @return the cancelled subscription, or a failure when it does not exist or is not active
      */
-    Result<Subscription, SubscriptionCommandFailure> handle(CancelSubscriptionCommand command);
+    Result<Subscription, ApplicationError> handle(CancelSubscriptionCommand command);
 }
