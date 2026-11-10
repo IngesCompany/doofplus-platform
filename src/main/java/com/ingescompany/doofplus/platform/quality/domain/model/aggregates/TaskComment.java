@@ -1,40 +1,54 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import jakarta.persistence.*;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
-@Entity
-@Table(name = "task_comments")
-@NoArgsConstructor
-public class TaskComment {
+public class TaskComment extends AbstractDomainAggregateRoot<TaskComment> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false)
-    private UUID taskId;
-
-    @Column(nullable = false, length = 2000)
+    private Long id;
+    private Long taskId;
+    private Long authorId;
     private String content;
-
-    private String author;
-
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public TaskComment(UUID taskId, String content, String author) {
+    public TaskComment(Long taskId, Long authorId, String content) {
+        if (taskId == null) {
+            throw new IllegalArgumentException("Task identifier is required");
+        }
+        if (authorId == null) {
+            throw new IllegalArgumentException("Comment author is required");
+        }
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Comment content is required");
+        }
+
         this.taskId = taskId;
+        this.authorId = authorId;
         this.content = content;
-        this.author = author;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    public static TaskComment reconstitute(
+            Long id, Long taskId, Long authorId, String content,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+        TaskComment comment = new TaskComment(taskId, authorId, content);
+        comment.id = id;
+        comment.createdAt = createdAt;
+        comment.updatedAt = updatedAt;
+        return comment;
     }
 
     public void updateContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Comment content is required");
+        }
         this.content = content;
+        this.updatedAt = LocalDateTime.now();
     }
 }
