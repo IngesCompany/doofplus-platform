@@ -4,11 +4,17 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AuditE
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IAuditEventRepository {
-    AuditEvent save(AuditEvent event);
-    Optional<AuditEvent> findById(UUID id);
+
+    AuditEvent save(AuditEvent auditEvent);
+
+    Optional<AuditEvent> findById(Long id);
+
     List<AuditEvent> findAll();
-    List<AuditEvent> findByEntityTypeAndEntityId(String entityType, UUID entityId);
+
+    List<AuditEvent> findByAggregateTypeAndAggregateId(
+            String aggregateType,
+            Long aggregateId
+    );
 }

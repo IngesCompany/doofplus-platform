@@ -4,12 +4,14 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AuditF
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IAuditFindingRepository {
-    AuditFinding save(AuditFinding finding);
-    Optional<AuditFinding> findById(UUID id);
+
+    AuditFinding save(AuditFinding auditFinding);
+
+    Optional<AuditFinding> findById(Long id);
+
     List<AuditFinding> findAll();
-    List<AuditFinding> findByAuditId(UUID auditId);
-    void deleteById(UUID id);
+
+    List<AuditFinding> findByAuditId(Long auditId);
 }
