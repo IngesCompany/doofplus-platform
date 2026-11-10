@@ -4,12 +4,14 @@ import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaAc
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface ICapaActionRepository {
+
     CapaAction save(CapaAction capaAction);
-    Optional<CapaAction> findById(UUID id);
+
+    Optional<CapaAction> findById(Long id);
+
     List<CapaAction> findAll();
-    List<CapaAction> findByCapaPlanId(UUID capaPlanId);
-    void deleteById(UUID id);
+
+    List<CapaAction> findByCapaPlanId(Long capaPlanId);
 }
