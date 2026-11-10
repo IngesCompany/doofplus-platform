@@ -21,32 +21,30 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class DeviationPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private DeviationSeverity severity;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     private DeviationStatus status;
 
-    @Column(name = "batch_id")
     private Long batchId;
 
     @Column(name = "assigned_to")
-    private Long assignedTo;
+    private String assignedTo;
 
-    @Column(name = "detected_at")
+    @Column(nullable = false)
     private LocalDateTime detectedAt;
 
-    @Column(name = "closed_at")
     private LocalDateTime closedAt;
 }

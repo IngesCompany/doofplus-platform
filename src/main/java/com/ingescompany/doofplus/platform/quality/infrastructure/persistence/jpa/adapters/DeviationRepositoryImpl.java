@@ -26,37 +26,37 @@ public class DeviationRepositoryImpl implements IDeviationRepository {
     @Override
     public Deviation save(Deviation deviation) {
         var saved = persistenceRepository.save(
-                DeviationPersistenceAssembler.toPersistenceFromDomain(deviation)
+                DeviationPersistenceAssembler.toEntity(deviation)
         );
 
         domainEventPublisher.publishAndClearEvents(deviation);
 
-        return DeviationPersistenceAssembler.toDomainFromPersistence(saved);
+        return DeviationPersistenceAssembler.toDomain(saved);
     }
 
     @Override
     public Optional<Deviation> findById(Long id) {
         return persistenceRepository.findById(id)
-                .map(DeviationPersistenceAssembler::toDomainFromPersistence);
+                .map(DeviationPersistenceAssembler::toDomain);
     }
 
     @Override
     public Optional<Deviation> findByCode(String code) {
         return persistenceRepository.findByCode(code)
-                .map(DeviationPersistenceAssembler::toDomainFromPersistence);
+                .map(DeviationPersistenceAssembler::toDomain);
     }
 
     @Override
     public List<Deviation> findAll() {
         return persistenceRepository.findAll().stream()
-                .map(DeviationPersistenceAssembler::toDomainFromPersistence)
+                .map(DeviationPersistenceAssembler::toDomain)
                 .toList();
     }
 
     @Override
     public List<Deviation> findByBatchId(Long batchId) {
         return persistenceRepository.findByBatchId(batchId).stream()
-                .map(DeviationPersistenceAssembler::toDomainFromPersistence)
+                .map(DeviationPersistenceAssembler::toDomain)
                 .toList();
     }
 
