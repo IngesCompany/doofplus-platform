@@ -1,4 +1,10 @@
 package com.ingescompany.doofplus.platform.quality.application.queryservices;
 
-public class CollaborationTaskQueryService {
+import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CollaborationTask;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllCollaborationTasksQuery;
+
+import java.util.List;
+
+public interface CollaborationTaskQueryService {
+    List<CollaborationTask> handle(GetAllCollaborationTasksQuery query);
 }
