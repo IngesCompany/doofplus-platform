@@ -1,11 +1,15 @@
 package com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.entities.Payment;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.*;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Subscription of an organization to a plan. It starts as pending, becomes active when the
@@ -27,6 +31,7 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     private BillingEmail billingEmail;
     private LocalDate currentPeriodStart;
     private LocalDate currentPeriodEnd;
+    private final List<Payment> payments = new ArrayList<>();
 
     private Subscription() {}
 
@@ -100,6 +105,23 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
         if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE);
         status = SubscriptionStatus.CANCELLED;
         autoRenew = false;
+    }
+
+    /**
+     * Records a payment of the subscription.
+     *
+     * @param payment payment to record
+     */
+    public void recordPayment(Payment payment) {
+        if (payment == null) throw new IllegalArgumentException("payment.error.notNull");
+        payments.add(payment);
+    }
+
+    /**
+     * @return an unmodifiable view of the payments of the subscription
+     */
+    public List<Payment> getPayments() {
+        return Collections.unmodifiableList(payments);
     }
 
     /**
