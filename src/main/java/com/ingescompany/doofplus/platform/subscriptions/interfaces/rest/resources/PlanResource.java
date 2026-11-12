@@ -17,6 +17,6 @@ public record PlanResource(
         @Schema(description = "Monthly price", example = "199.00") BigDecimal monthlyPrice,
         @Schema(description = "Annual price", example = "1990.00") BigDecimal annualPrice,
         @Schema(description = "Currency", example = "PEN") String currency,
-        @Schema(description = "Maximum number of users", example = "10") int userLimit,
-        @Schema(description = "Maximum number of IoT devices", example = "5") int iotDeviceLimit) {
+        @Schema(description = "Maximum number of users (0 means unlimited)", example = "10") int userLimit,
+        @Schema(description = "Maximum number of IoT devices (0 means unlimited)", example = "5") int iotDeviceLimit) {
 }

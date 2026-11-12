@@ -37,11 +37,11 @@ public record CreatePlanResource(
         @Pattern(regexp = "^[A-Z]{3}$", message = "{money.error.currency.pattern}")
         String currency,
 
-        @Schema(description = "Maximum number of users", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
-        @Positive(message = "{plan.error.limits.invalid}")
+        @Schema(description = "Maximum number of users (0 means unlimited)", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
+        @PositiveOrZero(message = "{plan.error.limits.invalid}")
         int userLimit,
 
-        @Schema(description = "Maximum number of IoT devices", example = "5", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Maximum number of IoT devices (0 means unlimited)", example = "5", requiredMode = Schema.RequiredMode.REQUIRED)
         @PositiveOrZero(message = "{plan.error.limits.invalid}")
         int iotDeviceLimit) {
 }

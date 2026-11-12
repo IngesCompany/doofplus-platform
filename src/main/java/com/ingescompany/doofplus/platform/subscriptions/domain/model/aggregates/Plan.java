@@ -67,9 +67,9 @@ public class Plan extends AbstractDomainAggregateRoot<Plan> {
      * Checks the plan limit before registering one more IoT device (US51, scenario 2).
      *
      * @param registeredDevices devices already registered by the organization
-     * @return {@code true} when one more device fits in the plan
+     * @return {@code true} when one more device fits in the plan or the plan has no limit (0)
      */
     public boolean allowsOneMoreIotDevice(int registeredDevices) {
-        return registeredDevices < iotDeviceLimit;
+        return iotDeviceLimit == 0 || registeredDevices < iotDeviceLimit;
     }
 }
