@@ -27,6 +27,7 @@ public record CreateSubscriptionResource(
 
         @Schema(description = "Card brand", example = "Visa", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "{subscription.error.cardBrand.notBlank}")
+        @Size(max = 20, message = "{subscription.error.cardBrand.size}")
         String cardBrand,
 
         @Schema(description = "Last four digits of the card", example = "4242", requiredMode = Schema.RequiredMode.REQUIRED)

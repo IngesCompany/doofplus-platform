@@ -46,7 +46,7 @@ public class SubscriptionPersistenceEntity extends AuditableAbstractPersistenceE
     @Column(nullable = false)
     private boolean autoRenew;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String cardBrand;
 
     @Column(nullable = false, length = 4)
