@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Amount of money in a currency.
  *
  * @param amount   non-negative amount
- * @param currency ISO 4217 currency code, for example {@code PEN}
+ * @param currency ISO 4217 currency code, for example {@code USD}
  */
 public record Money(BigDecimal amount, String currency) {
     private static final Pattern CURRENCY_PATTERN = Pattern.compile("^[A-Z]{3}$");

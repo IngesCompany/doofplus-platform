@@ -32,7 +32,7 @@ public record CreatePlanResource(
         @PositiveOrZero(message = "{money.error.amount.invalid}")
         BigDecimal annualPrice,
 
-        @Schema(description = "ISO 4217 currency code", example = "PEN", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "ISO 4217 currency code", example = "USD", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "{money.error.currency.pattern}")
         @Pattern(regexp = "^[A-Z]{3}$", message = "{money.error.currency.pattern}")
         String currency,

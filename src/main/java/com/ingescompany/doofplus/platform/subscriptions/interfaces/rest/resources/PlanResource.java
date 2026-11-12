@@ -16,7 +16,7 @@ public record PlanResource(
         @Schema(description = "Display name", example = "Standard Lab") String name,
         @Schema(description = "Monthly price", example = "199.00") BigDecimal monthlyPrice,
         @Schema(description = "Annual price", example = "1990.00") BigDecimal annualPrice,
-        @Schema(description = "Currency", example = "PEN") String currency,
+        @Schema(description = "Currency", example = "USD") String currency,
         @Schema(description = "Maximum number of users (0 means unlimited)", example = "10") int userLimit,
         @Schema(description = "Maximum number of IoT devices (0 means unlimited)", example = "5") int iotDeviceLimit) {
 }
