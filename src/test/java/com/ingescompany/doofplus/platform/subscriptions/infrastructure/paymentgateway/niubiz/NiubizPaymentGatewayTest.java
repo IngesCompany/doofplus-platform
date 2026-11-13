@@ -30,7 +30,7 @@ class NiubizPaymentGatewayTest {
     @BeforeEach
     void startServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress(0), 0);
-        server.createContext("/api.security/v1/security/v1/createToken", exchange -> {
+        server.createContext("/api.security/v1/security", exchange -> {
             securityAuthorizationHeader = exchange.getRequestHeaders().getFirst("Authorization");
             respond(exchange, 201, "security-token");
         });

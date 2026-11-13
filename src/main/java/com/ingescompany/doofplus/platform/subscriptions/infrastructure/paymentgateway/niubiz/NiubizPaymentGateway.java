@@ -27,7 +27,7 @@ public class NiubizPaymentGateway implements PaymentGateway {
     private static final String APPROVED_ACTION_CODE = "000";
     private static final String DEFAULT_REJECTION_MESSAGE = "Charge rejected by the payment gateway";
     private static final ParameterizedTypeReference<Map<String, Object>> JSON_OBJECT = new ParameterizedTypeReference<>() {};
-    private static final String SECURITY_PATH = "/api.security/v1/security/v1/createToken";
+    private static final String SECURITY_PATH = "/api.security/v1/security";
     private static final String AUTHORIZATION_PATH = "/api.authorization/v3/authorization/ecommerce/{merchantId}";
 
     private final RestClient restClient;
