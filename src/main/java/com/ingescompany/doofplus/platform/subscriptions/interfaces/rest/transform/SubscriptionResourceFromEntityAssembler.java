@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform;
 
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
+import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.PaymentResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.SubscriptionResource;
 
 /**
@@ -27,6 +28,16 @@ public class SubscriptionResourceFromEntityAssembler {
                 entity.getPaymentCard().expiry(),
                 entity.getBillingEmail().value(),
                 entity.getCurrentPeriodStart(),
-                entity.getCurrentPeriodEnd());
+                entity.getCurrentPeriodEnd(),
+                entity.getPayments().stream()
+                        .map(payment -> new PaymentResource(
+                                payment.getId(),
+                                payment.getInvoiceNumber(),
+                                payment.getAmount().amount(),
+                                payment.getAmount().currency(),
+                                payment.getGatewayTransactionId(),
+                                payment.getStatus().name(),
+                                payment.getProcessedAt()))
+                        .toList());
     }
 }

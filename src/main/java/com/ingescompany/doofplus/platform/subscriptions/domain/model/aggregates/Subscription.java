@@ -119,6 +119,23 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     }
 
     /**
+     * Applies an approved payment: activates a pending subscription or renews an active one (US52, US53).
+     *
+     * @throws IllegalStateException when the subscription is not pending or active
+     */
+    public void applyApprovedPayment() {
+        if (status == SubscriptionStatus.PENDING) activate();
+        else renew();
+    }
+
+    /**
+     * @return the invoice number of the next payment, for example {@code INV-12-3}
+     */
+    public String nextInvoiceNumber() {
+        return "INV-%d-%d".formatted(id, payments.size() + 1);
+    }
+
+    /**
      * @return an unmodifiable view of the payments of the subscription
      */
     public List<Payment> getPayments() {

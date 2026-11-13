@@ -3,6 +3,7 @@ package com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resourc
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Response resource representing a subscription.
@@ -22,5 +23,6 @@ public record SubscriptionResource(
         @Schema(description = "Card expiry", example = "08/2028") String cardExpiry,
         @Schema(description = "Email that receives the invoices", example = "billing@andinos.com.pe") String billingEmail,
         @Schema(description = "Start of the current billing period", example = "2026-10-27") LocalDate currentPeriodStart,
-        @Schema(description = "End of the current billing period", example = "2026-11-27") LocalDate currentPeriodEnd) {
+        @Schema(description = "End of the current billing period", example = "2026-11-27") LocalDate currentPeriodEnd,
+        @Schema(description = "Payments of the subscription") List<PaymentResource> payments) {
 }

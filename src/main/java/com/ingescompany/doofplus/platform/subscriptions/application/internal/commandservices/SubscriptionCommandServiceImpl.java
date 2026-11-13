@@ -1,10 +1,13 @@
 package com.ingescompany.doofplus.platform.subscriptions.application.internal.commandservices;
 
 import com.ingescompany.doofplus.platform.subscriptions.application.commandservices.SubscriptionCommandService;
+import com.ingescompany.doofplus.platform.subscriptions.application.internal.outboundservices.paymentgateway.PaymentGateway;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.entities.Payment;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.SubscriptionStatus;
 import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
@@ -31,10 +34,13 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     private static final List<SubscriptionStatus> CURRENT_STATUSES = List.of(SubscriptionStatus.PENDING, SubscriptionStatus.ACTIVE);
     private final SubscriptionRepository subscriptionRepository;
     private final PlanRepository planRepository;
+    private final PaymentGateway paymentGateway;
 
-    public SubscriptionCommandServiceImpl(SubscriptionRepository subscriptionRepository, PlanRepository planRepository) {
+    public SubscriptionCommandServiceImpl(SubscriptionRepository subscriptionRepository, PlanRepository planRepository,
+                                          PaymentGateway paymentGateway) {
         this.subscriptionRepository = subscriptionRepository;
         this.planRepository = planRepository;
+        this.paymentGateway = paymentGateway;
     }
 
     /**
@@ -56,6 +62,48 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
         log.info("Subscription created: organizationId={}, planId={}, id={}",
                 command.organizationId().value(), command.planId(), createdSubscription.getId());
         return Result.success(createdSubscription);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public Result<Subscription, ApplicationError> handle(PaySubscriptionCommand command) {
+        var found = subscriptionRepository.findById(command.subscriptionId());
+        if (found.isEmpty()) {
+            log.warn("Subscription not found: id={}", command.subscriptionId());
+            return Result.failure(ApplicationError.notFound("Subscription", command.subscriptionId().toString()));
+        }
+        var subscription = found.get();
+        if (!subscription.isCurrent()) {
+            log.warn("Subscription cannot be paid: id={}, status={}", subscription.getId(), subscription.getStatus());
+            return Result.failure(ApplicationError.businessRuleViolation("subscription-status",
+                    "Only a pending or active subscription can be paid"));
+        }
+        var plan = planRepository.findById(subscription.getPlanId());
+        if (plan.isEmpty()) {
+            log.warn("Plan not found: planId={}", subscription.getPlanId());
+            return Result.failure(ApplicationError.notFound("Plan", subscription.getPlanId().toString()));
+        }
+        var payment = new Payment(subscription.nextInvoiceNumber(), plan.get().getPrice(subscription.getBillingCycle()));
+        var authorization = paymentGateway.authorize(payment.getAmount(), command.cardToken());
+        if (authorization.approved()) {
+            payment.approve(authorization.transactionId());
+            subscription.applyApprovedPayment();
+        } else {
+            payment.reject(authorization.message());
+        }
+        subscription.recordPayment(payment);
+        var paidSubscription = subscriptionRepository.save(subscription);
+        if (!authorization.approved()) {
+            log.warn("Payment rejected: subscriptionId={}, invoice={}, reason={}",
+                    subscription.getId(), payment.getInvoiceNumber(), authorization.message());
+            return Result.failure(ApplicationError.businessRuleViolation("payment-rejected", authorization.message()));
+        }
+        log.info("Payment approved: subscriptionId={}, invoice={}, status={}",
+                subscription.getId(), payment.getInvoiceNumber(), paidSubscription.getStatus());
+        return Result.success(paidSubscription);
     }
 
     /**

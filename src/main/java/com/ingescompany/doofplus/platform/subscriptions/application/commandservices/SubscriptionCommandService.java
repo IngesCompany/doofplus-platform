@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
@@ -21,6 +22,16 @@ public interface SubscriptionCommandService {
      * @return the pending subscription, or a failure when the plan does not exist or the organization is already subscribed
      */
     Result<Subscription, ApplicationError> handle(CreateSubscriptionCommand command);
+
+    /**
+     * Handles the payment of the next billing period with Niubiz (US52). An approved payment activates
+     * a pending subscription or renews an active one; a rejected payment is recorded and reported.
+     *
+     * @param command pay command
+     * @return the paid subscription, or a failure when it or its plan does not exist, it is not pending
+     *         or active, or the gateway rejects the charge
+     */
+    Result<Subscription, ApplicationError> handle(PaySubscriptionCommand command);
 
     /**
      * Handles the activation of a pending subscription once the payment is authorized (US52).

@@ -4,11 +4,13 @@ import com.ingescompany.doofplus.platform.subscriptions.application.commandservi
 import com.ingescompany.doofplus.platform.subscriptions.application.queryservices.SubscriptionQueryService;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetAllSubscriptionsByOrganizationIdQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetSubscriptionByIdQuery;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.OrganizationId;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.CreateSubscriptionResource;
+import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.PaySubscriptionResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.SubscriptionResource;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.CreateSubscriptionCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.transform.SubscriptionResourceFromEntityAssembler;
@@ -74,6 +76,32 @@ public class SubscriptionsController {
         log.debug("POST /api/v1/subscriptions - organizationId={}, planId={}", resource.organizationId(), resource.planId());
         var result = subscriptionCommandService.handle(CreateSubscriptionCommandFromResourceAssembler.toCommandFromResource(resource));
         return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.CREATED);
+    }
+
+    /**
+     * Pays the next billing period with Niubiz (US52). An approved payment activates a pending
+     * subscription or renews an active one.
+     *
+     * @param id       Subscription ID
+     * @param resource the card token created by the Niubiz payment form
+     * @return the paid subscription, not found, or a business rule violation when it cannot be paid or the charge is rejected
+     */
+    @Operation(summary = "Pay a subscription", description = "Charges the plan price with Niubiz; an approved payment activates a PENDING subscription or renews an ACTIVE one")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Payment approved",
+                    content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Subscription or plan not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not pending or active, or Niubiz rejected the charge",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @PostMapping("{id}/payments")
+    public ResponseEntity<?> paySubscription(@PathVariable Long id, @Valid @RequestBody PaySubscriptionResource resource) {
+        log.debug("POST /api/v1/subscriptions/{}/payments", id);
+        var result = subscriptionCommandService.handle(new PaySubscriptionCommand(id, resource.cardToken()));
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 
     /**
