@@ -2,6 +2,10 @@ package com.ingescompany.doofplus.platform.organizations.domain.model.entities;
 
 import lombok.Getter;
 
+/**
+ * Manufacturing plant operated by an organization.
+ */
+@Getter
 public class Plant {
     private Long id;
     private String name;
@@ -18,7 +22,7 @@ public class Plant {
         this.address = address;
     }
 
-    public Plant(Long id, String name, String address, String status) {
+    public Plant(Long id, String name, String address) {
         this(name, address);
         this.id = id;
     }

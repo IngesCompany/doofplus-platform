@@ -1,25 +1,29 @@
 package com.ingescompany.doofplus.platform.organizations.domain.model.aggregates;
 
-import com.ingescompany.doofplus.platform.organizations.domain.model.comands.RegisterOrgganizationCommand;
+import com.ingescompany.doofplus.platform.organizations.domain.model.commands.RegisterOrganizationCommand;
 import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Plant;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.OrganizationStatus;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.Ruc;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ * Organization aggregate root: a pharmaceutical laboratory identified by its RUC
+ * that operates one or more plants.
+ */
 @Getter
-public class Organization {
+public class Organization extends AbstractDomainAggregateRoot<Organization> {
     private Long id;
     private String legalName;
     private Ruc ruc;
     private OrganizationStatus status;
     private final List<Plant> plants = new ArrayList<>();
 
-    public Organization(RegisterOrgganizationCommand command) {
+    public Organization(RegisterOrganizationCommand command) {
         this.legalName = command.legalName();
         this.ruc = command.ruc();
         this.status = OrganizationStatus.ACTIVE;
@@ -29,20 +33,18 @@ public class Organization {
     private Organization() {
     }
 
-    public static Organization reconstitute(Long id, String legalName, Ruc ruc, OrganizationStatus status, List<Plant> plants) {
-
+    public static Organization reconstitute(Long id, String legalName, Ruc ruc,
+                                            OrganizationStatus status, List<Plant> plants) {
         var organization = new Organization();
         organization.id = id;
         organization.legalName = legalName;
         organization.ruc = ruc;
         organization.status = status;
-        if (plants != null) {
-            organization.plants.addAll(plants);
-        }
+        if (plants != null) organization.plants.addAll(plants);
         return organization;
     }
 
-    private Plant addPlant(String name, String address) {
+    public Plant addPlant(String name, String address) {
         if (this.status == OrganizationStatus.SUSPENDED) {
             throw new IllegalStateException("organizations.error.organization.suspended");
         }
@@ -68,5 +70,4 @@ public class Organization {
     public List<Plant> getPlants() {
         return Collections.unmodifiableList(this.plants);
     }
-
 }
