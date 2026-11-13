@@ -75,6 +75,8 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles invalid request arguments such as malformed UUID path or payload values.
+     * When the exception message is a key of the message bundle (value objects throw keys),
+     * the details carry its localized text; any other message is returned as is.
      *
      * @param ex the illegal argument exception
      * @return error response with BAD_REQUEST status
@@ -83,7 +85,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex) {
         var applicationError = ApplicationError.validationError(
                 resolveMessageOrDefault("validation.request.argument", "request-argument"),
-                ex.getMessage() != null ? ex.getMessage() : resolveMessageOrDefault("validation.request.failed", "Request validation failed")
+                ex.getMessage() != null
+                        ? resolveMessageOrDefault(ex.getMessage(), ex.getMessage())
+                        : resolveMessageOrDefault("validation.request.failed", "Request validation failed")
         );
         return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
     }
