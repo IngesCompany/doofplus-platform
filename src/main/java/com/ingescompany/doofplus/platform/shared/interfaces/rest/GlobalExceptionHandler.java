@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.text.MessageFormat;
@@ -88,6 +90,41 @@ public class GlobalExceptionHandler {
                 ex.getMessage() != null
                         ? resolveMessageOrDefault(ex.getMessage(), ex.getMessage())
                         : resolveMessageOrDefault("validation.request.failed", "Request validation failed")
+        );
+        return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
+    }
+
+    /**
+     * Handles requests that leave out a required query parameter.
+     *
+     * @param ex the missing parameter exception
+     * @return error response with BAD_REQUEST status and the name of the parameter
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ProblemDetail> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        var applicationError = ApplicationError.validationError(
+                resolveMessageOrDefault("validation.request.argument", "request-argument"),
+                resolveMessageOrDefault("validation.request.parameter.missing",
+                        "Required parameter '%s' is missing".formatted(ex.getParameterName()),
+                        ex.getParameterName())
+        );
+        return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
+    }
+
+    /**
+     * Handles path or query parameters whose value cannot be converted to the expected type,
+     * such as a text where a numeric id is expected.
+     *
+     * @param ex the type mismatch exception
+     * @return error response with BAD_REQUEST status and the name of the parameter
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        var applicationError = ApplicationError.validationError(
+                resolveMessageOrDefault("validation.request.argument", "request-argument"),
+                resolveMessageOrDefault("validation.request.parameter.invalid",
+                        "Parameter '%s' has an invalid value".formatted(ex.getName()),
+                        ex.getName())
         );
         return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
     }
