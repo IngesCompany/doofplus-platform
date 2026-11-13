@@ -8,6 +8,7 @@ import com.ingescompany.doofplus.platform.organizations.infrastructure.persisten
 import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,6 +35,19 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
     public Optional<Organization> findById(Long id) {
         return organizationPersistenceRepository.findById(id)
                 .map(OrganizationPersistenceAssembler::toDomainFromPersistence);
+    }
+
+    @Override
+    public Optional<Organization> findByRuc(Ruc ruc) {
+        return organizationPersistenceRepository.findByRuc(ruc)
+                .map(OrganizationPersistenceAssembler::toDomainFromPersistence);
+    }
+
+    @Override
+    public List<Organization> findAll() {
+        return organizationPersistenceRepository.findAll().stream()
+                .map(OrganizationPersistenceAssembler::toDomainFromPersistence)
+                .toList();
     }
 
     @Override

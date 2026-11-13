@@ -2,7 +2,10 @@ package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
 import com.ingescompany.doofplus.platform.organizations.application.commandservices.OrganizationCommandService;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.OrganizationQueryService;
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllOrganizationsQuery;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetOrganizationByIdQuery;
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetOrganizationByRucQuery;
+import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.Ruc;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.OrganizationResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.RegisterOrganizationResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.OrganizationResourceFromEntityAssembler;
@@ -13,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -42,6 +47,19 @@ public class OrganizationsController {
                 result,
                 OrganizationResourceFromEntityAssembler::toResourceFromEntity,
                 HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    @Operation(summary = "Get every organization, or the one registered with a RUC")
+    public ResponseEntity<List<OrganizationResource>> getAllOrganizations(
+            @RequestParam(required = false) String ruc) {
+        var organizations = ruc == null || ruc.isBlank()
+                ? queryService.handle(new GetAllOrganizationsQuery())
+                : queryService.handle(new GetOrganizationByRucQuery(new Ruc(ruc))).stream().toList();
+        var resources = organizations.stream()
+                .map(OrganizationResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(resources);
     }
 
     @GetMapping("/{organizationId}")
