@@ -7,6 +7,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -125,6 +126,21 @@ public class GlobalExceptionHandler {
                 resolveMessageOrDefault("validation.request.parameter.invalid",
                         "Parameter '%s' has an invalid value".formatted(ex.getName()),
                         ex.getName())
+        );
+        return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
+    }
+
+    /**
+     * Handles request bodies that cannot be read, such as malformed JSON or a value of the wrong type.
+     *
+     * @param ex the unreadable message exception
+     * @return error response with BAD_REQUEST status
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        var applicationError = ApplicationError.validationError(
+                "request-body",
+                resolveMessageOrDefault("validation.request.body.unreadable", "The request body is not valid JSON")
         );
         return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
     }
