@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JPA entity of the {@code subscriptions} table (database diagram of Subscriptions &amp; Payments).
@@ -58,4 +60,8 @@ public class SubscriptionPersistenceEntity extends AuditableAbstractPersistenceE
     @Column(nullable = false, length = 254)
     @Convert(converter = BillingEmailAttributeConverter.class)
     private BillingEmail billingEmail;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "subscription_id", nullable = false)
+    private List<PaymentPersistenceEntity> payments = new ArrayList<>();
 }

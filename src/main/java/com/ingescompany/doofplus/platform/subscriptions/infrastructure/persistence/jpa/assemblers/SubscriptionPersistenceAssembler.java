@@ -23,7 +23,8 @@ public final class SubscriptionPersistenceAssembler {
                 new PaymentCard(entity.getCardBrand(), entity.getCardLast4(), entity.getCardExpiry()),
                 entity.getBillingEmail(),
                 entity.getCurrentPeriodStart(),
-                entity.getCurrentPeriodEnd());
+                entity.getCurrentPeriodEnd(),
+                entity.getPayments().stream().map(PaymentPersistenceAssembler::toDomainFromPersistence).toList());
     }
 
     public static SubscriptionPersistenceEntity toPersistenceFromDomain(Subscription domain) {
@@ -40,6 +41,8 @@ public final class SubscriptionPersistenceAssembler {
         entity.setBillingEmail(domain.getBillingEmail());
         entity.setCurrentPeriodStart(domain.getCurrentPeriodStart());
         entity.setCurrentPeriodEnd(domain.getCurrentPeriodEnd());
+        domain.getPayments().forEach(payment ->
+                entity.getPayments().add(PaymentPersistenceAssembler.toPersistenceFromDomain(payment)));
         return entity;
     }
 }

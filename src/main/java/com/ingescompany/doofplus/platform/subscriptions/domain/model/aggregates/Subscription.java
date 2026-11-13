@@ -51,14 +51,14 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     }
 
     /**
-     * Rebuilds a stored subscription.
+     * Rebuilds a stored subscription with its payments.
      *
      * @return the subscription with its persistent identifier
      */
     public static Subscription reconstitute(Long id, OrganizationId organizationId, Long planId, BillingCycle billingCycle,
                                             SubscriptionStatus status, boolean autoRenew, PaymentCard paymentCard,
                                             BillingEmail billingEmail, LocalDate currentPeriodStart,
-                                            LocalDate currentPeriodEnd) {
+                                            LocalDate currentPeriodEnd, List<Payment> payments) {
         var subscription = new Subscription();
         subscription.id = id;
         subscription.organizationId = organizationId;
@@ -70,6 +70,7 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
         subscription.billingEmail = billingEmail;
         subscription.currentPeriodStart = currentPeriodStart;
         subscription.currentPeriodEnd = currentPeriodEnd;
+        subscription.payments.addAll(payments);
         return subscription;
     }
 
