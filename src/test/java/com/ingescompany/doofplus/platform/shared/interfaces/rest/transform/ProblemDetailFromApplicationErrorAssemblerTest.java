@@ -67,4 +67,24 @@ class ProblemDetailFromApplicationErrorAssemblerTest {
         assertEquals("Recurso no encontrado", problemDetail.getDetail());
         assertEquals(URI.create("/api/v1/errors/not-found"), problemDetail.getType());
     }
+
+    @Test
+    void toProblemDetailFromApplicationErrorTranslatesDetailsThatAreAMessageKey() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+
+        var error = ApplicationError.validationError("request", "validation.request.failed");
+        var problemDetail = ProblemDetailFromApplicationErrorAssembler.toProblemDetailFromApplicationError(error);
+
+        assertEquals("Validación de solicitud fallida", problemDetail.getProperties().get("details"));
+    }
+
+    @Test
+    void toProblemDetailFromApplicationErrorKeepsDetailsThatAreFreeText() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+
+        var error = ApplicationError.validationError("request", "Quantity {0} is not valid");
+        var problemDetail = ProblemDetailFromApplicationErrorAssembler.toProblemDetailFromApplicationError(error);
+
+        assertEquals("Quantity {0} is not valid", problemDetail.getProperties().get("details"));
+    }
 }
