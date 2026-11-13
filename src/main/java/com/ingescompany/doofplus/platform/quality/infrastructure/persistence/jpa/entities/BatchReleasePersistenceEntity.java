@@ -41,7 +41,4 @@ public class BatchReleasePersistenceEntity extends AuditableAbstractPersistenceE
     private String signedBy;
 
     private LocalDateTime signedAt;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 }

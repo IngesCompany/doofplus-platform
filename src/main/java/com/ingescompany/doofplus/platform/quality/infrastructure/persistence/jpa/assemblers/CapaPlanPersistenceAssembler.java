@@ -3,6 +3,10 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaPlan;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CapaPlanPersistenceEntity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 public class CapaPlanPersistenceAssembler {
 
     public static CapaPlan toDomain(CapaPlanPersistenceEntity entity) {
@@ -14,7 +18,7 @@ public class CapaPlanPersistenceAssembler {
                 entity.getStatus(),
                 entity.getDueDate(),
                 entity.getResponsible(),
-                entity.getCreatedAt(),
+                toLocalDateTime(entity.getCreatedAt()),
                 entity.getCompletedAt()
         );
     }
@@ -29,9 +33,21 @@ public class CapaPlanPersistenceAssembler {
         entity.setStatus(domain.getStatus());
         entity.setDueDate(domain.getDueDate());
         entity.setResponsible(domain.getResponsible());
-        entity.setCreatedAt(domain.getCreatedAt());
         entity.setCompletedAt(domain.getCompletedAt());
 
         return entity;
+    }
+
+    /**
+     * The creation date comes from the audit column of the base persistence entity.
+     */
+    private static LocalDateTime toLocalDateTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

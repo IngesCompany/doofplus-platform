@@ -3,6 +3,10 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.BatchRelease;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.BatchReleasePersistenceEntity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 public class BatchReleasePersistenceAssembler {
 
     public static BatchRelease toDomain(BatchReleasePersistenceEntity entity) {
@@ -16,7 +20,7 @@ public class BatchReleasePersistenceAssembler {
                 entity.getSignatureReference(),
                 entity.getSignedBy(),
                 entity.getSignedAt(),
-                entity.getCreatedAt()
+                toLocalDateTime(entity.getCreatedAt())
         );
     }
 
@@ -32,8 +36,20 @@ public class BatchReleasePersistenceAssembler {
         entity.setSignatureReference(domain.getSignatureReference());
         entity.setSignedBy(domain.getSignedBy());
         entity.setSignedAt(domain.getSignedAt());
-        entity.setCreatedAt(domain.getCreatedAt());
 
         return entity;
+    }
+
+    /**
+     * The creation date comes from the audit column of the base persistence entity.
+     */
+    private static LocalDateTime toLocalDateTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

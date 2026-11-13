@@ -39,8 +39,5 @@ public class CapaPlanPersistenceEntity extends AuditableAbstractPersistenceEntit
     @Column(nullable = false)
     private String responsible;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     private LocalDateTime completedAt;
 }
