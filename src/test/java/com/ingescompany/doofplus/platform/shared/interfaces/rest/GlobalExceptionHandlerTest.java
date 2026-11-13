@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import java.net.URI;
@@ -91,5 +93,18 @@ class GlobalExceptionHandlerTest {
         assertEquals(400, response.getStatusCode().value());
         assertEquals("VALIDATION_ERROR", problemDetail.getProperties().get("code"));
         assertEquals("Falta el parámetro obligatorio 'organizationId'", problemDetail.getProperties().get("details"));
+    }
+
+    @Test
+    void handleHttpMessageNotReadableReturnsBadRequest() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+        var handler = new GlobalExceptionHandler();
+        var response = handler.handleHttpMessageNotReadable(
+                new HttpMessageNotReadableException("JSON parse error", new MockHttpInputMessage(new byte[0]))
+        );
+        var problemDetail = Objects.requireNonNull(response.getBody());
+
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("El cuerpo de la solicitud no es un JSON válido", problemDetail.getProperties().get("details"));
     }
 }
