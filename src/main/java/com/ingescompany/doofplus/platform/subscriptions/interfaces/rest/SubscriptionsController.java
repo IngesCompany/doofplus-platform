@@ -95,6 +95,8 @@ public class SubscriptionsController {
             @ApiResponse(responseCode = "404", description = "Subscription or plan not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not pending or active, or Niubiz rejected the charge",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "503", description = "Niubiz is not available; the payment is not recorded",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/payments")

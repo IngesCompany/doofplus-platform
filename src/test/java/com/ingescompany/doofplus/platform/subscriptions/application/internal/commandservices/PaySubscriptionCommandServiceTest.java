@@ -104,6 +104,18 @@ class PaySubscriptionCommandServiceTest {
     }
 
     @Test
+    void anUnavailableGatewayShouldReturnServiceUnavailableWithoutRecordingThePayment() {
+        when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(subscription(SubscriptionStatus.PENDING)));
+        when(planRepository.findById(2L)).thenReturn(Optional.of(plan()));
+        when(paymentGateway.authorize(any(), any())).thenReturn(PaymentResult.unavailable("Payment gateway is not available"));
+
+        var result = service.handle(new PaySubscriptionCommand(1L, "tok"));
+
+        assertThat(error(result).code()).isEqualTo("SERVICE_UNAVAILABLE");
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
     void payShouldFailWhenTheSubscriptionDoesNotExist() {
         when(subscriptionRepository.findById(1L)).thenReturn(Optional.empty());
 
