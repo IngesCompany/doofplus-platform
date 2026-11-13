@@ -3,5 +3,5 @@ package com.ingescompany.doofplus.platform.organizations.interfaces.rest.resourc
 /**
  * Register organization request resource.
  */
-public record RegisterOrganizationResource(String legalName, String ruc, String plantName, String plantAddress) {
+public record RegisterOrganizationResource(String legalName, String ruc, String region, String ownerName) {
 }

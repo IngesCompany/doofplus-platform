@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.assemblers;
 
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.Organization;
-import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Plant;
+import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Facility;
+import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.entities.FacilityPersistenceEntity;
 import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.entities.OrganizationPersistenceEntity;
-import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.entities.PlantPersistenceEntity;
 
 public final class OrganizationPersistenceAssembler {
 
@@ -12,15 +12,23 @@ public final class OrganizationPersistenceAssembler {
 
     public static Organization toDomainFromPersistence(OrganizationPersistenceEntity entity) {
         if (entity == null) return null;
-        var plants = entity.getPlants().stream()
-                .map(plant -> new Plant(plant.getId(), plant.getName(), plant.getAddress()))
+        var facilities = entity.getFacilities().stream()
+                .map(facility -> new Facility(
+                        facility.getId(),
+                        facility.getName(),
+                        facility.getType(),
+                        facility.getTimezone(),
+                        facility.getOwnerName(),
+                        facility.getStatus()))
                 .toList();
         return Organization.reconstitute(
                 entity.getId(),
                 entity.getLegalName(),
                 entity.getRuc(),
+                entity.getRegion(),
+                entity.getOwnerName(),
                 entity.getStatus(),
-                plants);
+                facilities);
     }
 
     public static OrganizationPersistenceEntity toPersistenceFromDomain(Organization domain) {
@@ -29,14 +37,19 @@ public final class OrganizationPersistenceAssembler {
         entity.setId(domain.getId());
         entity.setLegalName(domain.getLegalName());
         entity.setRuc(domain.getRuc());
+        entity.setRegion(domain.getRegion());
+        entity.setOwnerName(domain.getOwnerName());
         entity.setStatus(domain.getStatus());
-        for (Plant plant : domain.getPlants()) {
-            var plantEntity = new PlantPersistenceEntity();
-            plantEntity.setId(plant.getId());
-            plantEntity.setName(plant.getName());
-            plantEntity.setAddress(plant.getAddress());
-            plantEntity.setOrganization(entity);
-            entity.getPlants().add(plantEntity);
+        for (Facility facility : domain.getFacilities()) {
+            var facilityEntity = new FacilityPersistenceEntity();
+            facilityEntity.setId(facility.getId());
+            facilityEntity.setName(facility.getName());
+            facilityEntity.setType(facility.getType());
+            facilityEntity.setTimezone(facility.getTimezone());
+            facilityEntity.setOwnerName(facility.getOwnerName());
+            facilityEntity.setStatus(facility.getStatus());
+            facilityEntity.setOrganization(entity);
+            entity.getFacilities().add(facilityEntity);
         }
         return entity;
     }

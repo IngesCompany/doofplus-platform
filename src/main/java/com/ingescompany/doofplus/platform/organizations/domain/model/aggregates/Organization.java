@@ -1,7 +1,8 @@
 package com.ingescompany.doofplus.platform.organizations.domain.model.aggregates;
 
 import com.ingescompany.doofplus.platform.organizations.domain.model.commands.RegisterOrganizationCommand;
-import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Plant;
+import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Facility;
+import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.FacilityType;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.OrganizationStatus;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.Ruc;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
@@ -13,61 +14,69 @@ import java.util.List;
 
 /**
  * Organization aggregate root: a pharmaceutical laboratory identified by its RUC
- * that operates one or more plants.
+ * that operates one or more facilities.
  */
 @Getter
 public class Organization extends AbstractDomainAggregateRoot<Organization> {
     private Long id;
     private String legalName;
     private Ruc ruc;
+    private String region;
+    private String ownerName;
     private OrganizationStatus status;
-    private final List<Plant> plants = new ArrayList<>();
+    private final List<Facility> facilities = new ArrayList<>();
 
     public Organization(RegisterOrganizationCommand command) {
         this.legalName = command.legalName();
         this.ruc = command.ruc();
-        this.status = OrganizationStatus.ACTIVE;
-        this.addPlant(command.plantName(), command.plantAddress());
+        this.region = command.region();
+        this.ownerName = command.ownerName();
+        this.status = OrganizationStatus.PENDING_VERIFICATION;
     }
 
     private Organization() {
     }
 
-    public static Organization reconstitute(Long id, String legalName, Ruc ruc,
-                                            OrganizationStatus status, List<Plant> plants) {
+    public static Organization reconstitute(Long id, String legalName, Ruc ruc, String region, String ownerName,
+                                            OrganizationStatus status, List<Facility> facilities) {
         var organization = new Organization();
         organization.id = id;
         organization.legalName = legalName;
         organization.ruc = ruc;
+        organization.region = region;
+        organization.ownerName = ownerName;
         organization.status = status;
-        if (plants != null) organization.plants.addAll(plants);
+        if (facilities != null) organization.facilities.addAll(facilities);
         return organization;
     }
 
-    public Plant addPlant(String name, String address) {
-        if (this.status == OrganizationStatus.SUSPENDED) {
-            throw new IllegalStateException("organizations.error.organization.suspended");
+    public Facility addFacility(String name, FacilityType type, String timezone) {
+        if (this.status == OrganizationStatus.INACTIVE) {
+            throw new IllegalStateException("organizations.error.organization.inactive");
         }
-        var plant = new Plant(name, address);
-        this.plants.add(plant);
-        return plant;
+        var facility = new Facility(name, type, timezone, this.ownerName);
+        this.facilities.add(facility);
+        return facility;
     }
 
-    public void suspend() {
-        if (this.status == OrganizationStatus.SUSPENDED) {
-            throw new IllegalStateException("organizations.error.organization.alreadySuspended");
-        }
-        this.status = OrganizationStatus.SUSPENDED;
-    }
-
-    public void reactivate() {
+    public void verify() {
         if (this.status == OrganizationStatus.ACTIVE) {
             throw new IllegalStateException("organizations.error.organization.alreadyActive");
+        }
+        if (this.status == OrganizationStatus.INACTIVE) {
+            throw new IllegalStateException("organizations.error.organization.inactive");
         }
         this.status = OrganizationStatus.ACTIVE;
     }
 
-    public List<Plant> getPlants() {
-        return Collections.unmodifiableList(this.plants);
+    public void deactivate() {
+        if (this.status == OrganizationStatus.INACTIVE) {
+            throw new IllegalStateException("organizations.error.organization.alreadyInactive");
+        }
+        this.status = OrganizationStatus.INACTIVE;
+    }
+
+    public List<Facility> getFacilities() {
+        return Collections.unmodifiableList(this.facilities);
     }
 }

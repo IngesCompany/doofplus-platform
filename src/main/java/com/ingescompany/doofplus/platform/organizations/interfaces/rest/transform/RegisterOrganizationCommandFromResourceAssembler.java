@@ -13,7 +13,7 @@ public final class RegisterOrganizationCommandFromResourceAssembler {
         return new RegisterOrganizationCommand(
                 resource.legalName(),
                 new Ruc(resource.ruc()),
-                resource.plantName(),
-                resource.plantAddress());
+                resource.region(),
+                resource.ownerName());
     }
 }

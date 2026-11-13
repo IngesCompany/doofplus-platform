@@ -26,10 +26,17 @@ public class OrganizationPersistenceEntity extends AuditableAbstractPersistenceE
     @Column(name = "ruc", nullable = false, unique = true, length = 11)
     private Ruc ruc;
 
+    @Column(name = "region", nullable = false, length = 60)
+    private String region;
+
+    @Column(name = "owner_name", nullable = false, length = 150)
+    private String ownerName;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 25)
     private OrganizationStatus status;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PlantPersistenceEntity> plants = new ArrayList<>();
+    @OrderBy("id")
+    private List<FacilityPersistenceEntity> facilities = new ArrayList<>();
 }

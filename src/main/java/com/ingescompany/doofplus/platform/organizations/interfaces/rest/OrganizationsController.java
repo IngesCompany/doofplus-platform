@@ -2,9 +2,7 @@ package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
 import com.ingescompany.doofplus.platform.organizations.application.commandservices.OrganizationCommandService;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.OrganizationQueryService;
-import com.ingescompany.doofplus.platform.organizations.domain.model.commands.AddPlantCommand;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetOrganizationByIdQuery;
-import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.AddPlantResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.OrganizationResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.RegisterOrganizationResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.OrganizationResourceFromEntityAssembler;
@@ -23,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @RestController
 @RequestMapping(value = "/api/v1/organizations", produces = APPLICATION_JSON_VALUE)
-@Tag(name = "Organizations", description = "Organization registration and plant management endpoints")
+@Tag(name = "Organizations", description = "Organization registration endpoints")
 public class OrganizationsController {
 
     private final OrganizationCommandService commandService;
@@ -53,16 +51,5 @@ public class OrganizationsController {
                 .map(organization -> ResponseEntity.ok(
                         OrganizationResourceFromEntityAssembler.toResourceFromEntity(organization)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/{organizationId}/plants")
-    @Operation(summary = "Add a plant to an organization")
-    public ResponseEntity<?> addPlant(@PathVariable Long organizationId, @RequestBody AddPlantResource resource) {
-        var command = new AddPlantCommand(organizationId, resource.name(), resource.address());
-        var result = commandService.handle(command);
-        return ResponseEntityAssembler.toResponseEntityFromResult(
-                result,
-                OrganizationResourceFromEntityAssembler::toResourceFromEntity,
-                HttpStatus.CREATED);
     }
 }

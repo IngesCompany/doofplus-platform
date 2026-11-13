@@ -2,8 +2,9 @@ package com.ingescompany.doofplus.platform.organizations.application.internal.co
 
 import com.ingescompany.doofplus.platform.organizations.application.commandservices.OrganizationCommandService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.Organization;
-import com.ingescompany.doofplus.platform.organizations.domain.model.commands.AddPlantCommand;
+import com.ingescompany.doofplus.platform.organizations.domain.model.commands.AddFacilityCommand;
 import com.ingescompany.doofplus.platform.organizations.domain.model.commands.RegisterOrganizationCommand;
+import com.ingescompany.doofplus.platform.organizations.domain.model.entities.Facility;
 import com.ingescompany.doofplus.platform.organizations.domain.repositories.OrganizationRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
@@ -34,21 +35,23 @@ public class OrganizationCommandServiceImpl implements OrganizationCommandServic
     }
 
     @Override
-    public Result<Organization, ApplicationError> handle(AddPlantCommand command) {
+    public Result<Facility, ApplicationError> handle(AddFacilityCommand command) {
         var organizationOptional = organizationRepository.findById(command.organizationId());
         if (organizationOptional.isEmpty()) {
             return Result.failure(ApplicationError.notFound("Organization", command.organizationId().toString()));
         }
         var organization = organizationOptional.get();
         try {
-            organization.addPlant(command.name(), command.address());
-            return Result.success(organizationRepository.save(organization));
+            organization.addFacility(command.name(), command.type(), command.timezone());
+            var facilities = organizationRepository.save(organization).getFacilities();
+            // The saved aggregate carries the generated id of the facility that was just added: the last one.
+            return Result.success(facilities.get(facilities.size() - 1));
         } catch (IllegalArgumentException e) {
-            return Result.failure(ApplicationError.validationError("plant", e.getMessage()));
+            return Result.failure(ApplicationError.validationError("facility", e.getMessage()));
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("add-plant", e.getMessage()));
+            return Result.failure(ApplicationError.businessRuleViolation("add-facility", e.getMessage()));
         } catch (Exception e) {
-            return Result.failure(ApplicationError.unexpected("add-plant", e.getMessage()));
+            return Result.failure(ApplicationError.unexpected("add-facility", e.getMessage()));
         }
     }
 }
