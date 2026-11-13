@@ -2,7 +2,8 @@ package com.ingescompany.doofplus.platform.organizations.interfaces.rest.transfo
 
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.Organization;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.OrganizationResource;
-import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.PlantResource;
+
+import java.util.Locale;
 
 public final class OrganizationResourceFromEntityAssembler {
 
@@ -11,14 +12,16 @@ public final class OrganizationResourceFromEntityAssembler {
 
     public static OrganizationResource toResourceFromEntity(Organization entity) {
         if (entity == null) return null;
-        var plants = entity.getPlants().stream()
-                .map(plant -> new PlantResource(plant.getId(), plant.getName(), plant.getAddress()))
-                .toList();
         return new OrganizationResource(
                 entity.getId(),
                 entity.getLegalName(),
                 entity.getRuc() != null ? entity.getRuc().value() : null,
-                entity.getStatus() != null ? entity.getStatus().name() : null,
-                plants);
+                entity.getRegion(),
+                entity.getOwnerName(),
+                entity.getStatus() != null ? toKebabCase(entity.getStatus().name()) : null);
+    }
+
+    static String toKebabCase(String constantName) {
+        return constantName.toLowerCase(Locale.ROOT).replace('_', '-');
     }
 }

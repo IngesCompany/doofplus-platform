@@ -5,5 +5,7 @@ package com.ingescompany.doofplus.platform.organizations.domain.model.valueobjec
  */
 public enum OrganizationStatus {
     ACTIVE,
-    SUSPENDED
+    PENDING,
+    PENDING_VERIFICATION,
+    INACTIVE
 }
