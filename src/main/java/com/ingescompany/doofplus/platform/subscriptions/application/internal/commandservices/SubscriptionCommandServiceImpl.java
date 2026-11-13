@@ -88,6 +88,10 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
         }
         var payment = new Payment(subscription.nextInvoiceNumber(), plan.get().getPrice(subscription.getBillingCycle()));
         var authorization = paymentGateway.authorize(payment.getAmount(), command.cardToken());
+        if (authorization.unavailable()) {
+            log.warn("Payment gateway unavailable: subscriptionId={}, reason={}", subscription.getId(), authorization.message());
+            return Result.failure(ApplicationError.serviceUnavailable("payment-gateway", authorization.message()));
+        }
         if (authorization.approved()) {
             payment.approve(authorization.transactionId());
             subscription.applyApprovedPayment();

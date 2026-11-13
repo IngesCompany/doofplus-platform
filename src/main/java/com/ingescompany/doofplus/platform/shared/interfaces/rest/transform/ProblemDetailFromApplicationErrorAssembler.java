@@ -170,6 +170,7 @@ public final class ProblemDetailFromApplicationErrorAssembler {
             case String s when s.endsWith("_NOT_FOUND") -> HttpStatus.NOT_FOUND;
             case "BUSINESS_RULE_VIOLATION" -> HttpStatusCode.valueOf(422);
             case String s when s.endsWith("_CONFLICT") -> HttpStatus.CONFLICT;
+            case "SERVICE_UNAVAILABLE" -> HttpStatus.SERVICE_UNAVAILABLE;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }

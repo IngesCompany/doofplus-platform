@@ -64,6 +64,16 @@ public record ApplicationError(
     }
 
     /**
+     * Service unavailable error: an external service needed by the operation did not answer
+     */
+    public static ApplicationError serviceUnavailable(String service, String reason) {
+        return new ApplicationError(
+                "SERVICE_UNAVAILABLE",
+                "Service unavailable: %s".formatted(service),
+                reason);
+    }
+
+    /**
      * Unexpected error: something went wrong that shouldn't have
      */
     public static ApplicationError unexpected(String context, String reason) {

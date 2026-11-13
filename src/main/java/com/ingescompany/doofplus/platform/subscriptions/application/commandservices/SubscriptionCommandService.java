@@ -26,10 +26,11 @@ public interface SubscriptionCommandService {
     /**
      * Handles the payment of the next billing period with Niubiz (US52). An approved payment activates
      * a pending subscription or renews an active one; a rejected payment is recorded and reported.
+     * When the gateway is not available, nothing is recorded.
      *
      * @param command pay command
      * @return the paid subscription, or a failure when it or its plan does not exist, it is not pending
-     *         or active, or the gateway rejects the charge
+     *         or active, the gateway rejects the charge or the gateway is not available
      */
     Result<Subscription, ApplicationError> handle(PaySubscriptionCommand command);
 
