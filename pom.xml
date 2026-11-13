@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ingescompany.doofplus</groupId>
 	<artifactId>platform</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>IngesCompany-Backend</name>
 	<description>RESTful API of DoofPlus, the quality management and batch traceability platform for pharmaceutical laboratories.</description>
 	<url/>
