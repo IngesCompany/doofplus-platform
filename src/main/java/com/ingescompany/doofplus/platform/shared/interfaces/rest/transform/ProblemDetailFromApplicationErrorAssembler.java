@@ -50,7 +50,7 @@ public final class ProblemDetailFromApplicationErrorAssembler {
         problemDetail.setProperty("code", error.code());
 
         if (error.details() != null && !error.details().isBlank()) {
-            problemDetail.setProperty("details", error.details());
+            problemDetail.setProperty("details", toLocalizedDetails(error.details()));
         }
 
         return problemDetail;
@@ -65,6 +65,16 @@ public final class ProblemDetailFromApplicationErrorAssembler {
     public static ResponseEntity<ProblemDetail> toResponseFromApplicationError(ApplicationError error) {
         ProblemDetail problemDetail = toProblemDetailFromApplicationError(error);
         return ResponseEntity.status(problemDetail.getStatus()).body(problemDetail);
+    }
+
+    /**
+     * Translates the details when they are a key of the message bundle. Application services pass along
+     * the message of the domain exceptions, which is a key (for example, {@code organizations.error.ruc.pattern});
+     * any other text is returned as is.
+     */
+    private static String toLocalizedDetails(String details) {
+        String localized = toLocalizedMessageOrNull(details);
+        return localized != null ? localized : details;
     }
 
     private static URI toProblemTypeUri(String errorCode) {

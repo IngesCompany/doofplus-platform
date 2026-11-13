@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import java.net.URI;
 import java.util.Locale;
@@ -76,5 +77,19 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID string: {abc}", problemDetail.getProperties().get("details"));
+    }
+
+    @Test
+    void handleMissingServletRequestParameterReturnsBadRequestWithParameterName() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+        var handler = new GlobalExceptionHandler();
+        var response = handler.handleMissingServletRequestParameter(
+                new MissingServletRequestParameterException("organizationId", "Long")
+        );
+        var problemDetail = Objects.requireNonNull(response.getBody());
+
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("VALIDATION_ERROR", problemDetail.getProperties().get("code"));
+        assertEquals("Falta el parámetro obligatorio 'organizationId'", problemDetail.getProperties().get("details"));
     }
 }
