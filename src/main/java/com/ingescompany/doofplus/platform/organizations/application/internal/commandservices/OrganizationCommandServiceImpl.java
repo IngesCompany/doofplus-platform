@@ -21,7 +21,7 @@ public class OrganizationCommandServiceImpl implements OrganizationCommandServic
     public Result<Organization, ApplicationError> handle(RegisterOrganizationCommand command) {
         if (organizationRepository.existsByRuc(command.ruc())) {
             return Result.failure(ApplicationError.conflict("Organization",
-                    "RUC '%s' is already registered".formatted(command.ruc().value())));
+                    "organizations.error.ruc.duplicate"));
         }
         try {
             var organization = new Organization(command);
