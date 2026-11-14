@@ -5,8 +5,8 @@ import com.ingescompany.doofplus.platform.organizations.domain.model.valueobject
 /**
  * Command to update the notification preferences and the language of a profile.
  */
-public record UpdateProfilePreferencesCommand(Long profileId, NotificationPreferences preferences, String language) {
-    public UpdateProfilePreferencesCommand {
+public record UpdateUserProfilePreferencesCommand(Long profileId, NotificationPreferences preferences, String language) {
+    public UpdateUserProfilePreferencesCommand {
         if (profileId == null || profileId <= 0) {
             throw new IllegalArgumentException("organizations.error.profile.id.invalid");
         }

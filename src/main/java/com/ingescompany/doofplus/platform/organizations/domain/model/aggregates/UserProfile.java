@@ -1,6 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.domain.model.aggregates;
 
-import com.ingescompany.doofplus.platform.organizations.domain.model.commands.CreateProfileCommand;
+import com.ingescompany.doofplus.platform.organizations.domain.model.commands.CreateUserProfileCommand;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.Area;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.NotificationPreferences;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.PersonName;
@@ -10,10 +10,10 @@ import lombok.Getter;
 import java.util.Set;
 
 /**
- * Profile aggregate root: the personal data, area, site and preferences of a user of an organization.
+ * UserProfile aggregate root: the personal data, area, site and preferences of a user of an organization.
  */
 @Getter
-public class Profile extends AbstractDomainAggregateRoot<Profile> {
+public class UserProfile extends AbstractDomainAggregateRoot<UserProfile> {
     private static final Set<String> SUPPORTED_LANGUAGES = Set.of("en", "es");
     private static final String DEFAULT_LANGUAGE = "en";
 
@@ -27,7 +27,7 @@ public class Profile extends AbstractDomainAggregateRoot<Profile> {
     private String language;
     private NotificationPreferences preferences;
 
-    public Profile(CreateProfileCommand command) {
+    public UserProfile(CreateUserProfileCommand command) {
         this.userId = command.userId();
         this.organizationId = command.organizationId();
         this.name = command.name();
@@ -41,13 +41,13 @@ public class Profile extends AbstractDomainAggregateRoot<Profile> {
         }
     }
 
-    private Profile() {
+    private UserProfile() {
     }
 
-    public static Profile reconstitute(Long id, Long userId, Long organizationId, PersonName name, String email,
+    public static UserProfile reconstitute(Long id, Long userId, Long organizationId, PersonName name, String email,
                                        Area area, String site, String language,
                                        NotificationPreferences preferences) {
-        var profile = new Profile();
+        var profile = new UserProfile();
         profile.id = id;
         profile.userId = userId;
         profile.organizationId = organizationId;

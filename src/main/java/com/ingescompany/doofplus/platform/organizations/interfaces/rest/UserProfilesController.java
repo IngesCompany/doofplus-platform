@@ -1,13 +1,13 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
-import com.ingescompany.doofplus.platform.organizations.application.commandservices.ProfileCommandService;
-import com.ingescompany.doofplus.platform.organizations.application.queryservices.ProfileQueryService;
-import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllProfilesQuery;
+import com.ingescompany.doofplus.platform.organizations.application.commandservices.UserProfileCommandService;
+import com.ingescompany.doofplus.platform.organizations.application.queryservices.UserProfileQueryService;
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllUserProfilesQuery;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.CreateUserProfileResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.UpdateUserProfileResource;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.UserProfileResource;
-import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.CreateProfileCommandFromResourceAssembler;
-import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.UpdateProfilePreferencesCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.CreateUserProfileCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.UpdateUserProfilePreferencesCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform.UserProfileResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,10 +28,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Tag(name = "User Profiles", description = "User profile and preferences endpoints")
 public class UserProfilesController {
 
-    private final ProfileCommandService commandService;
-    private final ProfileQueryService queryService;
+    private final UserProfileCommandService commandService;
+    private final UserProfileQueryService queryService;
 
-    public UserProfilesController(ProfileCommandService commandService, ProfileQueryService queryService) {
+    public UserProfilesController(UserProfileCommandService commandService, UserProfileQueryService queryService) {
         this.commandService = commandService;
         this.queryService = queryService;
     }
@@ -39,7 +39,7 @@ public class UserProfilesController {
     @PostMapping
     @Operation(summary = "Create the profile of a user")
     public ResponseEntity<?> createUserProfile(@RequestBody CreateUserProfileResource resource) {
-        var command = CreateProfileCommandFromResourceAssembler.toCommandFromResource(resource);
+        var command = CreateUserProfileCommandFromResourceAssembler.toCommandFromResource(resource);
         var result = commandService.handle(command);
         return ResponseEntityAssembler.toResponseEntityFromResult(
                 result,
@@ -50,7 +50,7 @@ public class UserProfilesController {
     @GetMapping
     @Operation(summary = "Get every user profile")
     public ResponseEntity<List<UserProfileResource>> getAllUserProfiles() {
-        var resources = queryService.handle(new GetAllProfilesQuery()).stream()
+        var resources = queryService.handle(new GetAllUserProfilesQuery()).stream()
                 .map(UserProfileResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(resources);
@@ -60,7 +60,7 @@ public class UserProfilesController {
     @Operation(summary = "Update the notification preferences and the language of a user profile")
     public ResponseEntity<?> updateUserProfile(@PathVariable Long profileId,
                                                @RequestBody UpdateUserProfileResource resource) {
-        var command = UpdateProfilePreferencesCommandFromResourceAssembler.toCommandFromResource(profileId, resource);
+        var command = UpdateUserProfilePreferencesCommandFromResourceAssembler.toCommandFromResource(profileId, resource);
         var result = commandService.handle(command);
         return ResponseEntityAssembler.toResponseEntityFromResult(
                 result,

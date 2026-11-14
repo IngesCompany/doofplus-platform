@@ -6,9 +6,9 @@ import com.ingescompany.doofplus.platform.organizations.domain.model.valueobject
 /**
  * Command to create the profile of a user of an organization.
  */
-public record CreateProfileCommand(Long userId, Long organizationId, PersonName name, String email, Area area,
+public record CreateUserProfileCommand(Long userId, Long organizationId, PersonName name, String email, Area area,
                                    String site, String language) {
-    public CreateProfileCommand {
+    public CreateUserProfileCommand {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("organizations.error.profile.userId.invalid");
         }

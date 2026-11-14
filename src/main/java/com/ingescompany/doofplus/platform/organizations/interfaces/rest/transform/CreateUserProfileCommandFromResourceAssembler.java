@@ -1,19 +1,19 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform;
 
-import com.ingescompany.doofplus.platform.organizations.domain.model.commands.CreateProfileCommand;
+import com.ingescompany.doofplus.platform.organizations.domain.model.commands.CreateUserProfileCommand;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.Area;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.PersonName;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.CreateUserProfileResource;
 
 import java.util.Locale;
 
-public final class CreateProfileCommandFromResourceAssembler {
+public final class CreateUserProfileCommandFromResourceAssembler {
 
-    private CreateProfileCommandFromResourceAssembler() {
+    private CreateUserProfileCommandFromResourceAssembler() {
     }
 
-    public static CreateProfileCommand toCommandFromResource(CreateUserProfileResource resource) {
-        return new CreateProfileCommand(
+    public static CreateUserProfileCommand toCommandFromResource(CreateUserProfileResource resource) {
+        return new CreateUserProfileCommand(
                 resource.userId(),
                 resource.organizationId(),
                 new PersonName(resource.firstName(), resource.lastName()),

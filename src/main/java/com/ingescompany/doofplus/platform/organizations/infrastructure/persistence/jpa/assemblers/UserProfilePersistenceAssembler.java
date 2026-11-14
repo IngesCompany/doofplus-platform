@@ -1,18 +1,18 @@
 package com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.assemblers;
 
-import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.Profile;
+import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.UserProfile;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.NotificationPreferences;
 import com.ingescompany.doofplus.platform.organizations.domain.model.valueobjects.PersonName;
-import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.entities.ProfilePersistenceEntity;
+import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.entities.UserProfilePersistenceEntity;
 
-public final class ProfilePersistenceAssembler {
+public final class UserProfilePersistenceAssembler {
 
-    private ProfilePersistenceAssembler() {
+    private UserProfilePersistenceAssembler() {
     }
 
-    public static Profile toDomainFromPersistence(ProfilePersistenceEntity entity) {
+    public static UserProfile toDomainFromPersistence(UserProfilePersistenceEntity entity) {
         if (entity == null) return null;
-        return Profile.reconstitute(
+        return UserProfile.reconstitute(
                 entity.getId(),
                 entity.getUserId(),
                 entity.getOrganizationId(),
@@ -24,9 +24,9 @@ public final class ProfilePersistenceAssembler {
                 new NotificationPreferences(entity.isEmailNotifications(), entity.isInAppNotifications()));
     }
 
-    public static ProfilePersistenceEntity toPersistenceFromDomain(Profile domain) {
+    public static UserProfilePersistenceEntity toPersistenceFromDomain(UserProfile domain) {
         if (domain == null) return null;
-        var entity = new ProfilePersistenceEntity();
+        var entity = new UserProfilePersistenceEntity();
         entity.setId(domain.getId());
         entity.setUserId(domain.getUserId());
         entity.setOrganizationId(domain.getOrganizationId());
