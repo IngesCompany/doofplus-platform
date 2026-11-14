@@ -52,7 +52,7 @@ public class NiubizPaymentGateway implements PaymentGateway {
     public PaymentResult authorize(Money amount, String cardToken) {
         if (merchantId.isBlank() || username.isBlank() || password.isBlank()) {
             log.warn("Niubiz is not configured: set NIUBIZ_MERCHANT_ID, NIUBIZ_USERNAME and NIUBIZ_PASSWORD");
-            return PaymentResult.rejected("Payment gateway is not configured");
+            return PaymentResult.unavailable("Payment gateway is not configured");
         }
         try {
             var securityToken = restClient.get()
@@ -69,12 +69,16 @@ public class NiubizPaymentGateway implements PaymentGateway {
                     .body(JSON_OBJECT);
             return toResult(response);
         } catch (RestClientResponseException exception) {
+            if (exception.getStatusCode().is5xxServerError()) {
+                log.error("Niubiz failed: status={}", exception.getStatusCode().value());
+                return PaymentResult.unavailable("Payment gateway is not available");
+            }
             var reason = actionDescription(exception.getResponseBodyAs(JSON_OBJECT));
             log.warn("Niubiz rejected the charge: status={}, reason={}", exception.getStatusCode().value(), reason);
             return PaymentResult.rejected(reason);
         } catch (RestClientException exception) {
             log.error("Niubiz is not available: {}", exception.getMessage());
-            return PaymentResult.rejected("Payment gateway is not available");
+            return PaymentResult.unavailable("Payment gateway is not available");
         }
     }
 

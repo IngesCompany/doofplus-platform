@@ -9,6 +9,8 @@ public record CreateProductionBatchResource(
         String batchNumber,
         Long productionOrderId,
         BigDecimal plannedQuantityValue,
-        String plannedQuantityUnit
+        String plannedQuantityUnit,
+        String line,
+        String owner
 ) {
 }

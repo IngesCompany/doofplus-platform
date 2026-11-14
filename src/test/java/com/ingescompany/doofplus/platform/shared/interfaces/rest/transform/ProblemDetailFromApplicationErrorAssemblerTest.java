@@ -53,6 +53,34 @@ class ProblemDetailFromApplicationErrorAssemblerTest {
     }
 
     @Test
+    void toResponseFromApplicationErrorMapsServiceUnavailableTo503() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+
+        var error = ApplicationError.serviceUnavailable("payment-gateway", "Payment gateway is not available");
+        var response = ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(error);
+        var problemDetail = response.getBody();
+
+        assertNotNull(problemDetail);
+        assertEquals(503, response.getStatusCode().value());
+        assertEquals("SERVICE_UNAVAILABLE", problemDetail.getProperties().get("code"));
+        assertEquals("Servicio no disponible", problemDetail.getDetail());
+        assertEquals(URI.create("/api/v1/errors/service-unavailable"), problemDetail.getType());
+        assertEquals("Service Unavailable", problemDetail.getTitle());
+    }
+
+    @Test
+    void toResponseFromApplicationErrorMapsUnauthorizedTo401() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+
+        var response = ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                ApplicationError.unauthorized("telemetry", "monitoring.telemetry.error.apiKey.invalid"));
+
+        assertNotNull(response.getBody());
+        assertEquals(401, response.getStatusCode().value());
+        assertEquals("UNAUTHORIZED", response.getBody().getProperties().get("code"));
+    }
+
+    @Test
     void toResponseFromApplicationErrorFallsBackToCategoryKeyWhenSpecificIsMissing() {
         LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
 

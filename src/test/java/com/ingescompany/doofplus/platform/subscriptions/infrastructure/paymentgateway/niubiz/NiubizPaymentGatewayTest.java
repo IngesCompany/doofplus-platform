@@ -82,6 +82,7 @@ class NiubizPaymentGatewayTest {
         var result = gateway().authorize(AMOUNT, "DENIED");
 
         assertThat(result.approved()).isFalse();
+        assertThat(result.unavailable()).isFalse();
         assertThat(result.transactionId()).isNull();
         assertThat(result.message()).isEqualTo("Operacion denegada");
     }
@@ -92,7 +93,7 @@ class NiubizPaymentGatewayTest {
 
         var result = gateway().authorize(AMOUNT, "card-token");
 
-        assertThat(result.approved()).isFalse();
+        assertThat(result.unavailable()).isTrue();
         assertThat(result.message()).isEqualTo("Payment gateway is not available");
     }
 
@@ -101,7 +102,7 @@ class NiubizPaymentGatewayTest {
         var result = new NiubizPaymentGateway("http://localhost:" + server.getAddress().getPort(), "", "", "")
                 .authorize(AMOUNT, "card-token");
 
-        assertThat(result.approved()).isFalse();
+        assertThat(result.unavailable()).isTrue();
         assertThat(result.message()).isEqualTo("Payment gateway is not configured");
         assertThat(authorizationRequests).isEmpty();
     }

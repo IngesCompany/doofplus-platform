@@ -79,6 +79,11 @@ public class SensorRepositoryImpl implements SensorRepository {
     }
 
     @Override
+    public boolean existsAssignedToBatchByEquipmentCode(String equipmentCode) {
+        return sensorPersistenceRepository.existsByEquipmentCodeAndAssignedBatchNot(equipmentCode, "");
+    }
+
+    @Override
     public void deleteById(Long id) {
         sensorPersistenceRepository.deleteById(id);
     }

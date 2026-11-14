@@ -107,7 +107,7 @@ class SubscriptionCommandServiceImplTest {
 
         var result = service.handle(new CancelSubscriptionCommand(1L));
 
-        assertThat(error(result).code()).isEqualTo("BUSINESS_RULE_VIOLATION");
+        assertThat(error(result).code()).isEqualTo("SUBSCRIPTION_STATE_CONFLICT");
         verify(subscriptionRepository, never()).save(any());
     }
 }

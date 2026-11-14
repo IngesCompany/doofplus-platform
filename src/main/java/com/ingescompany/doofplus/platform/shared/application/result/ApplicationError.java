@@ -64,6 +64,36 @@ public record ApplicationError(
     }
 
     /**
+     * Invalid state error: the current status of the resource does not allow the operation (answered with 409)
+     */
+    public static ApplicationError invalidState(String resource, String reason) {
+        return new ApplicationError(
+                "%s_STATE_CONFLICT".formatted(resource.toUpperCase()),
+                "The status of %s does not allow this operation".formatted(resource),
+                reason);
+    }
+
+    /**
+     * Unauthorized error: the caller did not send valid credentials
+     */
+    public static ApplicationError unauthorized(String context, String reason) {
+        return new ApplicationError(
+                "UNAUTHORIZED",
+                "Unauthorized: %s".formatted(context),
+                reason);
+    }
+
+    /**
+     * Service unavailable error: an external service needed by the operation did not answer
+     */
+    public static ApplicationError serviceUnavailable(String service, String reason) {
+        return new ApplicationError(
+                "SERVICE_UNAVAILABLE",
+                "Service unavailable: %s".formatted(service),
+                reason);
+    }
+
+    /**
      * Unexpected error: something went wrong that shouldn't have
      */
     public static ApplicationError unexpected(String context, String reason) {

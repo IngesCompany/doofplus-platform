@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.manufacturing.domain.model.entities;
 
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,11 @@ public class BatchEvent {
     private String description;
 
     /**
+     * Tone of the event in the timeline (normal, warning or danger).
+     */
+    private EventTone tone;
+
+    /**
      * Identifier of the user or system that performed the action leading to this event.
      */
     private Long performedBy;
@@ -51,9 +57,10 @@ public class BatchEvent {
      * @param description A description of the batch event.
      * @param performedBy The identifier of the user or system that performed the action.
      */
-    public BatchEvent(String type, String description, Long performedBy) {
+    public BatchEvent(String type, String description, EventTone tone, Long performedBy) {
         this.type = Objects.requireNonNull(type, "type must not be null");
         this.description = Objects.requireNonNull(description, "description must not be null");
+        this.tone = Objects.requireNonNull(tone, "tone must not be null");
         this.performedBy = performedBy;
         this.occurredAt = LocalDateTime.now();
     }
@@ -61,11 +68,13 @@ public class BatchEvent {
     /**
      * Private constructor for reconstitution.
      */
-    public static BatchEvent reconstitute(Long id, String type, String description, Long performedBy, LocalDateTime occurredAt) {
+    public static BatchEvent reconstitute(Long id, String type, String description, EventTone tone, Long performedBy,
+                                          LocalDateTime occurredAt) {
         BatchEvent event = new BatchEvent();
         event.id = id;
         event.type = type;
         event.description = description;
+        event.tone = tone;
         event.performedBy = performedBy;
         event.occurredAt = occurredAt;
         return event;
