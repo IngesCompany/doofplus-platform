@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "profiles")
+@Table(name = "user_profiles")
 @Getter
 @Setter
 @NoArgsConstructor
-public class ProfilePersistenceEntity extends AuditableAbstractPersistenceEntity {
+public class UserProfilePersistenceEntity extends AuditableAbstractPersistenceEntity {
 
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;

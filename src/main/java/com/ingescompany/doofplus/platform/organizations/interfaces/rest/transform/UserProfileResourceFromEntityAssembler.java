@@ -1,6 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest.transform;
 
-import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.Profile;
+import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.UserProfile;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.UserProfileResource;
 
 import java.util.Locale;
@@ -10,7 +10,7 @@ public final class UserProfileResourceFromEntityAssembler {
     private UserProfileResourceFromEntityAssembler() {
     }
 
-    public static UserProfileResource toResourceFromEntity(Profile entity) {
+    public static UserProfileResource toResourceFromEntity(UserProfile entity) {
         if (entity == null) return null;
         var area = entity.getArea().name();
         return new UserProfileResource(
