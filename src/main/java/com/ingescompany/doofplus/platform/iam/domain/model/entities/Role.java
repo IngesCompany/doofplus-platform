@@ -1,56 +1,60 @@
 package com.ingescompany.doofplus.platform.iam.domain.model.entities;
 
 import com.ingescompany.doofplus.platform.iam.domain.model.valueobjects.Roles;
-import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
 /**
- * Role that can be assigned to a user (US07).
+ * Role domain entity.
  */
 @Getter
-@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@With
+@EqualsAndHashCode
+@ToString
 public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, unique = true, length = 30)
     private Roles name;
-
-    protected Role() {}
 
     public Role(Roles name) {
         this.name = name;
     }
 
     /**
-     * @return name of the role as text, for example {@code ROLE_ADMIN}
+     * Get the name of the role as a string.
+     *
+     * @return the name of the role as a string
      */
     public String getStringName() {
         return name.name();
     }
 
     /**
-     * @return default role entity
+     * Get the default role.
+     *
+     * @return the default role
      */
     public static Role getDefaultRole() {
-        return new Role(Roles.getDefaultRole());
+        return new Role(Roles.ROLE_QA_SPECIALIST);
     }
 
     /**
-     * @param name name of the role, for example {@code ROLE_ADMIN}
-     * @return role entity
+     * Get the role from its name.
+     *
+     * @param name the name of the role
+     * @return the role
      */
     public static Role toRoleFromName(String name) {
-        return new Role(Roles.valueOf(name));
+        return new Role(Roles.fromKey(name));
     }
 
     /**
-     * @param roles roles to validate
-     * @return the same roles, or a list with the default role when it is empty
+     * Validate the role set.
+     *
+     * @param roles the role set
+     * @return the role set
      */
     public static List<Role> validateRoleSet(List<Role> roles) {
         if (roles == null || roles.isEmpty()) {

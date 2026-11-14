@@ -1,20 +1,11 @@
 package com.ingescompany.doofplus.platform.iam.domain.model.commands;
 
-import com.ingescompany.doofplus.platform.iam.domain.model.valueobjects.EmailAddress;
-
 /**
- * Command to sign in with email address and password (US06).
+ * Command to sign in with the email, the password and, when the user enrolled it, the two-factor code.
  *
- * @param emailAddress email address of the user
- * @param password     password in plain text
+ * @param email         the email address of the user
+ * @param password      the password
+ * @param twoFactorCode the six-digit code of the authenticator app, or null in the first step
  */
-public record SignInCommand(EmailAddress emailAddress, String password) {
-    public SignInCommand {
-        if (emailAddress == null) {
-            throw new IllegalArgumentException("user.error.emailAddress.notBlank");
-        }
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("user.error.password.notBlank");
-        }
-    }
+public record SignInCommand(String email, String password, String twoFactorCode) {
 }

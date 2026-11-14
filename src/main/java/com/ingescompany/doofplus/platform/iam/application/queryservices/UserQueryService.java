@@ -1,30 +1,40 @@
 package com.ingescompany.doofplus.platform.iam.application.queryservices;
 
 import com.ingescompany.doofplus.platform.iam.domain.model.aggregates.User;
-import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByEmailAddressQuery;
+import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetAllUsersQuery;
 import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByIdQuery;
+import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByEmailQuery;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Application service contract providing read access to users.
- *
- * @since 1.0
+ * Application service contract for IAM user read queries.
  */
 public interface UserQueryService {
     /**
-     * Retrieves a user by its identifier.
+     * Handles retrieval of all users.
      *
-     * @param query query containing the user identifier
-     * @return user when found, otherwise empty
+     * @param query query marker
+     * @return list of users
+     */
+    List<User> handle(GetAllUsersQuery query);
+
+    /**
+     * Handles retrieval of a user by id.
+     *
+     * @param query user-id query
+     * @return matching user, if found
      */
     Optional<User> handle(GetUserByIdQuery query);
 
     /**
-     * Retrieves a user by its email address.
+     * Handles retrieval of a user by username.
      *
-     * @param query query containing the email address
-     * @return user when found, otherwise empty
+     * @param query username query
+     * @return matching user, if found
      */
-    Optional<User> handle(GetUserByEmailAddressQuery query);
+    Optional<User> handle(GetUserByEmailQuery query);
+
 }
+

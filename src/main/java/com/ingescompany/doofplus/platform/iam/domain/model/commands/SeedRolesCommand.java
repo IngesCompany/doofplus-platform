@@ -1,8 +1,8 @@
 package com.ingescompany.doofplus.platform.iam.domain.model.commands;
 
 /**
- * Command to create the roles of {@link com.ingescompany.doofplus.platform.iam.domain.model.valueobjects.Roles}
- * that do not exist yet.
+ * Seed roles command
+ * This class represents the command to seed the roles in the system.
  */
 public record SeedRolesCommand() {
 }

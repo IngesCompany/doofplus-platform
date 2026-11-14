@@ -2,23 +2,19 @@ package com.ingescompany.doofplus.platform.iam.application.internal.queryservice
 
 import com.ingescompany.doofplus.platform.iam.application.queryservices.UserQueryService;
 import com.ingescompany.doofplus.platform.iam.domain.model.aggregates.User;
-import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByEmailAddressQuery;
+import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetAllUsersQuery;
 import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByIdQuery;
-import com.ingescompany.doofplus.platform.iam.infrastructure.persistence.jpa.UserRepository;
-import lombok.extern.slf4j.Slf4j;
+import com.ingescompany.doofplus.platform.iam.domain.model.queries.GetUserByEmailQuery;
+import com.ingescompany.doofplus.platform.iam.domain.repositories.UserRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Application service for user query operations.
- *
- * @since 1.0
+ * Application service that resolves IAM user read queries.
  */
-@Slf4j
 @Service
-@Transactional(readOnly = true)
 public class UserQueryServiceImpl implements UserQueryService {
     private final UserRepository userRepository;
 
@@ -26,21 +22,18 @@ public class UserQueryServiceImpl implements UserQueryService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public List<User> handle(GetAllUsersQuery query) {
+        return userRepository.findAll();
+    }
+
     @Override
     public Optional<User> handle(GetUserByIdQuery query) {
-        log.debug("Querying user by id={}", query.userId());
         return userRepository.findById(query.userId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Optional<User> handle(GetUserByEmailAddressQuery query) {
-        log.debug("Querying user by emailAddress={}", query.emailAddress().value());
-        return userRepository.findByEmailAddress(query.emailAddress());
+    public Optional<User> handle(GetUserByEmailQuery query) {
+        return userRepository.findByEmail(query.email());
     }
 }

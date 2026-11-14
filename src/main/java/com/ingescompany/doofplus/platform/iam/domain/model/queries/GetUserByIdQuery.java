@@ -1,14 +1,11 @@
 package com.ingescompany.doofplus.platform.iam.domain.model.queries;
 
 /**
- * Query to get a user by its identifier.
- *
- * @param userId user identifier
+ * Get user by id query
+ * <p>
+ *     This class represents the query to get a user by its id.
+ * </p>
+ * @param userId the id of the user
  */
 public record GetUserByIdQuery(Long userId) {
-    public GetUserByIdQuery {
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("user.error.id.invalid");
-        }
-    }
 }
