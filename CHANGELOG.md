@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-14
+### Added
+- Manufacturing & Batch Management: catalog of products, master formulas, production orders and raw material lots (`/api/v1/products`, `/api/v1/master-formulas`, `/api/v1/production-orders`, `/api/v1/material-lots`), with the batch statuses of the Web Application (start, resume, release and progress).
+- IoT Monitoring: ThingsBoard telemetry (`POST /api/v1/telemetry`) and equipment removal (`DELETE /api/v1/equipment/{id}`), rejected with 409 while one of its sensors is monitoring a batch.
+
+### Changed
+- Organizations & Profiles: profiles are user profiles (`/api/v1/user-profiles`), as in the Web Application.
+- A state change that the current status does not allow answers 409 (`<RESOURCE>_STATE_CONFLICT`); 422 is kept for business rejections (formula not approved, payment rejected).
+
+### Fixed
+- Manufacturing: the incidents, events and consumptions of a batch are saved.
+- Subscriptions: answer 503 when Niubiz is not available.
+
 ## [1.0.0] - 2026-11-13
 ### Added
 - Shared kernel: `Result` and `ApplicationError`, RFC 9457 problem details with messages in English and Spanish, OpenAPI documentation with Swagger UI, CORS configuration, snake case naming strategy, domain event publishing and virtual threads.
