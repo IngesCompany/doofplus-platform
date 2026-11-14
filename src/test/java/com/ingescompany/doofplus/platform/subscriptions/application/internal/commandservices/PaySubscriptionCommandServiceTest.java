@@ -131,7 +131,7 @@ class PaySubscriptionCommandServiceTest {
 
         var result = service.handle(new PaySubscriptionCommand(1L, "tok"));
 
-        assertThat(error(result).code()).isEqualTo("BUSINESS_RULE_VIOLATION");
+        assertThat(error(result).code()).isEqualTo("SUBSCRIPTION_STATE_CONFLICT");
         verifyNoInteractions(paymentGateway);
         verify(subscriptionRepository, never()).save(any());
     }

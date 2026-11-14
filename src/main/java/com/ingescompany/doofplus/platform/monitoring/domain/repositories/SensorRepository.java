@@ -19,5 +19,6 @@ public interface SensorRepository {
     List<Sensor> findAllByEquipmentCode(String equipmentCode);
     boolean existsByCode(SensorCode code);
     boolean existsByDeviceId(DeviceId deviceId);
+    boolean existsAssignedToBatchByEquipmentCode(String equipmentCode);
     void deleteById(Long id);
 }

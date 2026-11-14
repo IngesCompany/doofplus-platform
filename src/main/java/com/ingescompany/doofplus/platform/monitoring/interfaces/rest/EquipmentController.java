@@ -2,6 +2,7 @@ package com.ingescompany.doofplus.platform.monitoring.interfaces.rest;
 
 import com.ingescompany.doofplus.platform.monitoring.application.commandservices.EquipmentCommandService;
 import com.ingescompany.doofplus.platform.monitoring.application.queryservices.EquipmentQueryService;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.DeleteEquipmentCommand;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.queries.GetAllEquipmentQuery;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.queries.GetEquipmentByIdQuery;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.CreateEquipmentResource;
@@ -10,7 +11,9 @@ import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.resources.U
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.CreateEquipmentCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.EquipmentResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.monitoring.interfaces.rest.transform.UpdateEquipmentCommandFromResourceAssembler;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Equipment;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ResponseEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -139,5 +142,28 @@ public class EquipmentController {
                 EquipmentResourceFromEntityAssembler::toResourceFromEntity,
                 HttpStatus.OK
         );
+    }
+
+    /**
+     * Removes a piece of equipment.
+     *
+     * @param id equipment persistent ID
+     * @return 204 when removed, 404 when it does not exist, 409 when one of its sensors is monitoring a batch
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete equipment", description = "Removes an equipment item. It is rejected while one of its sensors is monitoring a production batch.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Equipment removed successfully"),
+            @ApiResponse(responseCode = "404", description = "Equipment not found"),
+            @ApiResponse(responseCode = "409", description = "Conflict - one of its sensors is monitoring a production batch")
+    })
+    public ResponseEntity<?> deleteEquipment(
+            @PathVariable @Parameter(description = "Equipment unique identifier", example = "1", required = true) Long id
+    ) {
+        var result = equipmentCommandService.handle(new DeleteEquipmentCommand(id));
+        if (result instanceof Result.Failure<Equipment, ApplicationError> failure) {
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(failure.error());
+        }
+        return ResponseEntity.noContent().build();
     }
 }

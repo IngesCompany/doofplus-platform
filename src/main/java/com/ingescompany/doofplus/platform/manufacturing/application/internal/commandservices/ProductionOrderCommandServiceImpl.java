@@ -53,7 +53,7 @@ public class ProductionOrderCommandServiceImpl implements ProductionOrderCommand
         try {
             order.get().changeStatus(command.status());
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("order-status", e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("ProductionOrder", e.getMessage()));
         }
         return Result.success(productionOrderRepository.save(order.get()));
     }

@@ -64,6 +64,16 @@ public record ApplicationError(
     }
 
     /**
+     * Invalid state error: the current status of the resource does not allow the operation (answered with 409)
+     */
+    public static ApplicationError invalidState(String resource, String reason) {
+        return new ApplicationError(
+                "%s_STATE_CONFLICT".formatted(resource.toUpperCase()),
+                "The status of %s does not allow this operation".formatted(resource),
+                reason);
+    }
+
+    /**
      * Unauthorized error: the caller did not send valid credentials
      */
     public static ApplicationError unauthorized(String context, String reason) {

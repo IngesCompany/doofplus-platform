@@ -49,7 +49,7 @@ public class MasterFormulaCommandServiceImpl implements MasterFormulaCommandServ
         try {
             formula.approve(command);
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("formula-status", e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("MasterFormula", e.getMessage()));
         }
         masterFormulaRepository.findAllByProductCode(formula.getProductCode()).stream()
                 .filter(other -> !other.getId().equals(formula.getId()) && other.isApproved())

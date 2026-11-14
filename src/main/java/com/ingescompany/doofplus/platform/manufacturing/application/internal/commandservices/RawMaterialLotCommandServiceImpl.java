@@ -63,7 +63,7 @@ public class RawMaterialLotCommandServiceImpl implements RawMaterialLotCommandSe
         try {
             change.accept(lot.get());
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("lot-status", e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("RawMaterialLot", e.getMessage()));
         }
         return Result.success(rawMaterialLotRepository.save(lot.get()));
     }

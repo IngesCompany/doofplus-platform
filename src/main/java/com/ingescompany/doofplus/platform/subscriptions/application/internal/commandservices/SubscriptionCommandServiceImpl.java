@@ -78,7 +78,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
         var subscription = found.get();
         if (!subscription.isCurrent()) {
             log.warn("Subscription cannot be paid: id={}, status={}", subscription.getId(), subscription.getStatus());
-            return Result.failure(ApplicationError.businessRuleViolation("subscription-status",
+            return Result.failure(ApplicationError.invalidState("Subscription",
                     "Only a pending or active subscription can be paid"));
         }
         var plan = planRepository.findById(subscription.getPlanId());
@@ -151,7 +151,7 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
             transition.accept(subscription.get());
         } catch (IllegalStateException exception) {
             log.warn("Invalid subscription state: id={}, status={}", subscriptionId, subscription.get().getStatus());
-            return Result.failure(ApplicationError.businessRuleViolation("subscription-status", exception.getMessage()));
+            return Result.failure(ApplicationError.invalidState("Subscription", exception.getMessage()));
         }
         var updatedSubscription = subscriptionRepository.save(subscription.get());
         log.info("Subscription updated: id={}, status={}", subscriptionId, updatedSubscription.getStatus());
