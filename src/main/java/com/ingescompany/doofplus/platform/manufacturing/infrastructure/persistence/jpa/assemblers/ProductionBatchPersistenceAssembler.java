@@ -12,7 +12,6 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobject
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.embeddables.QuantityPersistenceEmbeddable;
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.entities.ProductionBatchPersistenceEntity;
 
-import java.util.ArrayList;
 
 /**
  * Static assembler between the domain and persistence representations.
@@ -44,7 +43,6 @@ public final class ProductionBatchPersistenceAssembler {
                 entity.getStartedAt(),
                 entity.getFinishedAt(),
                 entity.getConsumptions().stream().map(ProductionBatchPersistenceAssembler::toDomain).toList(),
-                new ArrayList<>(),
                 entity.getIncidents().stream().map(ProductionBatchPersistenceAssembler::toDomain).toList(),
                 entity.getEvents().stream().map(ProductionBatchPersistenceAssembler::toDomain).toList()
         );

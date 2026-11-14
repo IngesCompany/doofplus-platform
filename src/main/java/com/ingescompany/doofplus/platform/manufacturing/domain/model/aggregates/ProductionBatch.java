@@ -3,11 +3,11 @@ package com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ReleaseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.BatchEvent;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.MaterialConsumption;
-import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.ProcessParameter;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchStatus;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
@@ -15,7 +15,6 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobject
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import lombok.Getter;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,10 +95,6 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      */
     private final List<MaterialConsumption> consumptions = new ArrayList<>();
 
-    /**
-     * List of process parameters for the production batch.
-     */
-    private final List<ProcessParameter> parameters = new ArrayList<>();
 
     /**
      * List of incidents for the production batch.
@@ -145,7 +140,6 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
             LocalDateTime startedAt,
             LocalDateTime finishedAt,
             List<MaterialConsumption> consumptions,
-            List<ProcessParameter> parameters,
             List<Incident> incidents,
             List<BatchEvent> events
     ) {
@@ -162,7 +156,6 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         batch.startedAt = startedAt;
         batch.finishedAt = finishedAt;
         if (consumptions != null) batch.consumptions.addAll(consumptions);
-        if (parameters != null) batch.parameters.addAll(parameters);
         if (incidents != null) batch.incidents.addAll(incidents);
         if (events != null) batch.events.addAll(events);
         return batch;
@@ -183,19 +176,50 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
     }
 
     /**
-     * Closes the production batch, changing its status to CLOSED and recording the finish time.
+     * Finishes the production of the batch and requests its release to QA: the status changes
+     * from IN_PROGRESS to RELEASE_REQUESTED and the progress to 100.
      *
      * @param command the command containing the manufactured quantity.
-     * @throws IllegalStateException if the batch is already closed.
+     * @throws IllegalStateException if the batch is not in progress.
      */
     public void close(CloseBatchCommand command) {
-        if (this.status == BatchStatus.CLOSED) {
-            throw new IllegalStateException("manufacturing.error.batch.alreadyClosed");
+        if (this.status != BatchStatus.IN_PROGRESS) {
+            throw new IllegalStateException("manufacturing.error.batch.cannotClose");
         }
         this.manufacturedQuantity = Objects.requireNonNull(command.manufacturedQuantity(), "manufacturedQuantity must not be null");
-        this.status = BatchStatus.CLOSED;
+        this.status = BatchStatus.RELEASE_REQUESTED;
+        this.progress = 100;
         this.finishedAt = LocalDateTime.now();
-        this.recordEvent("BATCH_CLOSED", "Batch closed with manufactured quantity: " + this.manufacturedQuantity.value(), EventTone.NORMAL, null);
+        this.recordEvent("RELEASE_REQUESTED", "Production finished with " + this.manufacturedQuantity.value() + " "
+                + this.manufacturedQuantity.unit() + "; release requested to QA", EventTone.NORMAL, null);
+    }
+
+    /**
+     * Resumes a batch that is on hold.
+     *
+     * @throws IllegalStateException if the batch is not on hold.
+     */
+    public void resume() {
+        if (this.status != BatchStatus.ON_HOLD) {
+            throw new IllegalStateException("manufacturing.error.batch.cannotResume");
+        }
+        this.status = BatchStatus.IN_PROGRESS;
+        this.recordEvent("BATCH_RESUMED", "Batch manufacturing resumed", EventTone.NORMAL, null);
+    }
+
+    /**
+     * Releases the batch for distribution, signed by QA.
+     *
+     * @param command the command with the name of the person who releases the batch.
+     * @throws IllegalStateException if the release was not requested.
+     */
+    public void release(ReleaseBatchCommand command) {
+        if (this.status != BatchStatus.RELEASE_REQUESTED) {
+            throw new IllegalStateException("manufacturing.error.batch.cannotRelease");
+        }
+        this.status = BatchStatus.RELEASED;
+        this.recordEvent("BATCH_RELEASED", "Released for distribution by " + command.releasedBy().trim(),
+                EventTone.NORMAL, null);
     }
 
     /**
@@ -231,16 +255,6 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         this.recordEvent("MATERIAL_CONSUMED", "Raw material lot " + rawMaterialLotId + " consumed", EventTone.NORMAL, null);
     }
 
-    /**
-     * Records a process parameter for the production batch, adding a ProcessParameter record.
-     *
-     * @param name the name of the process parameter.
-     * @param value the value of the process parameter.
-     * @param unit the unit of the process parameter.
-     */
-    public void recordParameter(String name, BigDecimal value, String unit) {
-        this.parameters.add(new ProcessParameter(name, value, unit));
-    }
 
     /**
      * Records a batch event, adding it to the list of events.
@@ -270,14 +284,6 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         return Collections.unmodifiableList(this.consumptions);
     }
 
-    /**
-     * Returns an unmodifiable view of the list of process parameters for the production batch.
-     *
-     * @return an unmodifiable list of ProcessParameter.
-     */
-    public List<ProcessParameter> getParameters() {
-        return Collections.unmodifiableList(this.parameters);
-    }
 
     /**
      * Returns an unmodifiable view of the list of incidents for the production batch.

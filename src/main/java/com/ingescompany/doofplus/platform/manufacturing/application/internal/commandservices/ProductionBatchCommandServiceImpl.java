@@ -5,6 +5,9 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ReleaseBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ResumeBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.StartBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.manufacturing.domain.repositories.ProductionBatchRepository;
@@ -80,6 +83,44 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
         }
         var batch = batchOptional.get();
         batch.updateProgress(command);
+        return Result.success(productionBatchRepository.save(batch));
+    }
+
+    @Override
+    public Result<ProductionBatch, ApplicationError> handle(StartBatchCommand command) {
+        return transition(command.batchId(), "start-batch", ProductionBatch::start);
+    }
+
+    @Override
+    public Result<ProductionBatch, ApplicationError> handle(ResumeBatchCommand command) {
+        return transition(command.batchId(), "resume-batch", ProductionBatch::resume);
+    }
+
+    @Override
+    public Result<ProductionBatch, ApplicationError> handle(ReleaseBatchCommand command) {
+        return transition(command.batchId(), "release-batch", batch -> batch.release(command));
+    }
+
+    /**
+     * Loads a batch, applies a status change and saves it.
+     *
+     * @param batchId    identifier of the batch
+     * @param rule       name of the business rule reported when the change is not allowed
+     * @param transition aggregate method that changes the status
+     * @return the updated batch, not found, or a business rule violation when the status does not allow the change
+     */
+    private Result<ProductionBatch, ApplicationError> transition(Long batchId, String rule,
+                                                                 java.util.function.Consumer<ProductionBatch> transition) {
+        var batchOptional = productionBatchRepository.findById(batchId);
+        if (batchOptional.isEmpty()) {
+            return Result.failure(ApplicationError.notFound("ProductionBatch", batchId.toString()));
+        }
+        var batch = batchOptional.get();
+        try {
+            transition.accept(batch);
+        } catch (IllegalStateException e) {
+            return Result.failure(ApplicationError.businessRuleViolation(rule, e.getMessage()));
+        }
         return Result.success(productionBatchRepository.save(batch));
     }
 }

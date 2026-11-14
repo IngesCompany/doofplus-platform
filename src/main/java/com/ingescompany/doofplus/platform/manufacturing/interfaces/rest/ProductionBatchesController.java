@@ -3,6 +3,9 @@ import com.ingescompany.doofplus.platform.manufacturing.application.commandservi
 import com.ingescompany.doofplus.platform.manufacturing.application.queryservices.ProductionBatchQueryService;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ReleaseBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ResumeBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.StartBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetAllBatchesQuery;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetBatchByIdQuery;
@@ -14,6 +17,7 @@ import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resource
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.CreateProductionBatchResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.ProductionBatchResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.RegisterIncidentResource;
+import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.ReleaseProductionBatchResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.UpdateBatchProgressResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform.CreateProductionBatchCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform.IncidentResourceFromEntityAssembler;
@@ -130,5 +134,50 @@ public class ProductionBatchesController {
                 ProductionBatchResourceFromEntityAssembler::toResourceFromEntity,
                 HttpStatus.OK
         );
+    }
+
+    /**
+     * Starts a planned production batch.
+     *
+     * @param batchId the batch ID
+     * @return the batch in progress, 404 when it does not exist, or a business rule violation when it is not planned
+     */
+    @PostMapping("/{batchId}/start")
+    @Operation(summary = "Start a planned production batch")
+    public ResponseEntity<?> startBatch(@PathVariable Long batchId) {
+        var result = commandService.handle(new StartBatchCommand(batchId));
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result, ProductionBatchResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
+    }
+
+    /**
+     * Resumes a production batch that is on hold.
+     *
+     * @param batchId the batch ID
+     * @return the batch in progress, 404 when it does not exist, or a business rule violation when it is not on hold
+     */
+    @PostMapping("/{batchId}/resume")
+    @Operation(summary = "Resume a production batch that is on hold")
+    public ResponseEntity<?> resumeBatch(@PathVariable Long batchId) {
+        var result = commandService.handle(new ResumeBatchCommand(batchId));
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result, ProductionBatchResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
+    }
+
+    /**
+     * Releases a production batch for distribution (QA).
+     *
+     * @param batchId  the batch ID
+     * @param resource the name of the person who releases the batch
+     * @return the released batch, 400 without releasedBy, 404 when it does not exist,
+     *         or a business rule violation when the release was not requested
+     */
+    @PostMapping("/{batchId}/release")
+    @Operation(summary = "Release a production batch for distribution")
+    public ResponseEntity<?> releaseBatch(@PathVariable Long batchId,
+                                          @RequestBody ReleaseProductionBatchResource resource) {
+        var result = commandService.handle(new ReleaseBatchCommand(batchId, resource.releasedBy()));
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result, ProductionBatchResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 }

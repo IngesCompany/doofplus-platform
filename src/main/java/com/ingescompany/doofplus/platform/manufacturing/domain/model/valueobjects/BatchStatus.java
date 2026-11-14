@@ -4,7 +4,8 @@ package com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjec
  * Enumeration representing the Batch Status.
  *
  * <p>
- * This enumeration is used to define the various states a batch can be in during its lifecycle.
+ * The states are the ones the Web App shows for a batch (planned, in progress, on hold,
+ * release requested and released).
  * </p>
  */
 public enum BatchStatus {
@@ -21,23 +22,11 @@ public enum BatchStatus {
      */
     ON_HOLD,
     /**
-     * The batch has been finished.
-     */
-    FINISHED,
-    /**
-     * The batch has been closed.
-     */
-    CLOSED,
-    /**
-     * A request for release has been submitted for the batch.
+     * Production finished and the release was requested to QA.
      */
     RELEASE_REQUESTED,
     /**
-     * The batch has been released.
+     * QA released the batch for distribution.
      */
-    RELEASED,
-    /**
-     * The batch has been rejected.
-     */
-    REJECTED
+    RELEASED
 }

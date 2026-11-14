@@ -4,6 +4,9 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ReleaseBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.ResumeBatchCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.StartBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
@@ -38,4 +41,10 @@ public interface ProductionBatchCommandService {
     Result<Incident, ApplicationError> handle(RegisterIncidentCommand command);
 
     Result<ProductionBatch, ApplicationError> handle(UpdateBatchProgressCommand command);
+
+    Result<ProductionBatch, ApplicationError> handle(StartBatchCommand command);
+
+    Result<ProductionBatch, ApplicationError> handle(ResumeBatchCommand command);
+
+    Result<ProductionBatch, ApplicationError> handle(ReleaseBatchCommand command);
 }
