@@ -10,7 +10,9 @@ public class CreateProductionBatchCommandFromResourceAssembler {
         return new CreateBatchCommand(
                 new BatchNumber(resource.batchNumber()),
                 resource.productionOrderId(),
-                new Quantity(resource.plannedQuantityValue(), resource.plannedQuantityUnit())
+                new Quantity(resource.plannedQuantityValue(), resource.plannedQuantityUnit()),
+                resource.line(),
+                resource.owner()
         );
     }
 }

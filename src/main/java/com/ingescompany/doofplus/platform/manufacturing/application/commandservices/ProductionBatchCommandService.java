@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
@@ -35,4 +36,6 @@ public interface ProductionBatchCommandService {
      * @return A result containing the registered {@link Incident} or an {@link ApplicationError}.
      */
     Result<Incident, ApplicationError> handle(RegisterIncidentCommand command);
+
+    Result<ProductionBatch, ApplicationError> handle(UpdateBatchProgressCommand command);
 }

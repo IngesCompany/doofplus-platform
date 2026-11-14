@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.entities;
 
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,6 +25,10 @@ public class BatchEventPersistenceEntity extends AuditableAbstractPersistenceEnt
 
     @Column(name = "description", nullable = false, length = 500)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tone", length = 10)
+    private EventTone tone;
 
     @Column(name = "performed_by")
     private Long performedBy;

@@ -3,7 +3,8 @@ package com.ingescompany.doofplus.platform.manufacturing.domain.model.commands;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 
-public record CreateBatchCommand(BatchNumber batchNumber, Long productionOrderId,Quantity quantity) {
+public record CreateBatchCommand(BatchNumber batchNumber, Long productionOrderId, Quantity quantity, String line,
+                                 String owner) {
     public CreateBatchCommand {
         if (batchNumber == null) {
             throw new IllegalArgumentException("BatchNumber cannot be null");

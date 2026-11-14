@@ -3,12 +3,14 @@ package com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.BatchEvent;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.MaterialConsumption;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.ProcessParameter;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchStatus;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.IncidentSeverity;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import lombok.Getter;
@@ -60,6 +62,21 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
     private Quantity plannedQuantity;
 
     /**
+     * Production line where the batch runs, for example {@code Line 02}.
+     */
+    private String line;
+
+    /**
+     * Name of the person in charge of the batch, as the Web App shows it.
+     */
+    private String owner;
+
+    /**
+     * Progress of the batch, from 0 to 100.
+     */
+    private int progress;
+
+    /**
      * Quantity of the production batch that has been manufactured.
      */
     private Quantity manufacturedQuantity;
@@ -101,8 +118,11 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         this.batchNumber = Objects.requireNonNull(command.batchNumber(), "batchNumber must not be null");
         this.productionOrderId = Objects.requireNonNull(command.productionOrderId(), "productionOrderId must not be null");
         this.plannedQuantity = Objects.requireNonNull(command.quantity(), "quantity must not be null");
+        this.line = blankToNull(command.line());
+        this.owner = blankToNull(command.owner());
+        this.progress = 0;
         this.status = BatchStatus.PLANNED;
-        this.recordEvent("BATCH_CREATED", "Production batch created in PLANNED status", null);
+        this.recordEvent("BATCH_CREATED", "Production batch created in PLANNED status", EventTone.NORMAL, null);
     }
 
     public ProductionBatch() {
@@ -118,6 +138,9 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
             Long productionOrderId,
             BatchStatus status,
             Quantity plannedQuantity,
+            String line,
+            String owner,
+            int progress,
             Quantity manufacturedQuantity,
             LocalDateTime startedAt,
             LocalDateTime finishedAt,
@@ -132,6 +155,9 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         batch.productionOrderId = productionOrderId;
         batch.status = status;
         batch.plannedQuantity = plannedQuantity;
+        batch.line = line;
+        batch.owner = owner;
+        batch.progress = progress;
         batch.manufacturedQuantity = manufacturedQuantity;
         batch.startedAt = startedAt;
         batch.finishedAt = finishedAt;
@@ -153,7 +179,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         }
         this.status = BatchStatus.IN_PROGRESS;
         this.startedAt = LocalDateTime.now();
-        this.recordEvent("BATCH_STARTED", "Batch manufacturing execution started", null);
+        this.recordEvent("BATCH_STARTED", "Batch manufacturing execution started", EventTone.NORMAL, null);
     }
 
     /**
@@ -169,7 +195,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         this.manufacturedQuantity = Objects.requireNonNull(command.manufacturedQuantity(), "manufacturedQuantity must not be null");
         this.status = BatchStatus.CLOSED;
         this.finishedAt = LocalDateTime.now();
-        this.recordEvent("BATCH_CLOSED", "Batch closed with manufactured quantity: " + this.manufacturedQuantity.value(), null);
+        this.recordEvent("BATCH_CLOSED", "Batch closed with manufactured quantity: " + this.manufacturedQuantity.value(), EventTone.NORMAL, null);
     }
 
     /**
@@ -185,7 +211,12 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         if (command.severity() == IncidentSeverity.CRITICAL) {
             this.status = BatchStatus.ON_HOLD;
         }
-        this.recordEvent("INCIDENT_REGISTERED", "Incident registered: " + command.description(), null);
+        EventTone tone = switch (command.severity()) {
+            case CRITICAL -> EventTone.DANGER;
+            case MAJOR -> EventTone.WARNING;
+            default -> EventTone.NORMAL;
+        };
+        this.recordEvent("INCIDENT_REGISTERED", "Incident registered (" + command.severity() + "): " + command.description(), tone, null);
         return incident;
     }
 
@@ -197,7 +228,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      */
     public void consumeMaterial(Long rawMaterialLotId, Quantity quantity) {
         this.consumptions.add(new MaterialConsumption(rawMaterialLotId, quantity));
-        this.recordEvent("MATERIAL_CONSUMED", "Raw material lot " + rawMaterialLotId + " consumed", null);
+        this.recordEvent("MATERIAL_CONSUMED", "Raw material lot " + rawMaterialLotId + " consumed", EventTone.NORMAL, null);
     }
 
     /**
@@ -218,8 +249,8 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      * @param description a description of the batch event.
      * @param performedBy the identifier of the user or system that performed the action.
      */
-    private void recordEvent(String type, String description, Long performedBy) {
-        this.events.add(new BatchEvent(type, description, performedBy));
+    private void recordEvent(String type, String description, EventTone tone, Long performedBy) {
+        this.events.add(new BatchEvent(type, description, tone, performedBy));
     }
 
     /**
@@ -227,6 +258,14 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      *
      * @return an unmodifiable list of MaterialConsumption.
      */
+    public void updateProgress(UpdateBatchProgressCommand command) {
+        this.progress = command.progress();
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     public List<MaterialConsumption> getConsumptions() {
         return Collections.unmodifiableList(this.consumptions);
     }

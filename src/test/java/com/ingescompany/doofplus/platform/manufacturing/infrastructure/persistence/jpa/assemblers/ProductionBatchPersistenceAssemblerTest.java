@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.BatchNumber;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.IncidentSeverity;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class ProductionBatchPersistenceAssemblerTest {
 
     private static ProductionBatch batch() {
         return new ProductionBatch(new CreateBatchCommand(new BatchNumber("B-26041"), 1L,
-                new Quantity(new BigDecimal("120000"), "units")));
+                new Quantity(new BigDecimal("120000"), "units"), "Line 02", "Maria Mexico"));
     }
 
     @Test
@@ -38,6 +39,10 @@ class ProductionBatchPersistenceAssemblerTest {
         assertThat(rebuilt.getConsumptions().getFirst().getConsumedAt()).isNotNull();
         assertThat(rebuilt.getEvents()).extracting("type")
                 .containsExactly("BATCH_CREATED", "INCIDENT_REGISTERED", "MATERIAL_CONSUMED");
+        assertThat(rebuilt.getEvents()).extracting("tone")
+                .containsExactly(EventTone.NORMAL, EventTone.WARNING, EventTone.NORMAL);
+        assertThat(rebuilt.getLine()).isEqualTo("Line 02");
+        assertThat(rebuilt.getOwner()).isEqualTo("Maria Mexico");
     }
 
     @Test
