@@ -47,7 +47,7 @@ public class ProductionBatchPersistenceEntity extends AuditableAbstractPersisten
     @Column(name = "line", length = 30)
     private String line;
 
-    @Column(name = "owner", length = 150)
+    @Column(name = "owner", length = 100)
     private String owner;
 
     @Column(name = "progress", nullable = false)
