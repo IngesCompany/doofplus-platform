@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.subscriptions.application.internal.out
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ChangeSubscriptionPlanCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.entities.Payment;
@@ -132,6 +133,20 @@ public class SubscriptionCommandServiceImpl implements SubscriptionCommandServic
     @Transactional
     public Result<Subscription, ApplicationError> handle(CancelSubscriptionCommand command) {
         return transition(command.subscriptionId(), Subscription::cancel);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public Result<Subscription, ApplicationError> handle(ChangeSubscriptionPlanCommand command) {
+        if (!planRepository.existsById(command.planId())) {
+            log.warn("Plan not found: planId={}", command.planId());
+            return Result.failure(ApplicationError.notFound("Plan", command.planId().toString()));
+        }
+        return transition(command.subscriptionId(),
+                subscription -> subscription.changePlan(command.planId(), command.billingCycle()));
     }
 
     /**

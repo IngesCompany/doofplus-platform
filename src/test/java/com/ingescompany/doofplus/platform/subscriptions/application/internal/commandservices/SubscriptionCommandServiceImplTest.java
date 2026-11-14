@@ -4,6 +4,7 @@ import com.ingescompany.doofplus.platform.subscriptions.application.internal.out
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ChangeSubscriptionPlanCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.*;
 import com.ingescompany.doofplus.platform.subscriptions.domain.repositories.PlanRepository;
@@ -80,6 +81,28 @@ class SubscriptionCommandServiceImplTest {
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.toOptional().orElseThrow().getStatus()).isEqualTo(SubscriptionStatus.PENDING);
+    }
+
+    @Test
+    void changePlanShouldFailWhenThePlanDoesNotExist() {
+        when(planRepository.existsById(5L)).thenReturn(false);
+
+        var result = service.handle(new ChangeSubscriptionPlanCommand(1L, 5L, BillingCycle.ANNUAL));
+
+        assertThat(error(result).code()).isEqualTo("PLAN_NOT_FOUND");
+    }
+
+    @Test
+    void changePlanShouldSaveTheNewPlanAndCycle() {
+        when(planRepository.existsById(2L)).thenReturn(true);
+        when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(new Subscription(createCommand())));
+        when(subscriptionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.handle(new ChangeSubscriptionPlanCommand(1L, 2L, BillingCycle.ANNUAL));
+
+        var subscription = result.toOptional().orElseThrow();
+        assertThat(subscription.getPlanId()).isEqualTo(2L);
+        assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.ANNUAL);
     }
 
     @Test
