@@ -10,7 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JPA Persistence entity for batches.
@@ -51,4 +56,22 @@ public class ProductionBatchPersistenceEntity extends AuditableAbstractPersisten
 
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
+    @JoinColumn(name = "production_batch_id", nullable = false)
+    @OrderBy("id")
+    private List<MaterialConsumptionPersistenceEntity> consumptions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
+    @JoinColumn(name = "production_batch_id", nullable = false)
+    @OrderBy("id")
+    private List<IncidentPersistenceEntity> incidents = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
+    @JoinColumn(name = "production_batch_id", nullable = false)
+    @OrderBy("id")
+    private List<BatchEventPersistenceEntity> events = new ArrayList<>();
 }

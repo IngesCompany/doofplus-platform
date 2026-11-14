@@ -1,12 +1,13 @@
 package com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources;
 
 /**
- * Incident resource.
+ * Response resource representing an incident of a production batch.
  */
 public record IncidentResource(
         Long id,
         String description,
         String severity,
-        String status
+        String status,
+        String recordedAt
 ) {
 }

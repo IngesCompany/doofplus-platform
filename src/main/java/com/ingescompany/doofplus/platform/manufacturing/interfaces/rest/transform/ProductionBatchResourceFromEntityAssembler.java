@@ -1,6 +1,8 @@
 package com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform;
 
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.ProductionBatch;
+import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.BatchEventResource;
+import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.MaterialConsumptionResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.ProductionBatchResource;
 
 public class ProductionBatchResourceFromEntityAssembler {
@@ -16,7 +18,24 @@ public class ProductionBatchResourceFromEntityAssembler {
                 entity.getManufacturedQuantity() != null ? entity.getManufacturedQuantity().value() : null,
                 entity.getManufacturedQuantity() != null ? entity.getManufacturedQuantity().unit() : null,
                 entity.getStartedAt() != null ? entity.getStartedAt().toString() : null,
-                entity.getFinishedAt() != null ? entity.getFinishedAt().toString() : null
+                entity.getFinishedAt() != null ? entity.getFinishedAt().toString() : null,
+                entity.getIncidents().stream().map(IncidentResourceFromEntityAssembler::toResourceFromEntity).toList(),
+                entity.getConsumptions().stream()
+                        .map(consumption -> new MaterialConsumptionResource(
+                                consumption.getId(),
+                                consumption.getRawMaterialLotId(),
+                                consumption.getConsumedQuantity().value(),
+                                consumption.getConsumedQuantity().unit(),
+                                consumption.getConsumedAt() != null ? consumption.getConsumedAt().toString() : null))
+                        .toList(),
+                entity.getEvents().stream()
+                        .map(event -> new BatchEventResource(
+                                event.getId(),
+                                event.getType(),
+                                event.getDescription(),
+                                event.getPerformedBy(),
+                                event.getOccurredAt() != null ? event.getOccurredAt().toString() : null))
+                        .toList()
         );
     }
 }
