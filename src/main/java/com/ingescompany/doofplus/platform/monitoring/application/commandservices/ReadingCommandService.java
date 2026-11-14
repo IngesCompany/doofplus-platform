@@ -2,6 +2,7 @@ package com.ingescompany.doofplus.platform.monitoring.application.commandservice
 
 import com.ingescompany.doofplus.platform.monitoring.domain.model.aggregates.Reading;
 import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.CreateReadingCommand;
+import com.ingescompany.doofplus.platform.monitoring.domain.model.commands.RecordTelemetryCommand;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 
@@ -10,4 +11,6 @@ import com.ingescompany.doofplus.platform.shared.application.result.Result;
  */
 public interface ReadingCommandService {
     Result<Reading, ApplicationError> handle(CreateReadingCommand command);
+
+    Result<Reading, ApplicationError> handle(RecordTelemetryCommand command);
 }

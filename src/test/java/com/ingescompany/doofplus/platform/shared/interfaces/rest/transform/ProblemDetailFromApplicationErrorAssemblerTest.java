@@ -69,6 +69,18 @@ class ProblemDetailFromApplicationErrorAssemblerTest {
     }
 
     @Test
+    void toResponseFromApplicationErrorMapsUnauthorizedTo401() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+
+        var response = ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                ApplicationError.unauthorized("telemetry", "monitoring.telemetry.error.apiKey.invalid"));
+
+        assertNotNull(response.getBody());
+        assertEquals(401, response.getStatusCode().value());
+        assertEquals("UNAUTHORIZED", response.getBody().getProperties().get("code"));
+    }
+
+    @Test
     void toResponseFromApplicationErrorFallsBackToCategoryKeyWhenSpecificIsMissing() {
         LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
 
