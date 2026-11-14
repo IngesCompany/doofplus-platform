@@ -3,57 +3,67 @@ package com.ingescompany.doofplus.platform.manufacturing.domain.model.entities;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.Quantity;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
  * MaterialConsumption domain entity
  *
  * <p>
- *     Represents the consumption of materials in the manufacturing process.
- *     This entity is responsible for tracking the amount of materials consumed
- *     during production, ensuring accurate inventory management and cost calculation.
+ *     Represents the consumption of a raw material lot in a production batch.
+ *     It keeps the consumed quantity and when it was consumed, for the traceability of the batch.
  * </p>
  */
-
 @Getter
 public class MaterialConsumption {
+
     /**
      * Unique identifier for the material consumption record.
      */
     private Long id;
 
     /**
-     * Identifier of the production batch associated with this material consumption.
+     * Identifier of the raw material lot that was consumed.
      */
     private Long rawMaterialLotId;
 
     /**
-     * Quantity of materials consumed in the manufacturing process.
+     * Quantity of the raw material lot consumed by the batch.
      */
-    private Quantity quantityUsed;
+    private Quantity consumedQuantity;
 
-    public MaterialConsumption(){
+    /**
+     * Date and time when the material was consumed.
+     */
+    private LocalDateTime consumedAt;
 
+    public MaterialConsumption() {
     }
 
     /**
-     * Constructor for MaterialConsumption.
-     * @param rawMaterialLotId The identifier of the raw material lot.
-     * @param quantityUsed The quantity of materials consumed.
+     * Creates a material consumption recorded now.
+     *
+     * @param rawMaterialLotId identifier of the raw material lot
+     * @param consumedQuantity quantity consumed
      */
-    public MaterialConsumption(Long rawMaterialLotId, Quantity quantityUsed) {
+    public MaterialConsumption(Long rawMaterialLotId, Quantity consumedQuantity) {
         this.rawMaterialLotId = Objects.requireNonNull(rawMaterialLotId, "rawMaterialLotId must not be null");
-        this.quantityUsed = Objects.requireNonNull(quantityUsed, "quantityUsed must not be null");
+        this.consumedQuantity = Objects.requireNonNull(consumedQuantity, "consumedQuantity must not be null");
+        this.consumedAt = LocalDateTime.now();
     }
 
     /**
-     * Private constructor for reconstitution.
+     * Rebuilds a stored material consumption.
+     *
+     * @return the material consumption with its persistent identifier
      */
-    public static MaterialConsumption reconstitute(Long id, Long rawMaterialLotId, Quantity quantityUsed) {
+    public static MaterialConsumption reconstitute(Long id, Long rawMaterialLotId, Quantity consumedQuantity,
+                                                   LocalDateTime consumedAt) {
         MaterialConsumption consumption = new MaterialConsumption();
         consumption.id = id;
         consumption.rawMaterialLotId = rawMaterialLotId;
-        consumption.quantityUsed = quantityUsed;
+        consumption.consumedQuantity = consumedQuantity;
+        consumption.consumedAt = consumedAt;
         return consumption;
     }
 }

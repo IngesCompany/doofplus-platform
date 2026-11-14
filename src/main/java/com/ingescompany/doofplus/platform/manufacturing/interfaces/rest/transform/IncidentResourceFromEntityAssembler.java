@@ -10,7 +10,8 @@ public class IncidentResourceFromEntityAssembler {
                 entity.getId(),
                 entity.getDescription(),
                 entity.getSeverity() != null ? entity.getSeverity().name() : null,
-                entity.getStatus() != null ? entity.getStatus().name() : null
+                entity.getStatus() != null ? entity.getStatus().name() : null,
+                entity.getRecordedAt() != null ? entity.getRecordedAt().toString() : null
         );
     }
 }

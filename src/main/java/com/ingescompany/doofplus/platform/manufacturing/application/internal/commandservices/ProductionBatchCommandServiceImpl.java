@@ -63,9 +63,9 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
         }
         var batch = batchOptional.get();
         try {
-            var incident = batch.registerIncident(command);
-            productionBatchRepository.save(batch);
-            return Result.success(incident);
+            batch.registerIncident(command);
+            var savedBatch = productionBatchRepository.save(batch);
+            return Result.success(savedBatch.getIncidents().getLast());
         } catch (Exception e) {
             return Result.failure(ApplicationError.unexpected("register-incident", e.getMessage()));
         }
