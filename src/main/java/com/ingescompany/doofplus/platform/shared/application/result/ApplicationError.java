@@ -64,6 +64,16 @@ public record ApplicationError(
     }
 
     /**
+     * Unauthorized error: the caller did not send valid credentials
+     */
+    public static ApplicationError unauthorized(String context, String reason) {
+        return new ApplicationError(
+                "UNAUTHORIZED",
+                "Unauthorized: %s".formatted(context),
+                reason);
+    }
+
+    /**
      * Service unavailable error: an external service needed by the operation did not answer
      */
     public static ApplicationError serviceUnavailable(String service, String reason) {

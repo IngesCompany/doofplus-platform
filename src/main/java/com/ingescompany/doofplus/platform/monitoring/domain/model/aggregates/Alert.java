@@ -18,6 +18,7 @@ import java.util.Objects;
  */
 @Getter
 public class Alert extends AbstractDomainAggregateRoot<Alert> {
+    private static final double CRITICAL_SHARE_OF_RANGE = 0.10;
     private Long id;
     private AlertCode code;
     private String sensorCode;
@@ -136,5 +137,42 @@ public class Alert extends AbstractDomainAggregateRoot<Alert> {
     public void linkRecord(String linkedRecord) {
         this.linkedRecord = linkedRecord != null ? linkedRecord : "";
         this.status = "under-investigation";
+    }
+
+    /**
+     * Builds the alert of a reading out of the range of its sensor. It is critical when the reading goes
+     * beyond the limit by more than 10 % of the range, and a warning otherwise.
+     *
+     * @param sensor  sensor that measured the value
+     * @param reading reading out of range
+     * @return the open alert, with a code made of the time of the reading and the sensor code
+     */
+    public static Alert fromOutOfRangeReading(Sensor sensor, Reading reading) {
+        double range = sensor.getUpperLimit() - sensor.getLowerLimit();
+        boolean above = reading.getValue() > sensor.getUpperLimit();
+        double excess = above ? reading.getValue() - sensor.getUpperLimit() : sensor.getLowerLimit() - reading.getValue();
+        String severity = excess > range * CRITICAL_SHARE_OF_RANGE ? "critical" : "warning";
+        java.time.ZonedDateTime at = recordedAtUtc(reading.getRecordedAt());
+        String code = "ALT-" + at.format(java.time.format.DateTimeFormatter.ofPattern("yyMMddHHmmss")) + "-"
+                + sensor.getCode().value();
+        String detail = "%s read %s %s at %s UTC; accepted range %s–%s %s.".formatted(
+                sensor.getCode().value(), number(reading.getValue()), sensor.getUnit(),
+                at.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                number(sensor.getLowerLimit()), number(sensor.getUpperLimit()), sensor.getUnit());
+        return new Alert(new CreateAlertCommand(new AlertCode(code), sensor.getCode().value(), sensor.getEquipmentCode(),
+                severity, "open", sensor.getType() + " " + (above ? "above" : "below") + " the limit", detail,
+                reading.getBatchCode(), "", "", "", ""));
+    }
+
+    private static java.time.ZonedDateTime recordedAtUtc(String recordedAt) {
+        try {
+            return java.time.Instant.parse(recordedAt).atZone(java.time.ZoneOffset.UTC);
+        } catch (RuntimeException e) {
+            return java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC);
+        }
+    }
+
+    private static String number(Double value) {
+        return new java.text.DecimalFormat("0.##", java.text.DecimalFormatSymbols.getInstance(java.util.Locale.ROOT)).format(value);
     }
 }
