@@ -7,6 +7,7 @@ public record BatchEventResource(
         Long id,
         String type,
         String description,
+        String tone,
         Long performedBy,
         String occurredAt
 ) {

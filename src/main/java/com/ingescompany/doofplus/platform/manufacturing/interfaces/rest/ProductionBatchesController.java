@@ -3,6 +3,7 @@ import com.ingescompany.doofplus.platform.manufacturing.application.commandservi
 import com.ingescompany.doofplus.platform.manufacturing.application.queryservices.ProductionBatchQueryService;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetAllBatchesQuery;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetBatchByIdQuery;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.queries.GetBatchByNumberQuery;
@@ -13,6 +14,7 @@ import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resource
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.CreateProductionBatchResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.ProductionBatchResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.RegisterIncidentResource;
+import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.resources.UpdateBatchProgressResource;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform.CreateProductionBatchCommandFromResourceAssembler;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform.IncidentResourceFromEntityAssembler;
 import com.ingescompany.doofplus.platform.manufacturing.interfaces.rest.transform.ProductionBatchResourceFromEntityAssembler;
@@ -107,6 +109,26 @@ public class ProductionBatchesController {
                 result,
                 IncidentResourceFromEntityAssembler::toResourceFromEntity,
                 HttpStatus.CREATED
+        );
+    }
+
+    /**
+     * Updates the progress of a production batch (0 to 100), as the Web App shows it.
+     *
+     * @param batchId  the batch ID
+     * @param resource the new progress
+     * @return the updated batch, 400 when the progress is out of range, or 404 when the batch does not exist
+     */
+    @PatchMapping("/{batchId}/progress")
+    @Operation(summary = "Update the progress of a production batch")
+    public ResponseEntity<?> updateProgress(
+            @PathVariable Long batchId,
+            @RequestBody UpdateBatchProgressResource resource) {
+        var result = commandService.handle(new UpdateBatchProgressCommand(batchId, resource.progress()));
+        return ResponseEntityAssembler.toResponseEntityFromResult(
+                result,
+                ProductionBatchResourceFromEntityAssembler::toResourceFromEntity,
+                HttpStatus.OK
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.assemblers;
 
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.BatchEvent;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.valueobjects.EventTone;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.MaterialConsumption;
 import com.ingescompany.doofplus.platform.manufacturing.infrastructure.persistence.jpa.entities.BatchEventPersistenceEntity;
@@ -36,6 +37,9 @@ public final class ProductionBatchPersistenceAssembler {
                 entity.getProductionOrderId(),
                 entity.getStatus(),
                 plannedQty,
+                entity.getLine(),
+                entity.getOwner(),
+                entity.getProgress(),
                 manufacturedQty,
                 entity.getStartedAt(),
                 entity.getFinishedAt(),
@@ -52,6 +56,9 @@ public final class ProductionBatchPersistenceAssembler {
         entity.setBatchNumber(domain.getBatchNumber());
         entity.setProductionOrderId(domain.getProductionOrderId());
         entity.setStatus(domain.getStatus());
+        entity.setLine(domain.getLine());
+        entity.setOwner(domain.getOwner());
+        entity.setProgress(domain.getProgress());
         entity.setStartedAt(domain.getStartedAt());
         entity.setFinishedAt(domain.getFinishedAt());
         if (domain.getPlannedQuantity() != null) {
@@ -107,6 +114,7 @@ public final class ProductionBatchPersistenceAssembler {
 
     private static BatchEvent toDomain(BatchEventPersistenceEntity entity) {
         return BatchEvent.reconstitute(entity.getId(), entity.getType(), entity.getDescription(),
+                entity.getTone() != null ? entity.getTone() : EventTone.NORMAL,
                 entity.getPerformedBy(), entity.getOccurredAt());
     }
 
@@ -115,6 +123,7 @@ public final class ProductionBatchPersistenceAssembler {
         entity.setId(domain.getId());
         entity.setType(domain.getType());
         entity.setDescription(domain.getDescription());
+        entity.setTone(domain.getTone());
         entity.setPerformedBy(domain.getPerformedBy());
         entity.setOccurredAt(domain.getOccurredAt());
         return entity;

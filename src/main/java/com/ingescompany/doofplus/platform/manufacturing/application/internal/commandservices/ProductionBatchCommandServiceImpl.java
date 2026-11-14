@@ -5,6 +5,7 @@ import com.ingescompany.doofplus.platform.manufacturing.domain.model.aggregates.
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CloseBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.CreateBatchCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.RegisterIncidentCommand;
+import com.ingescompany.doofplus.platform.manufacturing.domain.model.commands.UpdateBatchProgressCommand;
 import com.ingescompany.doofplus.platform.manufacturing.domain.model.entities.Incident;
 import com.ingescompany.doofplus.platform.manufacturing.domain.repositories.ProductionBatchRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
@@ -69,5 +70,16 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
         } catch (Exception e) {
             return Result.failure(ApplicationError.unexpected("register-incident", e.getMessage()));
         }
+    }
+
+    @Override
+    public Result<ProductionBatch, ApplicationError> handle(UpdateBatchProgressCommand command) {
+        var batchOptional = productionBatchRepository.findById(command.batchId());
+        if (batchOptional.isEmpty()) {
+            return Result.failure(ApplicationError.notFound("ProductionBatch", command.batchId().toString()));
+        }
+        var batch = batchOptional.get();
+        batch.updateProgress(command);
+        return Result.success(productionBatchRepository.save(batch));
     }
 }

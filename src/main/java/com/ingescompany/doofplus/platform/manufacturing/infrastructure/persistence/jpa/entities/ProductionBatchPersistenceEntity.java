@@ -44,6 +44,15 @@ public class ProductionBatchPersistenceEntity extends AuditableAbstractPersisten
     })
     private QuantityPersistenceEmbeddable plannedQuantity;
 
+    @Column(name = "line", length = 30)
+    private String line;
+
+    @Column(name = "owner", length = 150)
+    private String owner;
+
+    @Column(name = "progress", nullable = false)
+    private int progress;
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "manufactured_quantity_value")),

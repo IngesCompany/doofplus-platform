@@ -15,6 +15,9 @@ public class ProductionBatchResourceFromEntityAssembler {
                 entity.getStatus() != null ? entity.getStatus().name() : null,
                 entity.getPlannedQuantity() != null ? entity.getPlannedQuantity().value() : null,
                 entity.getPlannedQuantity() != null ? entity.getPlannedQuantity().unit() : null,
+                entity.getLine(),
+                entity.getOwner(),
+                entity.getProgress(),
                 entity.getManufacturedQuantity() != null ? entity.getManufacturedQuantity().value() : null,
                 entity.getManufacturedQuantity() != null ? entity.getManufacturedQuantity().unit() : null,
                 entity.getStartedAt() != null ? entity.getStartedAt().toString() : null,
@@ -33,6 +36,7 @@ public class ProductionBatchResourceFromEntityAssembler {
                                 event.getId(),
                                 event.getType(),
                                 event.getDescription(),
+                                event.getTone().name(),
                                 event.getPerformedBy(),
                                 event.getOccurredAt() != null ? event.getOccurredAt().toString() : null))
                         .toList()
