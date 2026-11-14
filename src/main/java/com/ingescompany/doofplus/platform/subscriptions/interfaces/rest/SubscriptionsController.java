@@ -4,6 +4,9 @@ import com.ingescompany.doofplus.platform.subscriptions.application.commandservi
 import com.ingescompany.doofplus.platform.subscriptions.application.queryservices.SubscriptionQueryService;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ChangeSubscriptionPlanCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.valueobjects.BillingCycle;
+import com.ingescompany.doofplus.platform.subscriptions.interfaces.rest.resources.ChangeSubscriptionPlanResource;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.queries.GetAllSubscriptionsByOrganizationIdQuery;
@@ -127,6 +130,32 @@ public class SubscriptionsController {
     public ResponseEntity<?> activateSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/activation", id);
         var result = subscriptionCommandService.handle(new ActivateSubscriptionCommand(id));
+        return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
+    }
+
+    /**
+     * Changes the plan and the billing cycle of a pending or active subscription (US53).
+     *
+     * @param id       Subscription ID
+     * @param resource the new plan and billing cycle
+     * @return the updated subscription, not found, or 409 when it is not pending or active
+     */
+    @Operation(summary = "Change the plan of a subscription", description = "Changes the plan and the billing cycle of a PENDING or ACTIVE subscription; the new price is charged in the next payment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Plan changed",
+                    content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid plan or billing cycle",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Subscription or plan not found",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not pending or active",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @PutMapping("{id}/plan")
+    public ResponseEntity<?> changeSubscriptionPlan(@PathVariable Long id, @Valid @RequestBody ChangeSubscriptionPlanResource resource) {
+        log.debug("PUT /api/v1/subscriptions/{}/plan", id);
+        var command = new ChangeSubscriptionPlanCommand(id, resource.planId(), BillingCycle.valueOf(resource.billingCycle()));
+        var result = subscriptionCommandService.handle(command);
         return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
 
