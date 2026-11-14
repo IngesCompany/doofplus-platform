@@ -140,7 +140,7 @@ public class ProductionBatchesController {
      * Starts a planned production batch.
      *
      * @param batchId the batch ID
-     * @return the batch in progress, 404 when it does not exist, or a business rule violation when it is not planned
+     * @return the batch in progress, 404 when it does not exist, or 409 when it is not planned
      */
     @PostMapping("/{batchId}/start")
     @Operation(summary = "Start a planned production batch")
@@ -154,7 +154,7 @@ public class ProductionBatchesController {
      * Resumes a production batch that is on hold.
      *
      * @param batchId the batch ID
-     * @return the batch in progress, 404 when it does not exist, or a business rule violation when it is not on hold
+     * @return the batch in progress, 404 when it does not exist, or 409 when it is not on hold
      */
     @PostMapping("/{batchId}/resume")
     @Operation(summary = "Resume a production batch that is on hold")
@@ -170,7 +170,7 @@ public class ProductionBatchesController {
      * @param batchId  the batch ID
      * @param resource the name of the person who releases the batch
      * @return the released batch, 400 without releasedBy, 404 when it does not exist,
-     *         or a business rule violation when the release was not requested
+     *         or 409 when the release was not requested
      */
     @PostMapping("/{batchId}/release")
     @Operation(summary = "Release a production batch for distribution")

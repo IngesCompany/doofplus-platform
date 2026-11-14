@@ -19,4 +19,5 @@ public interface SensorPersistenceRepository extends JpaRepository<SensorPersist
     List<SensorPersistenceEntity> findAllByEquipmentCode(String equipmentCode);
     boolean existsByCode(SensorCode code);
     boolean existsByDeviceId(DeviceId deviceId);
+    boolean existsByEquipmentCodeAndAssignedBatchNot(String equipmentCode, String assignedBatch);
 }

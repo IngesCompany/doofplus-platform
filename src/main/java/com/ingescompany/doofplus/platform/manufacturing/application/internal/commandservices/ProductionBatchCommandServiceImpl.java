@@ -53,7 +53,7 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
             var updatedBatch = productionBatchRepository.save(batch);
             return Result.success(updatedBatch);
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("close-batch", e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("ProductionBatch", e.getMessage()));
         } catch (Exception e) {
             return Result.failure(ApplicationError.unexpected("close-production-batch", e.getMessage()));
         }
@@ -107,7 +107,7 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
      * @param batchId    identifier of the batch
      * @param rule       name of the business rule reported when the change is not allowed
      * @param transition aggregate method that changes the status
-     * @return the updated batch, not found, or a business rule violation when the status does not allow the change
+     * @return the updated batch, not found, or a conflict when the status does not allow the change
      */
     private Result<ProductionBatch, ApplicationError> transition(Long batchId, String rule,
                                                                  java.util.function.Consumer<ProductionBatch> transition) {
@@ -119,7 +119,7 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
         try {
             transition.accept(batch);
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation(rule, e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("ProductionBatch", e.getMessage()));
         }
         return Result.success(productionBatchRepository.save(batch));
     }

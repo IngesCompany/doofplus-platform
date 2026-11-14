@@ -60,7 +60,7 @@ public class OrganizationCommandServiceImpl implements OrganizationCommandServic
         } catch (IllegalArgumentException e) {
             return Result.failure(ApplicationError.validationError("facility", e.getMessage()));
         } catch (IllegalStateException e) {
-            return Result.failure(ApplicationError.businessRuleViolation("add-facility", e.getMessage()));
+            return Result.failure(ApplicationError.invalidState("Organization", e.getMessage()));
         } catch (Exception e) {
             return Result.failure(ApplicationError.unexpected("add-facility", e.getMessage()));
         }

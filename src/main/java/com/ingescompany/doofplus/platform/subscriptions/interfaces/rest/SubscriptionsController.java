@@ -84,7 +84,7 @@ public class SubscriptionsController {
      *
      * @param id       Subscription ID
      * @param resource the card token created by the Niubiz payment form
-     * @return the paid subscription, not found, or a business rule violation when it cannot be paid or the charge is rejected
+     * @return the paid subscription, not found, 409 when it cannot be paid, or 422 when the charge is rejected
      */
     @Operation(summary = "Pay a subscription", description = "Charges the plan price with Niubiz; an approved payment activates a PENDING subscription or renews an ACTIVE one")
     @ApiResponses(value = {
@@ -94,7 +94,9 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Subscription or plan not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not pending or active, or Niubiz rejected the charge",
+            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not pending or active",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "422", description = "Niubiz rejected the charge",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "503", description = "Niubiz is not available; the payment is not recorded",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -110,7 +112,7 @@ public class SubscriptionsController {
      * Activates a pending subscription once the payment is authorized (US52).
      *
      * @param id Subscription ID
-     * @return the active subscription, not found, or a business rule violation when it is not pending
+     * @return the active subscription, not found, or 409 when it is not pending
      */
     @Operation(summary = "Activate a subscription", description = "Activates a PENDING subscription once the payment is authorized")
     @ApiResponses(value = {
@@ -118,7 +120,7 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
             @ApiResponse(responseCode = "404", description = "Subscription not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not pending",
+            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not pending",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/activation")
@@ -132,7 +134,7 @@ public class SubscriptionsController {
      * Renews an active subscription for one more billing period (US53).
      *
      * @param id Subscription ID
-     * @return the renewed subscription, not found, or a business rule violation when it is not active
+     * @return the renewed subscription, not found, or 409 when it is not active
      */
     @Operation(summary = "Renew a subscription", description = "Extends an ACTIVE subscription for one more billing period")
     @ApiResponses(value = {
@@ -140,7 +142,7 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
             @ApiResponse(responseCode = "404", description = "Subscription not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not active",
+            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not active",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/renewal")
@@ -154,7 +156,7 @@ public class SubscriptionsController {
      * Cancels an active subscription (US53).
      *
      * @param id Subscription ID
-     * @return the cancelled subscription, not found, or a business rule violation when it is not active
+     * @return the cancelled subscription, not found, or 409 when it is not active
      */
     @Operation(summary = "Cancel a subscription", description = "Cancels an ACTIVE subscription; the access stays until the end of the paid period")
     @ApiResponses(value = {
@@ -162,7 +164,7 @@ public class SubscriptionsController {
                     content = @Content(schema = @Schema(implementation = SubscriptionResource.class))),
             @ApiResponse(responseCode = "404", description = "Subscription not found",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "422", description = "Business rule violation - the subscription is not active",
+            @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not active",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("{id}/cancellation")

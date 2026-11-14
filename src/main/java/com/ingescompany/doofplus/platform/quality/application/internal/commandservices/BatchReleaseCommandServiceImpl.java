@@ -70,7 +70,7 @@ public class BatchReleaseCommandServiceImpl implements BatchReleaseCommandServic
 
         } catch (IllegalStateException e) {
             return Result.failure(
-                    ApplicationError.businessRuleViolation("approve-batch-release", e.getMessage())
+                    ApplicationError.invalidState("BatchRelease", e.getMessage())
             );
         } catch (Exception e) {
             return Result.failure(
@@ -101,7 +101,7 @@ public class BatchReleaseCommandServiceImpl implements BatchReleaseCommandServic
 
         } catch (IllegalStateException e) {
             return Result.failure(
-                    ApplicationError.businessRuleViolation("reject-batch-release", e.getMessage())
+                    ApplicationError.invalidState("BatchRelease", e.getMessage())
             );
         } catch (Exception e) {
             return Result.failure(
