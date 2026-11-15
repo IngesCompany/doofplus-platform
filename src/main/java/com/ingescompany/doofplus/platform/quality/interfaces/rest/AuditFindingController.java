@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditFindingByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.AuditFindingCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AuditFindingQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditFindingsByAuditIdQuery;
@@ -53,7 +54,7 @@ public class AuditFindingController {
     @GetMapping
     @Operation(summary = "Get audit findings by audit ID")
     public ResponseEntity<List<AuditFindingResource>> getAuditFindingsByAuditId(
-            @RequestParam Long auditId) {
+            @RequestParam(required = false) Long auditId) {
 
         var query = new GetAuditFindingsByAuditIdQuery(auditId);
 
@@ -62,5 +63,13 @@ public class AuditFindingController {
                 .toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a audit finding by its identifier")
+    public ResponseEntity<AuditFindingResource> getAuditFindingById(@PathVariable Long id) {
+        return queryService.handle(new GetAuditFindingByIdQuery(id))
+                .map(found -> ResponseEntity.ok(AuditFindingResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetRegulatoryReportByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.RegulatoryReportQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.RegulatoryReport;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllRegulatoryReportsQuery;
@@ -20,5 +22,10 @@ public class RegulatoryReportQueryServiceImpl implements RegulatoryReportQuerySe
     @Override
     public List<RegulatoryReport> handle(GetAllRegulatoryReportsQuery query) {
         return regulatoryReportRepository.findAll();
+    }
+
+    @Override
+    public Optional<RegulatoryReport> handle(GetRegulatoryReportByIdQuery query) {
+        return regulatoryReportRepository.findById(query.id());
     }
 }

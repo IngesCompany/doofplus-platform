@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetCollaborationTaskByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.CollaborationTaskCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.CollaborationTaskQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllCollaborationTasksQuery;
@@ -61,5 +62,13 @@ public class CollaborationTaskController {
                 .toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a collaboration task by its identifier")
+    public ResponseEntity<CollaborationTaskResource> getCollaborationTaskById(@PathVariable Long id) {
+        return queryService.handle(new GetCollaborationTaskByIdQuery(id))
+                .map(found -> ResponseEntity.ok(CollaborationTaskResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

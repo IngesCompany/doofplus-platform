@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditEventByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AuditEventQueryService;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.AuditEventResource;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.transform.AuditEventResourceFromEntityAssembler;
@@ -42,5 +43,13 @@ public class AuditEventController {
                 .toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a audit event by its identifier")
+    public ResponseEntity<AuditEventResource> getAuditEventById(@PathVariable Long id) {
+        return queryService.handle(new GetAuditEventByIdQuery(id))
+                .map(found -> ResponseEntity.ok(AuditEventResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

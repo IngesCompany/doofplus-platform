@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetTraceabilityGapByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.TraceabilityGapCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.TraceabilityGapQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllTraceabilityGapsQuery;
@@ -76,5 +77,13 @@ public class TraceabilityGapController {
                         .toList();
 
         return ResponseEntity.ok(gaps);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a traceability gap by its identifier")
+    public ResponseEntity<TraceabilityGapResource> getTraceabilityGapById(@PathVariable Long id) {
+        return queryService.handle(new GetTraceabilityGapByIdQuery(id))
+                .map(found -> ResponseEntity.ok(TraceabilityGapResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetEvidenceByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.EvidenceQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Evidence;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllEvidenceQuery;
@@ -26,5 +28,10 @@ public class EvidenceQueryServiceImpl implements EvidenceQueryService {
     @Override
     public List<Evidence> handle(GetEvidenceByDeviationIdQuery query) {
         return evidenceRepository.findByDeviationId(query.deviationId());
+    }
+
+    @Override
+    public Optional<Evidence> handle(GetEvidenceByIdQuery query) {
+        return evidenceRepository.findById(query.id());
     }
 }

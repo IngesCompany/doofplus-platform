@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditEventByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AuditEventQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AuditEvent;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.IAuditEventRepository;
@@ -27,5 +29,10 @@ public class AuditEventQueryServiceImpl implements AuditEventQueryService {
                 aggregateType,
                 aggregateId
         );
+    }
+
+    @Override
+    public Optional<AuditEvent> handle(GetAuditEventByIdQuery query) {
+        return auditEventRepository.findById(query.id());
     }
 }

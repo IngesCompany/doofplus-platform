@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.adapters;
 
+import java.util.Optional;
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.ContactInquiry;
 import com.ingescompany.doofplus.platform.organizations.domain.repositories.ContactInquiryRepository;
 import com.ingescompany.doofplus.platform.organizations.infrastructure.persistence.jpa.assemblers.ContactInquiryPersistenceAssembler;
@@ -27,6 +28,12 @@ public class ContactInquiryRepositoryImpl implements ContactInquiryRepository {
                 ContactInquiryPersistenceAssembler.toPersistenceFromDomain(contactInquiry));
         domainEventPublisher.publishAndClearEvents(contactInquiry);
         return ContactInquiryPersistenceAssembler.toDomainFromPersistence(saved);
+    }
+
+    @Override
+    public Optional<ContactInquiry> findById(Long id) {
+        return contactInquiryPersistenceRepository.findById(id)
+                .map(ContactInquiryPersistenceAssembler::toDomainFromPersistence);
     }
 
     @Override

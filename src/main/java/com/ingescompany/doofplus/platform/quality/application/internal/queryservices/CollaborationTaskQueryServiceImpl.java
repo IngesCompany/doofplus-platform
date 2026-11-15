@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetCollaborationTaskByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.CollaborationTaskQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CollaborationTask;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllCollaborationTasksQuery;
@@ -20,5 +22,10 @@ public class CollaborationTaskQueryServiceImpl implements CollaborationTaskQuery
     @Override
     public List<CollaborationTask> handle(GetAllCollaborationTasksQuery query) {
         return collaborationTaskRepository.findAll();
+    }
+
+    @Override
+    public Optional<CollaborationTask> handle(GetCollaborationTaskByIdQuery query) {
+        return collaborationTaskRepository.findById(query.id());
     }
 }

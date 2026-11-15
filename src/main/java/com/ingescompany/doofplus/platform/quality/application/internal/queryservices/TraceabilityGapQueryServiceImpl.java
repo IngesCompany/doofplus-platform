@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetTraceabilityGapByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.TraceabilityGapQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.TraceabilityGap;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllTraceabilityGapsQuery;
@@ -26,5 +28,10 @@ public class TraceabilityGapQueryServiceImpl implements TraceabilityGapQueryServ
     @Override
     public List<TraceabilityGap> handle(GetTraceabilityGapsByBatchIdQuery query) {
         return repository.findByBatchId(query.batchId());
+    }
+
+    @Override
+    public Optional<TraceabilityGap> handle(GetTraceabilityGapByIdQuery query) {
+        return repository.findById(query.id());
     }
 }

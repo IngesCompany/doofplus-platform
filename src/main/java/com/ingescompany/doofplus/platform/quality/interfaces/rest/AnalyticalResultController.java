@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAnalyticalResultByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.AnalyticalResultCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AnalyticalResultQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAnalyticalResultsByBatchIdQuery;
@@ -53,7 +54,7 @@ public class AnalyticalResultController {
     @GetMapping
     @Operation(summary = "Get analytical results by batch ID")
     public ResponseEntity<List<AnalyticalResultResource>> getByBatchId(
-            @RequestParam Long batchId) {
+            @RequestParam(required = false) Long batchId) {
 
         var results = queryService.handle(
                 new GetAnalyticalResultsByBatchIdQuery(batchId)
@@ -64,5 +65,13 @@ public class AnalyticalResultController {
                 .toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a analytical result by its identifier")
+    public ResponseEntity<AnalyticalResultResource> getAnalyticalResultById(@PathVariable Long id) {
+        return queryService.handle(new GetAnalyticalResultByIdQuery(id))
+                .map(found -> ResponseEntity.ok(AnalyticalResultResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
