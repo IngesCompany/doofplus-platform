@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-15
+### Added
+- IAM: invitations of new members for administrators (`POST /api/v1/invitations`, `GET /api/v1/invitations?organizationId=`, `GET /api/v1/invitations/{id}`); 409 when the email belongs to a user who is no longer invited or to a pending invitation.
+- README: URLs of the deployed API and Swagger UI, and the environment variables of production.
+
 ## [1.2.0] - 2026-11-15
 ### Added
 - IAM: sign-up and sign-in with JWT (`/api/v1/authentication/sign-up`, `/api/v1/authentication/sign-in`) and two-factor authentication with a six-digit code; users and roles (`/api/v1/users`, `/api/v1/roles`). Only administrators list the users and read the contact inquiries.

@@ -116,6 +116,7 @@ public class WebSecurityConfiguration {
                         // Only the administrators list every user of the platform.
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMINISTRATOR")
                         .requestMatchers("/api/v1/users/**", "/api/v1/roles/**").authenticated()
+                        .requestMatchers("/api/v1/invitations", "/api/v1/invitations/**").hasRole("ADMINISTRATOR")
                         // TS12, scenario 3: only the administrators read the contact inquiries.
                         .requestMatchers(HttpMethod.GET, "/api/v1/contact-inquiries", "/api/v1/contact-inquiries/**").hasRole("ADMINISTRATOR")
                         // The other bounded contexts stay open while the Web Application adopts the token.
