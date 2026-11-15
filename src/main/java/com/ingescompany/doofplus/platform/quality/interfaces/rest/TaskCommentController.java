@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetTaskCommentByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.TaskCommentCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.TaskCommentQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetTaskCommentsQuery;
@@ -50,6 +51,16 @@ public class TaskCommentController {
         );
     }
 
+    @GetMapping
+    @Operation(summary = "Get every task comment, or the ones of a task")
+    public ResponseEntity<List<TaskCommentResource>> getComments(@RequestParam(required = false) Long taskId) {
+        List<TaskCommentResource> comments = queryService.handle(new GetTaskCommentsQuery(taskId))
+                .stream()
+                .map(TaskCommentResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(comments);
+    }
+
     @GetMapping("/by-task/{taskId}")
     @Operation(summary = "Get comments by task ID")
     public ResponseEntity<List<TaskCommentResource>> getCommentsByTaskId(
@@ -62,5 +73,13 @@ public class TaskCommentController {
                         .toList();
 
         return ResponseEntity.ok(comments);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a task comment by its identifier")
+    public ResponseEntity<TaskCommentResource> getTaskCommentById(@PathVariable Long id) {
+        return queryService.handle(new GetTaskCommentByIdQuery(id))
+                .map(found -> ResponseEntity.ok(TaskCommentResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

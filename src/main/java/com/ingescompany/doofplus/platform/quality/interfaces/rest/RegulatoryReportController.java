@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetRegulatoryReportByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.RegulatoryReportCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.RegulatoryReportQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllRegulatoryReportsQuery;
@@ -61,5 +62,13 @@ public class RegulatoryReportController {
                         .toList();
 
         return ResponseEntity.ok(reports);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a regulatory report by its identifier")
+    public ResponseEntity<RegulatoryReportResource> getRegulatoryReportById(@PathVariable Long id) {
+        return queryService.handle(new GetRegulatoryReportByIdQuery(id))
+                .map(found -> ResponseEntity.ok(RegulatoryReportResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetUserProfileByIdQuery;
 import com.ingescompany.doofplus.platform.organizations.application.commandservices.UserProfileCommandService;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.UserProfileQueryService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllUserProfilesQuery;
@@ -49,8 +50,10 @@ public class UserProfilesController {
 
     @GetMapping
     @Operation(summary = "Get every user profile")
-    public ResponseEntity<List<UserProfileResource>> getAllUserProfiles() {
+    public ResponseEntity<List<UserProfileResource>> getAllUserProfiles(
+            @RequestParam(required = false) Long organizationId) {
         var resources = queryService.handle(new GetAllUserProfilesQuery()).stream()
+                .filter(profile -> organizationId == null || organizationId.equals(profile.getOrganizationId()))
                 .map(UserProfileResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(resources);
@@ -66,5 +69,13 @@ public class UserProfilesController {
                 result,
                 UserProfileResourceFromEntityAssembler::toResourceFromEntity,
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a user profile by its identifier")
+    public ResponseEntity<UserProfileResource> getUserProfileById(@PathVariable Long id) {
+        return queryService.handle(new GetUserProfileByIdQuery(id))
+                .map(found -> ResponseEntity.ok(UserProfileResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditFindingByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AuditFindingQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AuditFinding;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditFindingsByAuditIdQuery;
@@ -19,6 +21,12 @@ public class AuditFindingQueryServiceImpl implements AuditFindingQueryService {
 
     @Override
     public List<AuditFinding> handle(GetAuditFindingsByAuditIdQuery query) {
+        if (query.auditId() == null) return auditFindingRepository.findAll();
         return auditFindingRepository.findByAuditId(query.auditId());
+    }
+
+    @Override
+    public Optional<AuditFinding> handle(GetAuditFindingByIdQuery query) {
+        return auditFindingRepository.findById(query.id());
     }
 }

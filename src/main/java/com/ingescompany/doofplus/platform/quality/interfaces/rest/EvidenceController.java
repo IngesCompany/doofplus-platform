@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetEvidenceByIdQuery;
 import com.ingescompany.doofplus.platform.quality.application.commandservices.EvidenceCommandService;
 import com.ingescompany.doofplus.platform.quality.application.queryservices.EvidenceQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllEvidenceQuery;
@@ -76,5 +77,13 @@ public class EvidenceController {
                 .toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a evidence by its identifier")
+    public ResponseEntity<EvidenceResource> getEvidenceById(@PathVariable Long id) {
+        return queryService.handle(new GetEvidenceByIdQuery(id))
+                .map(found -> ResponseEntity.ok(EvidenceResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
