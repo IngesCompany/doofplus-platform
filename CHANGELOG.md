@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-15
+### Added
+- IAM: sign-up and sign-in with JWT (`/api/v1/authentication/sign-up`, `/api/v1/authentication/sign-in`) and two-factor authentication with a six-digit code; users and roles (`/api/v1/users`, `/api/v1/roles`). Only administrators list the users and read the contact inquiries.
+- Lookups by id and the filters that the Web Application uses.
+- Subscriptions: change the plan and the billing cycle of a subscription.
+
+### Changed
+- Quality & Compliance follows `contratos/quality-api.json`, from the class and database diagrams: 13 resources with people by name and related records by code, `PUT /{id}` to edit, `DELETE /api/v1/evidence/{id}` (409 when it is reviewed), `POST /api/v1/audit-events` and filters by code (`?batchCode=`, `?recordCode=`, `?capaCode=`...) instead of the routes by internal id. Enums are answered in UPPER_SNAKE_CASE and accepted in kebab-case. Batch releases do not change.
+
 ## [1.1.0] - 2026-11-14
 ### Added
 - Manufacturing & Batch Management: catalog of products, master formulas, production orders and raw material lots (`/api/v1/products`, `/api/v1/master-formulas`, `/api/v1/production-orders`, `/api/v1/material-lots`), with the batch statuses of the Web Application (start, resume, release and progress).
