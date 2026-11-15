@@ -8,33 +8,30 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the task comments.
+ */
 @Service
 public class TaskCommentCommandServiceImpl implements TaskCommentCommandService {
 
-    private final ITaskCommentRepository taskCommentRepository;
+    private final ITaskCommentRepository repository;
 
-    public TaskCommentCommandServiceImpl(ITaskCommentRepository taskCommentRepository) {
-        this.taskCommentRepository = taskCommentRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the task comments
+     */
+    public TaskCommentCommandServiceImpl(ITaskCommentRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<TaskComment, ApplicationError> handle(CreateTaskCommentCommand command) {
         try {
-            TaskComment taskComment = new TaskComment(
-                    command.taskId(),
-                    command.authorId(),
-                    command.content()
-            );
-
-            return Result.success(taskCommentRepository.save(taskComment));
-        } catch (IllegalArgumentException exception) {
-            return Result.failure(
-                    ApplicationError.validationError("task comment", exception.getMessage())
-            );
-        } catch (Exception exception) {
-            return Result.failure(
-                    ApplicationError.unexpected("creating task comment", exception.getMessage())
-            );
+            var taskComment = new TaskComment(command);
+            return Result.success(repository.save(taskComment));
+        } catch (IllegalArgumentException e) {
+            return Result.failure(ApplicationError.validationError("TaskComment", e.getMessage()));
         }
     }
 }

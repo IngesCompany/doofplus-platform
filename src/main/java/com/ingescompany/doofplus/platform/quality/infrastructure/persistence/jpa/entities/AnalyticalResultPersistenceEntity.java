@@ -1,6 +1,7 @@
 package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities;
 
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.AnalyticalResultStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ApprovalState;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ResultStatus;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,8 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Row of the analytical_results table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "analytical_results")
 @Getter
@@ -20,33 +22,35 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AnalyticalResultPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false)
-    private Long batchId;
+    @Column(name = "batch_code", length = 30, nullable = false)
+    private String batchCode;
 
-    @Column(nullable = false)
-    private String testName;
+    @Column(name = "sample_code", length = 30, nullable = false)
+    private String sampleCode;
 
-    private String parameter;
+    @Column(name = "report_code", length = 30, nullable = false)
+    private String reportCode;
 
-    @Column(nullable = false)
-    private Double measuredValue;
+    @Column(name = "test_name", length = 100, nullable = false)
+    private String test;
 
-    @Column(nullable = false)
-    private Double minimumValue;
+    @Column(name = "protocol", length = 50, nullable = false)
+    private String protocol;
 
-    @Column(nullable = false)
-    private Double maximumValue;
+    @Column(name = "result", length = 30, nullable = false)
+    private String result;
 
-    private String unit;
+    @Column(name = "specification", length = 50, nullable = false)
+    private String specification;
+
+    @Column(name = "analyst", length = 100, nullable = false)
+    private String analyst;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AnalyticalResultStatus status;
+    @Column(name = "status", length = 24, nullable = false)
+    private ResultStatus status;
 
-    private Long reviewedBy;
-
-    @Column(nullable = false)
-    private LocalDateTime testedAt;
-
-    private LocalDateTime reviewedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval", length = 24, nullable = false)
+    private ApprovalState approval;
 }

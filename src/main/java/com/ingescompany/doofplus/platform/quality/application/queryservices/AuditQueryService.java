@@ -7,8 +7,24 @@ import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditB
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Query service of the audits.
+ */
 public interface AuditQueryService {
-    Optional<Audit> handle(GetAuditByIdQuery query);
 
+    /**
+     * Lists the audits.
+     *
+     * @param query the query
+     * @return the audits
+     */
     List<Audit> handle(GetAllAuditsQuery query);
+
+    /**
+     * Finds a audit by its identifier.
+     *
+     * @param query the query
+     * @return the audit, if it exists
+     */
+    Optional<Audit> handle(GetAuditByIdQuery query);
 }

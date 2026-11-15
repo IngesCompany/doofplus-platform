@@ -3,53 +3,51 @@ package com.ingescompany.doofplus.platform.quality.application.internal.commands
 import com.ingescompany.doofplus.platform.quality.application.commandservices.CapaActionCommandService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaAction;
 import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateCapaActionCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateCapaActionCommand;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.ICapaActionRepository;
-import com.ingescompany.doofplus.platform.quality.domain.repositories.ICapaPlanRepository;
 import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the capa actions.
+ */
 @Service
 public class CapaActionCommandServiceImpl implements CapaActionCommandService {
 
-    private final ICapaActionRepository capaActionRepository;
-    private final ICapaPlanRepository capaPlanRepository;
+    private final ICapaActionRepository repository;
 
-    public CapaActionCommandServiceImpl(
-            ICapaActionRepository capaActionRepository,
-            ICapaPlanRepository capaPlanRepository
-    ) {
-        this.capaActionRepository = capaActionRepository;
-        this.capaPlanRepository = capaPlanRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the capa actions
+     */
+    public CapaActionCommandServiceImpl(ICapaActionRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<CapaAction, ApplicationError> handle(CreateCapaActionCommand command) {
-        if (capaPlanRepository.findById(command.capaPlanId()).isEmpty()) {
-            return Result.failure(
-                    ApplicationError.notFound("CapaPlan", command.capaPlanId().toString())
-            );
-        }
-
         try {
-            CapaAction capaAction = new CapaAction(
-                    command.capaPlanId(),
-                    command.title(),
-                    command.description(),
-                    command.assignedTo().toString(),
-                    command.dueDate()
-            );
-
-            return Result.success(capaActionRepository.save(capaAction));
-
+            var capaAction = new CapaAction(command);
+            return Result.success(repository.save(capaAction));
         } catch (IllegalArgumentException e) {
-            return Result.failure(
-                    ApplicationError.validationError("CapaAction", e.getMessage())
-            );
-        } catch (Exception e) {
-            return Result.failure(
-                    ApplicationError.unexpected("create-capa-action", e.getMessage())
-            );
+            return Result.failure(ApplicationError.validationError("CapaAction", e.getMessage()));
+        }
+    }
+
+    @Override
+    public Result<CapaAction, ApplicationError> handle(UpdateCapaActionCommand command) {
+        var found = repository.findById(command.capaActionId());
+        if (found.isEmpty()) {
+            return Result.failure(ApplicationError.notFound("CapaAction", String.valueOf(command.capaActionId())));
+        }
+        try {
+            var capaAction = found.get();
+            capaAction.update(command);
+            return Result.success(repository.save(capaAction));
+        } catch (IllegalArgumentException e) {
+            return Result.failure(ApplicationError.validationError("CapaAction", e.getMessage()));
         }
     }
 }

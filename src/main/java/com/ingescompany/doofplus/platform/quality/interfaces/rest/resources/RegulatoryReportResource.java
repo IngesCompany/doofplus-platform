@@ -1,18 +1,16 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Regulatory report answered by the API. Enums in UPPER_SNAKE_CASE, dates in yyyy-MM-dd and date-times in ISO 8601 UTC.
+ */
 public record RegulatoryReportResource(
         Long id,
         String code,
-        String title,
-        String description,
-        String regulatoryAuthority,
-        String fileReference,
-        LocalDate dueDate,
+        String type,
+        String scope,
+        String owner,
         String status,
-        Long preparedBy,
-        LocalDateTime submittedAt
-) {
+        String template,
+        String format,
+        String createdAt) {
 }

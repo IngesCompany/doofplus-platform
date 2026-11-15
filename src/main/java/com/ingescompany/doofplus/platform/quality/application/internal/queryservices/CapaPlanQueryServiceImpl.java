@@ -10,22 +10,32 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the query service of the capa plans.
+ */
 @Service
 public class CapaPlanQueryServiceImpl implements CapaPlanQueryService {
 
-    private final ICapaPlanRepository capaPlanRepository;
+    private final ICapaPlanRepository repository;
 
-    public CapaPlanQueryServiceImpl(ICapaPlanRepository capaPlanRepository) {
-        this.capaPlanRepository = capaPlanRepository;
-    }
-
-    @Override
-    public Optional<CapaPlan> handle(GetCapaPlanByIdQuery query) {
-        return capaPlanRepository.findById(query.capaPlanId());
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the capa plans
+     */
+    public CapaPlanQueryServiceImpl(ICapaPlanRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public List<CapaPlan> handle(GetAllCapaPlansQuery query) {
-        return capaPlanRepository.findAll();
+        return query.sourceDeviation() == null || query.sourceDeviation().isBlank()
+                ? repository.findAll()
+                : repository.findBySourceDeviation(query.sourceDeviation().trim());
+    }
+
+    @Override
+    public Optional<CapaPlan> handle(GetCapaPlanByIdQuery query) {
+        return repository.findById(query.capaPlanId());
     }
 }

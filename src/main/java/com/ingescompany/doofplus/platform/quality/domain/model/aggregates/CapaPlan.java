@@ -1,95 +1,123 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateCapaPlanCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateCapaPlanCommand;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.CapaStatus;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import java.time.LocalDate;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
-
+/**
+ * Capa plan of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class CapaPlan extends AbstractDomainAggregateRoot<CapaPlan> {
 
+    /**
+     * The identifier; null until the capa plan is saved.
+     */
     private Long id;
-    private Long deviationId;
+
+    /**
+     * The code.
+     */
+    private String code;
+
+    /**
+     * The title.
+     */
     private String title;
-    private String description;
+
+    /**
+     * The source deviation.
+     */
+    private String sourceDeviation;
+
+    /**
+     * The owner.
+     */
+    private String owner;
+
+    /**
+     * The reviewer.
+     */
+    private String reviewer;
+
+    /**
+     * The root cause.
+     */
+    private String rootCause;
+
+    /**
+     * The acceptance criterion.
+     */
+    private String acceptanceCriterion;
+
+    /**
+     * The effectiveness check at.
+     */
+    private LocalDate effectivenessCheckAt;
+
+    /**
+     * The status.
+     */
     private CapaStatus status;
-    private LocalDate dueDate;
-    private String responsible;
-    private LocalDateTime createdAt;
-    private LocalDateTime completedAt;
 
-    public CapaPlan(
-            Long deviationId,
-            String title,
-            String description,
-            LocalDate dueDate,
-            String responsible
-    ) {
-        this.deviationId = Objects.requireNonNull(deviationId);
-        this.title = Objects.requireNonNull(title);
-        this.description = Objects.requireNonNull(description);
-        this.dueDate = Objects.requireNonNull(dueDate);
-        this.responsible = Objects.requireNonNull(responsible);
-        this.status = CapaStatus.OPEN;
-        this.createdAt = LocalDateTime.now();
+    private CapaPlan() {
     }
 
-    public static CapaPlan reconstitute(
-            Long id,
-            Long deviationId,
-            String title,
-            String description,
-            CapaStatus status,
-            LocalDate dueDate,
-            String responsible,
-            LocalDateTime createdAt,
-            LocalDateTime completedAt
-    ) {
-        CapaPlan plan = new CapaPlan(
-                deviationId, title, description, dueDate, responsible
-        );
-
-        plan.id = id;
-        plan.status = status;
-        plan.createdAt = createdAt;
-        plan.completedAt = completedAt;
-
-        return plan;
+    /**
+     * Creates the capa plan from its command.
+     *
+     * @param command the data of the capa plan
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public CapaPlan(CreateCapaPlanCommand command) {
+        apply(command.code(), command.title(), command.sourceDeviation(), command.owner(), command.reviewer(), command.rootCause(), command.acceptanceCriterion(), command.effectivenessCheckAt(), command.status());
     }
 
-    public void start() {
-        if (status != CapaStatus.OPEN) {
-            throw new IllegalStateException("quality.error.capa.invalidStart");
-        }
-
-        status = CapaStatus.IN_PROGRESS;
+    /**
+     * Rebuilds a saved capa plan without validating it again.
+     *
+     * @return the capa plan
+     */
+    public static CapaPlan reconstitute(Long id, String code, String title, String sourceDeviation, String owner, String reviewer, String rootCause, String acceptanceCriterion, LocalDate effectivenessCheckAt, CapaStatus status) {
+        var capaPlan = new CapaPlan();
+        capaPlan.id = id;
+        capaPlan.code = code;
+        capaPlan.title = title;
+        capaPlan.sourceDeviation = sourceDeviation;
+        capaPlan.owner = owner;
+        capaPlan.reviewer = reviewer;
+        capaPlan.rootCause = rootCause;
+        capaPlan.acceptanceCriterion = acceptanceCriterion;
+        capaPlan.effectivenessCheckAt = effectivenessCheckAt;
+        capaPlan.status = status;
+        return capaPlan;
     }
 
-    public void requestVerification() {
-        if (status != CapaStatus.IN_PROGRESS) {
-            throw new IllegalStateException("quality.error.capa.invalidVerification");
-        }
-
-        status = CapaStatus.PENDING_VERIFICATION;
+    /**
+     * Replaces the data of the capa plan with the data of the command.
+     *
+     * @param command the new data
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public void update(UpdateCapaPlanCommand command) {
+        apply(command.code(), command.title(), command.sourceDeviation(), command.owner(), command.reviewer(), command.rootCause(), command.acceptanceCriterion(), command.effectivenessCheckAt(), command.status());
     }
 
-    public void complete() {
-        if (status != CapaStatus.PENDING_VERIFICATION) {
-            throw new IllegalStateException("quality.error.capa.invalidCompletion");
-        }
-
-        status = CapaStatus.COMPLETED;
-        completedAt = LocalDateTime.now();
-    }
-
-    public void cancel() {
-        if (status == CapaStatus.COMPLETED) {
-            throw new IllegalStateException("quality.error.capa.alreadyCompleted");
-        }
-
-        status = CapaStatus.CANCELLED;
+    private void apply(String code, String title, String sourceDeviation, String owner, String reviewer, String rootCause, String acceptanceCriterion, LocalDate effectivenessCheckAt, CapaStatus status) {
+        if (code == null || code.isBlank()) throw new IllegalArgumentException("quality.capaPlan.error.code.notBlank");
+        this.code = code == null ? "" : code.trim();
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("quality.capaPlan.error.title.notBlank");
+        this.title = title == null ? "" : title.trim();
+        this.sourceDeviation = sourceDeviation == null ? "" : sourceDeviation.trim();
+        this.owner = owner == null ? "" : owner.trim();
+        this.reviewer = reviewer == null ? "" : reviewer.trim();
+        this.rootCause = rootCause == null ? "" : rootCause.trim();
+        this.acceptanceCriterion = acceptanceCriterion == null ? "" : acceptanceCriterion.trim();
+        this.effectivenessCheckAt = effectivenessCheckAt;
+        this.status = status != null ? status : CapaStatus.DRAFT;
     }
 }

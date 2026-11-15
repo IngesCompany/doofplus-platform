@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a RegulatoryReport by its identifier.
+ * Query of a regulatory report by its identifier.
  *
- * @param id identifier
+ * @param regulatoryReportId the identifier
  */
-public record GetRegulatoryReportByIdQuery(Long id) {
+public record GetRegulatoryReportByIdQuery(Long regulatoryReportId) {
 }

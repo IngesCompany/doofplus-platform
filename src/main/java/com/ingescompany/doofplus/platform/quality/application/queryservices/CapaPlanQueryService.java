@@ -7,9 +7,24 @@ import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetCapaPl
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Query service of the capa plans.
+ */
 public interface CapaPlanQueryService {
 
-    Optional<CapaPlan> handle(GetCapaPlanByIdQuery query);
-
+    /**
+     * Lists the capa plans, filtered when the query has a value.
+     *
+     * @param query the query
+     * @return the capa plans
+     */
     List<CapaPlan> handle(GetAllCapaPlansQuery query);
+
+    /**
+     * Finds a capa plan by its identifier.
+     *
+     * @param query the query
+     * @return the capa plan, if it exists
+     */
+    Optional<CapaPlan> handle(GetCapaPlanByIdQuery query);
 }

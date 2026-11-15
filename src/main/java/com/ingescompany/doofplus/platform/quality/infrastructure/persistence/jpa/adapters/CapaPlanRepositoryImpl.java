@@ -3,54 +3,55 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaPlan;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.ICapaPlanRepository;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.assemblers.CapaPlanPersistenceAssembler;
+import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CapaPlanPersistenceEntity;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.repositories.CapaPlanPersistenceRepository;
-import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Adapter of the domain repository of the capa plans on Spring Data JPA.
+ */
 @Repository
 public class CapaPlanRepositoryImpl implements ICapaPlanRepository {
 
-    private final CapaPlanPersistenceRepository persistenceRepository;
-    private final DomainEventPublisher domainEventPublisher;
+    private final CapaPlanPersistenceRepository repository;
 
-    public CapaPlanRepositoryImpl(
-            CapaPlanPersistenceRepository persistenceRepository,
-            DomainEventPublisher domainEventPublisher) {
-        this.persistenceRepository = persistenceRepository;
-        this.domainEventPublisher = domainEventPublisher;
+    /**
+     * Creates the adapter.
+     *
+     * @param repository the Spring Data repository
+     */
+    public CapaPlanRepositoryImpl(CapaPlanPersistenceRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public CapaPlan save(CapaPlan capaPlan) {
-        var saved = persistenceRepository.save(
-                CapaPlanPersistenceAssembler.toEntity(capaPlan)
-        );
-
-        domainEventPublisher.publishAndClearEvents(capaPlan);
-
-        return CapaPlanPersistenceAssembler.toDomain(saved);
+        var entity = capaPlan.getId() == null
+                ? new CapaPlanPersistenceEntity()
+                : repository.findById(capaPlan.getId()).orElseGet(CapaPlanPersistenceEntity::new);
+        return CapaPlanPersistenceAssembler.toDomain(repository.save(CapaPlanPersistenceAssembler.toEntity(capaPlan, entity)));
     }
 
     @Override
     public Optional<CapaPlan> findById(Long id) {
-        return persistenceRepository.findById(id)
-                .map(CapaPlanPersistenceAssembler::toDomain);
+        return repository.findById(id).map(CapaPlanPersistenceAssembler::toDomain);
     }
 
     @Override
     public List<CapaPlan> findAll() {
-        return persistenceRepository.findAll().stream()
-                .map(CapaPlanPersistenceAssembler::toDomain)
-                .toList();
+        return repository.findAll().stream().map(CapaPlanPersistenceAssembler::toDomain).toList();
     }
 
     @Override
-    public List<CapaPlan> findByDeviationId(Long deviationId) {
-        return persistenceRepository.findByDeviationId(deviationId).stream()
-                .map(CapaPlanPersistenceAssembler::toDomain)
-                .toList();
+    public List<CapaPlan> findBySourceDeviation(String sourceDeviation) {
+        return repository.findBySourceDeviation(sourceDeviation).stream().map(CapaPlanPersistenceAssembler::toDomain).toList();
+    }
+
+    @Override
+    public boolean existsByCode(String code, Long id) {
+        return id == null ? repository.existsByCode(code) : repository.existsByCodeAndIdNot(code, id);
     }
 }

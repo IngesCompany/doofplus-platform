@@ -8,37 +8,30 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the audit findings.
+ */
 @Service
 public class AuditFindingCommandServiceImpl implements AuditFindingCommandService {
 
-    private final IAuditFindingRepository auditFindingRepository;
+    private final IAuditFindingRepository repository;
 
-    public AuditFindingCommandServiceImpl(IAuditFindingRepository auditFindingRepository) {
-        this.auditFindingRepository = auditFindingRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the audit findings
+     */
+    public AuditFindingCommandServiceImpl(IAuditFindingRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<AuditFinding, ApplicationError> handle(CreateAuditFindingCommand command) {
         try {
-            AuditFinding auditFinding = new AuditFinding(
-                    command.auditId(),
-                    command.title(),
-                    command.description(),
-                    command.severity(),
-                    command.relatedDeviationId()
-            );
-
-            AuditFinding savedAuditFinding = auditFindingRepository.save(auditFinding);
-            return Result.success(savedAuditFinding);
-
+            var auditFinding = new AuditFinding(command);
+            return Result.success(repository.save(auditFinding));
         } catch (IllegalArgumentException e) {
-            return Result.failure(
-                    ApplicationError.validationError("AuditFinding", e.getMessage())
-            );
-        } catch (Exception e) {
-            return Result.failure(
-                    ApplicationError.unexpected("create-audit-finding", e.getMessage())
-            );
+            return Result.failure(ApplicationError.validationError("AuditFinding", e.getMessage()));
         }
     }
 }

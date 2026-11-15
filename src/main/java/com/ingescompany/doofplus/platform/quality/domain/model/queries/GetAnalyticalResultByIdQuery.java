@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a AnalyticalResult by its identifier.
+ * Query of a analytical result by its identifier.
  *
- * @param id identifier
+ * @param analyticalResultId the identifier
  */
-public record GetAnalyticalResultByIdQuery(Long id) {
+public record GetAnalyticalResultByIdQuery(Long analyticalResultId) {
 }

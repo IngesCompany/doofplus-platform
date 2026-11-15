@@ -1,80 +1,96 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateEvidenceCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateEvidenceCommand;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceStatus;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceType;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Evidence of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class Evidence extends AbstractDomainAggregateRoot<Evidence> {
 
+    /**
+     * The identifier; null until the evidence is saved.
+     */
     private Long id;
-    private String title;
-    private String description;
-    private EvidenceType type;
-    private String fileReference;
-    private Long deviationId;
-    private Long documentId;
-    private Long uploadedBy;
+
+    /**
+     * The record code.
+     */
+    private String recordCode;
+
+    /**
+     * The file name.
+     */
+    private String fileName;
+
+    /**
+     * The detail.
+     */
+    private String detail;
+
+    /**
+     * The status.
+     */
     private EvidenceStatus status;
-    private LocalDateTime uploadedAt;
-    private LocalDateTime verifiedAt;
 
-    public Evidence(String title, String description, EvidenceType type,
-                    String fileReference, Long deviationId,
-                    Long documentId, Long uploadedBy) {
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Evidence title is required");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("Evidence type is required");
-        }
-        if (fileReference == null || fileReference.isBlank()) {
-            throw new IllegalArgumentException("Evidence file reference is required");
-        }
-
-        this.title = title;
-        this.description = description;
-        this.type = type;
-        this.fileReference = fileReference;
-        this.deviationId = deviationId;
-        this.documentId = documentId;
-        this.uploadedBy = uploadedBy;
-        this.status = EvidenceStatus.PENDING;
-        this.uploadedAt = LocalDateTime.now();
+    private Evidence() {
     }
 
-    public static Evidence reconstitute(
-            Long id, String title, String description, EvidenceType type,
-            String fileReference, Long deviationId, Long documentId,
-            Long uploadedBy, EvidenceStatus status,
-            LocalDateTime uploadedAt, LocalDateTime verifiedAt) {
+    /**
+     * Creates the evidence from its command.
+     *
+     * @param command the data of the evidence
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public Evidence(CreateEvidenceCommand command) {
+        apply(command.recordCode(), command.fileName(), command.detail(), command.status());
+    }
 
-        Evidence evidence = new Evidence(
-                title, description, type, fileReference,
-                deviationId, documentId, uploadedBy
-        );
+    /**
+     * Rebuilds a saved evidence without validating it again.
+     *
+     * @return the evidence
+     */
+    public static Evidence reconstitute(Long id, String recordCode, String fileName, String detail, EvidenceStatus status) {
+        var evidence = new Evidence();
         evidence.id = id;
+        evidence.recordCode = recordCode;
+        evidence.fileName = fileName;
+        evidence.detail = detail;
         evidence.status = status;
-        evidence.uploadedAt = uploadedAt;
-        evidence.verifiedAt = verifiedAt;
         return evidence;
     }
 
-    public void verify() {
-        if (status != EvidenceStatus.PENDING) {
-            throw new IllegalStateException("Only pending evidence can be verified");
-        }
-        status = EvidenceStatus.VERIFIED;
-        verifiedAt = LocalDateTime.now();
+    /**
+     * Replaces the data of the evidence with the data of the command.
+     *
+     * @param command the new data
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public void update(UpdateEvidenceCommand command) {
+        apply(command.recordCode(), command.fileName(), command.detail(), command.status());
     }
 
-    public void reject() {
-        if (status != EvidenceStatus.PENDING) {
-            throw new IllegalStateException("Only pending evidence can be rejected");
-        }
-        status = EvidenceStatus.REJECTED;
+    /**
+     * Reviewed evidence cannot be removed, so the investigation keeps its integrity.
+     *
+     * @return true when the evidence is not reviewed
+     */
+    public boolean canBeRemoved() {
+        return status != EvidenceStatus.REVIEWED;
+    }
+
+    private void apply(String recordCode, String fileName, String detail, EvidenceStatus status) {
+        if (recordCode == null || recordCode.isBlank()) throw new IllegalArgumentException("quality.evidence.error.recordCode.notBlank");
+        this.recordCode = recordCode == null ? "" : recordCode.trim();
+        if (fileName == null || fileName.isBlank()) throw new IllegalArgumentException("quality.evidence.error.fileName.notBlank");
+        this.fileName = fileName == null ? "" : fileName.trim();
+        this.detail = detail == null ? "" : detail.trim();
+        this.status = status != null ? status : EvidenceStatus.ATTACHED;
     }
 }

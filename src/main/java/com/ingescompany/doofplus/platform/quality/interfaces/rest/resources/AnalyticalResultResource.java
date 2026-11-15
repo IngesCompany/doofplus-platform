@@ -1,19 +1,18 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDateTime;
-
+/**
+ * Analytical result answered by the API. Enums in UPPER_SNAKE_CASE, dates in yyyy-MM-dd and date-times in ISO 8601 UTC.
+ */
 public record AnalyticalResultResource(
         Long id,
-        Long batchId,
-        String testName,
-        String parameter,
-        Double measuredValue,
-        Double minimumValue,
-        Double maximumValue,
-        String unit,
+        String batchCode,
+        String sampleCode,
+        String reportCode,
+        String test,
+        String protocol,
+        String result,
+        String specification,
+        String analyst,
         String status,
-        Long reviewedBy,
-        LocalDateTime testedAt,
-        LocalDateTime reviewedAt
-) {
+        String approval) {
 }

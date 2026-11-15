@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a CollaborationTask by its identifier.
+ * Query of a collaboration task by its identifier.
  *
- * @param id identifier
+ * @param collaborationTaskId the identifier
  */
-public record GetCollaborationTaskByIdQuery(Long id) {
+public record GetCollaborationTaskByIdQuery(Long collaborationTaskId) {
 }

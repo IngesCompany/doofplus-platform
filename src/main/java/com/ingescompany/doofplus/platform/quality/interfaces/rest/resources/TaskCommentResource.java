@@ -1,13 +1,13 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDateTime;
-
+/**
+ * Task comment answered by the API. Enums in UPPER_SNAKE_CASE, dates in yyyy-MM-dd and date-times in ISO 8601 UTC.
+ */
 public record TaskCommentResource(
         Long id,
-        Long taskId,
-        Long authorId,
-        String content,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
+        String recordCode,
+        String author,
+        String initials,
+        String postedAt,
+        String text) {
 }

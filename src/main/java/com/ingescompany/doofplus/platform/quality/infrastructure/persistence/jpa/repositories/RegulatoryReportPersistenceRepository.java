@@ -2,12 +2,30 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.RegulatoryReportPersistenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
+/**
+ * Spring Data repository of the regulatory_reports table.
+ */
+@Repository
 public interface RegulatoryReportPersistenceRepository extends JpaRepository<RegulatoryReportPersistenceEntity, Long> {
 
-    Optional<RegulatoryReportPersistenceEntity> findByCode(String code);
-
+    /**
+     * Tells whether a row has the code.
+     *
+     * @param code the code
+     * @return true when it exists
+     */
     boolean existsByCode(String code);
+
+    /**
+     * Tells whether a row other than the given one has the code.
+     *
+     * @param code the code
+     * @param id   the identifier of the row to leave out
+     * @return true when it exists
+     */
+    boolean existsByCodeAndIdNot(String code, Long id);
 }

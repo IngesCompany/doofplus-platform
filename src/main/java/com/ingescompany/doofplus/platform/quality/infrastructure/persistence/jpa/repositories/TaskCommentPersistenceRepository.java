@@ -2,11 +2,21 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.TaskCommentPersistenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface TaskCommentPersistenceRepository
-        extends JpaRepository<TaskCommentPersistenceEntity, Long> {
+/**
+ * Spring Data repository of the task_comments table.
+ */
+@Repository
+public interface TaskCommentPersistenceRepository extends JpaRepository<TaskCommentPersistenceEntity, Long> {
 
-    List<TaskCommentPersistenceEntity> findByTaskId(Long taskId);
+    /**
+     * Lists the rows with the given record code.
+     *
+     * @param recordCode the record code
+     * @return the rows
+     */
+    List<TaskCommentPersistenceEntity> findByRecordCode(String recordCode);
 }

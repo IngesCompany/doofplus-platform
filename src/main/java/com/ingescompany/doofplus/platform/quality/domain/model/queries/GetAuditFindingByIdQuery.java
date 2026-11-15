@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a AuditFinding by its identifier.
+ * Query of a audit finding by its identifier.
  *
- * @param id identifier
+ * @param auditFindingId the identifier
  */
-public record GetAuditFindingByIdQuery(Long id) {
+public record GetAuditFindingByIdQuery(Long auditFindingId) {
 }

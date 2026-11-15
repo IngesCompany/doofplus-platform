@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a TaskComment by its identifier.
+ * Query of a task comment by its identifier.
  *
- * @param id identifier
+ * @param taskCommentId the identifier
  */
-public record GetTaskCommentByIdQuery(Long id) {
+public record GetTaskCommentByIdQuery(Long taskCommentId) {
 }
