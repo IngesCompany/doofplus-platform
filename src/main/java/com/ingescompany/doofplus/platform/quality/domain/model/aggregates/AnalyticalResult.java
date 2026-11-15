@@ -1,86 +1,130 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateAnalyticalResultCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateAnalyticalResultCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ApprovalState;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ResultStatus;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.AnalyticalResultStatus;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Analytical result of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class AnalyticalResult extends AbstractDomainAggregateRoot<AnalyticalResult> {
 
+    /**
+     * The identifier; null until the analytical result is saved.
+     */
     private Long id;
-    private Long batchId;
-    private String testName;
-    private String parameter;
-    private Double measuredValue;
-    private Double minimumValue;
-    private Double maximumValue;
-    private String unit;
-    private AnalyticalResultStatus status;
-    private Long reviewedBy;
-    private LocalDateTime testedAt;
-    private LocalDateTime reviewedAt;
 
-    public AnalyticalResult(Long batchId, String testName, String parameter,
-                            Double measuredValue, Double minimumValue,
-                            Double maximumValue, String unit,
-                            LocalDateTime testedAt) {
-        if (batchId == null) {
-            throw new IllegalArgumentException("Batch identifier is required");
-        }
-        if (measuredValue == null || minimumValue == null || maximumValue == null) {
-            throw new IllegalArgumentException("Analytical values are required");
-        }
-        if (minimumValue > maximumValue) {
-            throw new IllegalArgumentException("Minimum value cannot exceed maximum value");
-        }
+    /**
+     * The batch code.
+     */
+    private String batchCode;
 
-        this.batchId = batchId;
-        this.testName = testName;
-        this.parameter = parameter;
-        this.measuredValue = measuredValue;
-        this.minimumValue = minimumValue;
-        this.maximumValue = maximumValue;
-        this.unit = unit;
-        this.testedAt = testedAt;
-        this.status = measuredValue >= minimumValue && measuredValue <= maximumValue
-                ? AnalyticalResultStatus.WITHIN_SPECIFICATION
-                : AnalyticalResultStatus.OUT_OF_SPECIFICATION;
+    /**
+     * The sample code.
+     */
+    private String sampleCode;
+
+    /**
+     * The report code.
+     */
+    private String reportCode;
+
+    /**
+     * The test.
+     */
+    private String test;
+
+    /**
+     * The protocol.
+     */
+    private String protocol;
+
+    /**
+     * The result.
+     */
+    private String result;
+
+    /**
+     * The specification.
+     */
+    private String specification;
+
+    /**
+     * The analyst.
+     */
+    private String analyst;
+
+    /**
+     * The status.
+     */
+    private ResultStatus status;
+
+    /**
+     * The approval.
+     */
+    private ApprovalState approval;
+
+    private AnalyticalResult() {
     }
 
-    public static AnalyticalResult reconstitute(
-            Long id, Long batchId, String testName, String parameter,
-            Double measuredValue, Double minimumValue, Double maximumValue,
-            String unit, AnalyticalResultStatus status, Long reviewedBy,
-            LocalDateTime testedAt, LocalDateTime reviewedAt) {
-
-        AnalyticalResult result = new AnalyticalResult(
-                batchId, testName, parameter, measuredValue,
-                minimumValue, maximumValue, unit, testedAt
-        );
-        result.id = id;
-        result.status = status;
-        result.reviewedBy = reviewedBy;
-        result.reviewedAt = reviewedAt;
-        return result;
+    /**
+     * Creates the analytical result from its command.
+     *
+     * @param command the data of the analytical result
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public AnalyticalResult(CreateAnalyticalResultCommand command) {
+        apply(command.batchCode(), command.sampleCode(), command.reportCode(), command.test(), command.protocol(), command.result(), command.specification(), command.analyst(), command.status(), command.approval());
     }
 
-    public void approve(Long reviewerId) {
-        if (status != AnalyticalResultStatus.WITHIN_SPECIFICATION) {
-            throw new IllegalStateException("Only results within specification can be approved");
-        }
-        status = AnalyticalResultStatus.APPROVED;
-        reviewedBy = reviewerId;
-        reviewedAt = LocalDateTime.now();
+    /**
+     * Rebuilds a saved analytical result without validating it again.
+     *
+     * @return the analytical result
+     */
+    public static AnalyticalResult reconstitute(Long id, String batchCode, String sampleCode, String reportCode, String test, String protocol, String result, String specification, String analyst, ResultStatus status, ApprovalState approval) {
+        var analyticalResult = new AnalyticalResult();
+        analyticalResult.id = id;
+        analyticalResult.batchCode = batchCode;
+        analyticalResult.sampleCode = sampleCode;
+        analyticalResult.reportCode = reportCode;
+        analyticalResult.test = test;
+        analyticalResult.protocol = protocol;
+        analyticalResult.result = result;
+        analyticalResult.specification = specification;
+        analyticalResult.analyst = analyst;
+        analyticalResult.status = status;
+        analyticalResult.approval = approval;
+        return analyticalResult;
     }
 
-    public void reject(Long reviewerId) {
-        if (status == AnalyticalResultStatus.APPROVED) {
-            throw new IllegalStateException("Approved results cannot be rejected");
-        }
-        status = AnalyticalResultStatus.REJECTED;
-        reviewedBy = reviewerId;
-        reviewedAt = LocalDateTime.now();
+    /**
+     * Replaces the data of the analytical result with the data of the command.
+     *
+     * @param command the new data
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public void update(UpdateAnalyticalResultCommand command) {
+        apply(command.batchCode(), command.sampleCode(), command.reportCode(), command.test(), command.protocol(), command.result(), command.specification(), command.analyst(), command.status(), command.approval());
+    }
+
+    private void apply(String batchCode, String sampleCode, String reportCode, String test, String protocol, String result, String specification, String analyst, ResultStatus status, ApprovalState approval) {
+        if (batchCode == null || batchCode.isBlank()) throw new IllegalArgumentException("quality.analyticalResult.error.batchCode.notBlank");
+        this.batchCode = batchCode == null ? "" : batchCode.trim();
+        this.sampleCode = sampleCode == null ? "" : sampleCode.trim();
+        this.reportCode = reportCode == null ? "" : reportCode.trim();
+        if (test == null || test.isBlank()) throw new IllegalArgumentException("quality.analyticalResult.error.test.notBlank");
+        this.test = test == null ? "" : test.trim();
+        this.protocol = protocol == null ? "" : protocol.trim();
+        this.result = result == null ? "" : result.trim();
+        this.specification = specification == null ? "" : specification.trim();
+        this.analyst = analyst == null ? "" : analyst.trim();
+        this.status = status != null ? status : ResultStatus.PENDING;
+        this.approval = approval != null ? approval : ApprovalState.REQUESTED;
     }
 }

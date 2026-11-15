@@ -4,34 +4,38 @@ import com.ingescompany.doofplus.platform.quality.application.queryservices.Devi
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Deviation;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllDeviationsQuery;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetDeviationByIdQuery;
-import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetDeviationsByBatchIdQuery;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.IDeviationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the query service of the deviations.
+ */
 @Service
 public class DeviationQueryServiceImpl implements DeviationQueryService {
 
-    private final IDeviationRepository deviationRepository;
+    private final IDeviationRepository repository;
 
-    public DeviationQueryServiceImpl(IDeviationRepository deviationRepository) {
-        this.deviationRepository = deviationRepository;
-    }
-
-    @Override
-    public Optional<Deviation> handle(GetDeviationByIdQuery query) {
-        return deviationRepository.findById(query.deviationId());
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the deviations
+     */
+    public DeviationQueryServiceImpl(IDeviationRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public List<Deviation> handle(GetAllDeviationsQuery query) {
-        return deviationRepository.findAll();
+        return query.batchCode() == null || query.batchCode().isBlank()
+                ? repository.findAll()
+                : repository.findByBatchCode(query.batchCode().trim());
     }
 
     @Override
-    public List<Deviation> handle(GetDeviationsByBatchIdQuery query) {
-        return deviationRepository.findByBatchId(query.batchId());
+    public Optional<Deviation> handle(GetDeviationByIdQuery query) {
+        return repository.findById(query.deviationId());
     }
 }

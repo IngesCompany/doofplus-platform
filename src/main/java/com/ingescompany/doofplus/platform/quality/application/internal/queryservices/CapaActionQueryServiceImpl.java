@@ -4,34 +4,38 @@ import com.ingescompany.doofplus.platform.quality.application.queryservices.Capa
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaAction;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllCapaActionsQuery;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetCapaActionByIdQuery;
-import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetCapaActionsByCapaPlanIdQuery;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.ICapaActionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the query service of the capa actions.
+ */
 @Service
 public class CapaActionQueryServiceImpl implements CapaActionQueryService {
 
-    private final ICapaActionRepository capaActionRepository;
+    private final ICapaActionRepository repository;
 
-    public CapaActionQueryServiceImpl(ICapaActionRepository capaActionRepository) {
-        this.capaActionRepository = capaActionRepository;
-    }
-
-    @Override
-    public Optional<CapaAction> handle(GetCapaActionByIdQuery query) {
-        return capaActionRepository.findById(query.capaActionId());
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the capa actions
+     */
+    public CapaActionQueryServiceImpl(ICapaActionRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public List<CapaAction> handle(GetAllCapaActionsQuery query) {
-        return capaActionRepository.findAll();
+        return query.capaCode() == null || query.capaCode().isBlank()
+                ? repository.findAll()
+                : repository.findByCapaCode(query.capaCode().trim());
     }
 
     @Override
-    public List<CapaAction> handle(GetCapaActionsByCapaPlanIdQuery query) {
-        return capaActionRepository.findByCapaPlanId(query.capaPlanId());
+    public Optional<CapaAction> handle(GetCapaActionByIdQuery query) {
+        return repository.findById(query.capaActionId());
     }
 }

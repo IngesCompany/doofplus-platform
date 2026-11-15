@@ -1,18 +1,20 @@
 package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities;
 
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.QualityDocumentStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DocumentStatus;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Row of the quality_documents table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "quality_documents")
 @Getter
@@ -20,26 +22,43 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class QualityDocumentPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "code", length = 30, nullable = false)
     private String code;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    private String documentType;
-
-    private String fileReference;
-
+    @Column(name = "version", length = 10, nullable = false)
     private String version;
 
+    @Column(name = "title", length = 255, nullable = false)
+    private String title;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private QualityDocumentStatus status;
+    @Column(name = "status", length = 24, nullable = false)
+    private DocumentStatus status;
 
-    private Long ownerId;
+    @Column(name = "author", length = 100, nullable = false)
+    private String author;
 
-    private LocalDateTime approvedAt;
+    @Column(name = "technical_reviewer", length = 100, nullable = false)
+    private String technicalReviewer;
+
+    @Column(name = "approver", length = 100, nullable = false)
+    private String approver;
+
+    @Column(name = "changed_at")
+    private LocalDate changedAt;
+
+    @Column(name = "purpose", columnDefinition = "TEXT", nullable = false)
+    private String purpose;
+
+    @Column(name = "scope", columnDefinition = "TEXT", nullable = false)
+    private String scope;
+
+    @Column(name = "procedure_text", columnDefinition = "TEXT", nullable = false)
+    private String procedure;
+
+    @Column(name = "revision_summary", columnDefinition = "TEXT", nullable = false)
+    private String revisionSummary;
+
+    @Column(name = "review_cycle_months", nullable = false)
+    private Integer reviewCycleMonths;
 }

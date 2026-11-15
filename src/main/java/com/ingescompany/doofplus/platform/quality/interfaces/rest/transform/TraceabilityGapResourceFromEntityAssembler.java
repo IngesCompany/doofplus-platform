@@ -3,23 +3,27 @@ package com.ingescompany.doofplus.platform.quality.interfaces.rest.transform;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.TraceabilityGap;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.TraceabilityGapResource;
 
-public class TraceabilityGapResourceFromEntityAssembler {
+/**
+ * Converts a traceability gap to its REST resource.
+ */
+public final class TraceabilityGapResourceFromEntityAssembler {
 
-    public static TraceabilityGapResource toResourceFromEntity(TraceabilityGap entity) {
-        if (entity == null) {
-            return null;
-        }
+    private TraceabilityGapResourceFromEntityAssembler() {
+    }
 
+    /**
+     * Converts a traceability gap to its resource.
+     *
+     * @param traceabilityGap the traceability gap
+     * @return the resource
+     */
+    public static TraceabilityGapResource toResourceFromEntity(TraceabilityGap traceabilityGap) {
         return new TraceabilityGapResource(
-                entity.getId(),
-                entity.getBatchId(),
-                entity.getDescription(),
-                entity.getMissingReference(),
-                entity.getAffectedProcess(),
-                entity.getStatus() != null ? entity.getStatus().name() : null,
-                entity.getReviewedBy(),
-                entity.getDetectedAt(),
-                entity.getResolvedAt()
-        );
+                traceabilityGap.getId(),
+                traceabilityGap.getBatchCode(),
+                traceabilityGap.getProduct(),
+                traceabilityGap.getMissingRecord(),
+                traceabilityGap.getDetail(),
+                QualityValueParser.fromEnum(traceabilityGap.getStatus()));
     }
 }

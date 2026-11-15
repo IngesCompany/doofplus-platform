@@ -1,78 +1,90 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
-import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateAuditCommand;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.AuditStatus;
+import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Audit of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class Audit extends AbstractDomainAggregateRoot<Audit> {
 
+    /**
+     * The identifier; null until the audit is saved.
+     */
     private Long id;
+
+    /**
+     * The code.
+     */
     private String code;
+
+    /**
+     * The title.
+     */
     private String title;
-    private String scope;
-    private String auditType;
-    private Long auditorId;
-    private LocalDate plannedDate;
-    private LocalDateTime startedAt;
-    private LocalDateTime completedAt;
+
+    /**
+     * The period.
+     */
+    private String period;
+
+    /**
+     * The areas reviewed.
+     */
+    private Integer areasReviewed;
+
+    /**
+     * The areas total.
+     */
+    private Integer areasTotal;
+
+    /**
+     * The status.
+     */
     private AuditStatus status;
 
-    public Audit(String code, String title, String scope,
-                 String auditType, Long auditorId, LocalDate plannedDate) {
-        if (code == null || code.isBlank()) {
-            throw new IllegalArgumentException("Audit code is required");
-        }
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Audit title is required");
-        }
-
-        this.code = code;
-        this.title = title;
-        this.scope = scope;
-        this.auditType = auditType;
-        this.auditorId = auditorId;
-        this.plannedDate = plannedDate;
-        this.status = AuditStatus.PLANNED;
+    private Audit() {
     }
 
-    public static Audit reconstitute(
-            Long id, String code, String title, String scope,
-            String auditType, Long auditorId, LocalDate plannedDate,
-            LocalDateTime startedAt, LocalDateTime completedAt,
-            AuditStatus status) {
+    /**
+     * Creates the audit from its command.
+     *
+     * @param command the data of the audit
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public Audit(CreateAuditCommand command) {
+        apply(command.code(), command.title(), command.period(), command.areasReviewed(), command.areasTotal(), command.status());
+    }
 
-        Audit audit = new Audit(code, title, scope, auditType, auditorId, plannedDate);
+    /**
+     * Rebuilds a saved audit without validating it again.
+     *
+     * @return the audit
+     */
+    public static Audit reconstitute(Long id, String code, String title, String period, Integer areasReviewed, Integer areasTotal, AuditStatus status) {
+        var audit = new Audit();
         audit.id = id;
-        audit.startedAt = startedAt;
-        audit.completedAt = completedAt;
+        audit.code = code;
+        audit.title = title;
+        audit.period = period;
+        audit.areasReviewed = areasReviewed;
+        audit.areasTotal = areasTotal;
         audit.status = status;
         return audit;
     }
 
-    public void start() {
-        if (status != AuditStatus.PLANNED) {
-            throw new IllegalStateException("Only planned audits can start");
-        }
-        status = AuditStatus.IN_PROGRESS;
-        startedAt = LocalDateTime.now();
-    }
-
-    public void complete() {
-        if (status != AuditStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Only audits in progress can be completed");
-        }
-        status = AuditStatus.COMPLETED;
-        completedAt = LocalDateTime.now();
-    }
-
-    public void cancel() {
-        if (status == AuditStatus.COMPLETED) {
-            throw new IllegalStateException("Completed audits cannot be cancelled");
-        }
-        status = AuditStatus.CANCELLED;
+    private void apply(String code, String title, String period, Integer areasReviewed, Integer areasTotal, AuditStatus status) {
+        if (code == null || code.isBlank()) throw new IllegalArgumentException("quality.audit.error.code.notBlank");
+        this.code = code == null ? "" : code.trim();
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("quality.audit.error.title.notBlank");
+        this.title = title == null ? "" : title.trim();
+        this.period = period == null ? "" : period.trim();
+        this.areasReviewed = areasReviewed != null ? areasReviewed : 0;
+        this.areasTotal = areasTotal != null ? areasTotal : 0;
+        this.status = status != null ? status : AuditStatus.SCHEDULED;
     }
 }

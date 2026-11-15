@@ -1,17 +1,17 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Capa plan answered by the API. Enums in UPPER_SNAKE_CASE, dates in yyyy-MM-dd and date-times in ISO 8601 UTC.
+ */
 public record CapaPlanResource(
         Long id,
-        Long deviationId,
+        String code,
         String title,
-        String description,
-        String status,
-        LocalDate dueDate,
-        String responsible,
-        LocalDateTime createdAt,
-        LocalDateTime completedAt
-) {
+        String sourceDeviation,
+        String owner,
+        String reviewer,
+        String rootCause,
+        String acceptanceCriterion,
+        String effectivenessCheckAt,
+        String status) {
 }

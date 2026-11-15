@@ -1,24 +1,30 @@
 package com.ingescompany.doofplus.platform.quality.application.queryservices;
 
-import java.util.Optional;
-import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetEvidenceByIdQuery;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Evidence;
 import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllEvidenceQuery;
-import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetEvidenceByDeviationIdQuery;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetEvidenceByIdQuery;
 
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Query service of the evidence.
+ */
 public interface EvidenceQueryService {
 
-    List<Evidence> handle(GetAllEvidenceQuery query);
-
-    List<Evidence> handle(GetEvidenceByDeviationIdQuery query);
-
     /**
-     * Gets a Evidence by its identifier.
+     * Lists the evidence, filtered when the query has a value.
      *
      * @param query the query
-     * @return the Evidence, or empty when it does not exist
+     * @return the evidence
+     */
+    List<Evidence> handle(GetAllEvidenceQuery query);
+
+    /**
+     * Finds a evidence by its identifier.
+     *
+     * @param query the query
+     * @return the evidence, if it exists
      */
     Optional<Evidence> handle(GetEvidenceByIdQuery query);
 }

@@ -5,61 +5,48 @@ import com.ingescompany.doofplus.platform.quality.domain.repositories.IQualityDo
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.assemblers.QualityDocumentPersistenceAssembler;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.QualityDocumentPersistenceEntity;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.repositories.QualityDocumentPersistenceRepository;
-import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Adapter of the domain repository of the quality documents on Spring Data JPA.
+ */
 @Repository
 public class QualityDocumentRepositoryImpl implements IQualityDocumentRepository {
 
     private final QualityDocumentPersistenceRepository repository;
-    private final DomainEventPublisher domainEventPublisher;
 
-    public QualityDocumentRepositoryImpl(
-            QualityDocumentPersistenceRepository repository,
-            DomainEventPublisher domainEventPublisher) {
+    /**
+     * Creates the adapter.
+     *
+     * @param repository the Spring Data repository
+     */
+    public QualityDocumentRepositoryImpl(QualityDocumentPersistenceRepository repository) {
         this.repository = repository;
-        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
-    public QualityDocument save(QualityDocument document) {
-        QualityDocumentPersistenceEntity entity =
-                QualityDocumentPersistenceAssembler.toEntity(document);
-
-        QualityDocumentPersistenceEntity savedEntity = repository.save(entity);
-        QualityDocument savedDocument =
-                QualityDocumentPersistenceAssembler.toDomain(savedEntity);
-
-        domainEventPublisher.publishAndClearEvents(document);
-
-        return savedDocument;
+    public QualityDocument save(QualityDocument qualityDocument) {
+        var entity = qualityDocument.getId() == null
+                ? new QualityDocumentPersistenceEntity()
+                : repository.findById(qualityDocument.getId()).orElseGet(QualityDocumentPersistenceEntity::new);
+        return QualityDocumentPersistenceAssembler.toDomain(repository.save(QualityDocumentPersistenceAssembler.toEntity(qualityDocument, entity)));
     }
 
     @Override
     public Optional<QualityDocument> findById(Long id) {
-        return repository.findById(id)
-                .map(QualityDocumentPersistenceAssembler::toDomain);
-    }
-
-    @Override
-    public Optional<QualityDocument> findByCode(String code) {
-        return repository.findByCode(code)
-                .map(QualityDocumentPersistenceAssembler::toDomain);
+        return repository.findById(id).map(QualityDocumentPersistenceAssembler::toDomain);
     }
 
     @Override
     public List<QualityDocument> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(QualityDocumentPersistenceAssembler::toDomain)
-                .toList();
+        return repository.findAll().stream().map(QualityDocumentPersistenceAssembler::toDomain).toList();
     }
 
     @Override
-    public boolean existsByCode(String code) {
-        return repository.existsByCode(code);
+    public List<QualityDocument> findByCode(String code) {
+        return repository.findByCode(code).stream().map(QualityDocumentPersistenceAssembler::toDomain).toList();
     }
 }

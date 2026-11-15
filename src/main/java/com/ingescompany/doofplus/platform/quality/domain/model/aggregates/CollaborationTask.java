@@ -1,87 +1,90 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateCollaborationTaskCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.TaskStatus;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.CollaborationTaskStatus;
+import java.time.LocalDateTime;
 import lombok.Getter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Collaboration task of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class CollaborationTask extends AbstractDomainAggregateRoot<CollaborationTask> {
 
+    /**
+     * The identifier; null until the collaboration task is saved.
+     */
     private Long id;
+
+    /**
+     * The title.
+     */
     private String title;
-    private String description;
-    private Long assignedTo;
-    private Long createdBy;
-    private Long relatedDeviationId;
-    private LocalDate dueDate;
-    private CollaborationTaskStatus status;
-    private LocalDateTime completedAt;
 
-    public CollaborationTask(String title, String description,
-                             Long assignedTo, Long createdBy,
-                             Long relatedDeviationId, LocalDate dueDate) {
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Task title is required");
-        }
+    /**
+     * The record code.
+     */
+    private String recordCode;
 
-        this.title = title;
-        this.description = description;
-        this.assignedTo = assignedTo;
-        this.createdBy = createdBy;
-        this.relatedDeviationId = relatedDeviationId;
-        this.dueDate = dueDate;
-        this.status = CollaborationTaskStatus.PENDING;
+    /**
+     * The detail.
+     */
+    private String detail;
+
+    /**
+     * The owner.
+     */
+    private String owner;
+
+    /**
+     * The due at.
+     */
+    private LocalDateTime dueAt;
+
+    /**
+     * The status.
+     */
+    private TaskStatus status;
+
+    private CollaborationTask() {
     }
 
-    public static CollaborationTask reconstitute(
-            Long id, String title, String description,
-            Long assignedTo, Long createdBy, Long relatedDeviationId,
-            LocalDate dueDate, CollaborationTaskStatus status,
-            LocalDateTime completedAt) {
-
-        CollaborationTask task = new CollaborationTask(
-                title, description, assignedTo, createdBy,
-                relatedDeviationId, dueDate
-        );
-        task.id = id;
-        task.status = status;
-        task.completedAt = completedAt;
-        return task;
+    /**
+     * Creates the collaboration task from its command.
+     *
+     * @param command the data of the collaboration task
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public CollaborationTask(CreateCollaborationTaskCommand command) {
+        apply(command.title(), command.recordCode(), command.detail(), command.owner(), command.dueAt(), command.status());
     }
 
-    public void assignTo(Long userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("Assigned user is required");
-        }
-        if (status == CollaborationTaskStatus.COMPLETED ||
-                status == CollaborationTaskStatus.CANCELLED) {
-            throw new IllegalStateException("Closed tasks cannot be reassigned");
-        }
-        assignedTo = userId;
+    /**
+     * Rebuilds a saved collaboration task without validating it again.
+     *
+     * @return the collaboration task
+     */
+    public static CollaborationTask reconstitute(Long id, String title, String recordCode, String detail, String owner, LocalDateTime dueAt, TaskStatus status) {
+        var collaborationTask = new CollaborationTask();
+        collaborationTask.id = id;
+        collaborationTask.title = title;
+        collaborationTask.recordCode = recordCode;
+        collaborationTask.detail = detail;
+        collaborationTask.owner = owner;
+        collaborationTask.dueAt = dueAt;
+        collaborationTask.status = status;
+        return collaborationTask;
     }
 
-    public void start() {
-        if (status != CollaborationTaskStatus.PENDING) {
-            throw new IllegalStateException("Only pending tasks can start");
-        }
-        status = CollaborationTaskStatus.IN_PROGRESS;
-    }
-
-    public void complete() {
-        if (status != CollaborationTaskStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Only tasks in progress can be completed");
-        }
-        status = CollaborationTaskStatus.COMPLETED;
-        completedAt = LocalDateTime.now();
-    }
-
-    public void cancel() {
-        if (status == CollaborationTaskStatus.COMPLETED) {
-            throw new IllegalStateException("Completed tasks cannot be cancelled");
-        }
-        status = CollaborationTaskStatus.CANCELLED;
+    private void apply(String title, String recordCode, String detail, String owner, LocalDateTime dueAt, TaskStatus status) {
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("quality.collaborationTask.error.title.notBlank");
+        this.title = title == null ? "" : title.trim();
+        this.recordCode = recordCode == null ? "" : recordCode.trim();
+        this.detail = detail == null ? "" : detail.trim();
+        this.owner = owner == null ? "" : owner.trim();
+        this.dueAt = dueAt;
+        this.status = status != null ? status : TaskStatus.TO_DO;
     }
 }

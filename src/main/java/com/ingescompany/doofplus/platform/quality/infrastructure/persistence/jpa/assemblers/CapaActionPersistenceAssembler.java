@@ -3,33 +3,41 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaAction;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CapaActionPersistenceEntity;
 
-public class CapaActionPersistenceAssembler {
+/**
+ * Converts the capa actions between the domain and the persistence entity.
+ */
+public final class CapaActionPersistenceAssembler {
 
-    public static CapaAction toDomain(CapaActionPersistenceEntity entity) {
-        return CapaAction.reconstitute(
-                entity.getId(),
-                entity.getCapaPlanId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getAssignedTo(),
-                entity.getDueDate(),
-                entity.getStatus(),
-                entity.getCompletedAt()
-        );
+    private CapaActionPersistenceAssembler() {
     }
 
-    public static CapaActionPersistenceEntity toEntity(CapaAction domain) {
-        CapaActionPersistenceEntity entity = new CapaActionPersistenceEntity();
-
-        entity.setId(domain.getId());
-        entity.setCapaPlanId(domain.getCapaPlanId());
-        entity.setTitle(domain.getTitle());
-        entity.setDescription(domain.getDescription());
-        entity.setAssignedTo(domain.getAssignedTo());
-        entity.setDueDate(domain.getDueDate());
-        entity.setStatus(domain.getStatus());
-        entity.setCompletedAt(domain.getCompletedAt());
-
+    /**
+     * Copies the data of the capa action to a row.
+     *
+     * @param capaAction    the capa action
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static CapaActionPersistenceEntity toEntity(CapaAction capaAction, CapaActionPersistenceEntity entity) {
+        entity.setCapaCode(capaAction.getCapaCode());
+        entity.setCode(capaAction.getCode());
+        entity.setType(capaAction.getType());
+        entity.setTitle(capaAction.getTitle());
+        entity.setOwner(capaAction.getOwner());
+        entity.setDueAt(capaAction.getDueAt());
+        entity.setStatus(capaAction.getStatus());
+        entity.setEvidence(capaAction.getEvidence());
+        entity.setEvidenceAttached(capaAction.getEvidenceAttached());
         return entity;
+    }
+
+    /**
+     * Rebuilds the capa action of a row.
+     *
+     * @param entity the row
+     * @return the capa action
+     */
+    public static CapaAction toDomain(CapaActionPersistenceEntity entity) {
+        return CapaAction.reconstitute(entity.getId(), entity.getCapaCode(), entity.getCode(), entity.getType(), entity.getTitle(), entity.getOwner(), entity.getDueAt(), entity.getStatus(), entity.getEvidence(), entity.getEvidenceAttached());
     }
 }

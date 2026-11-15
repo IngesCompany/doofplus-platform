@@ -5,15 +5,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Spring Data repository of the deviations table.
+ */
 @Repository
-public interface DeviationPersistenceRepository
-        extends JpaRepository<DeviationPersistenceEntity, Long> {
+public interface DeviationPersistenceRepository extends JpaRepository<DeviationPersistenceEntity, Long> {
 
-    Optional<DeviationPersistenceEntity> findByCode(String code);
+    /**
+     * Lists the rows with the given batch code.
+     *
+     * @param batchCode the batch code
+     * @return the rows
+     */
+    List<DeviationPersistenceEntity> findByBatchCode(String batchCode);
 
-    List<DeviationPersistenceEntity> findByBatchId(Long batchId);
-
+    /**
+     * Tells whether a row has the code.
+     *
+     * @param code the code
+     * @return true when it exists
+     */
     boolean existsByCode(String code);
+
+    /**
+     * Tells whether a row other than the given one has the code.
+     *
+     * @param code the code
+     * @param id   the identifier of the row to leave out
+     * @return true when it exists
+     */
+    boolean existsByCodeAndIdNot(String code, Long id);
 }

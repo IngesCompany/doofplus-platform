@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a Evidence by its identifier.
+ * Query of a evidence by its identifier.
  *
- * @param id identifier
+ * @param evidenceId the identifier
  */
-public record GetEvidenceByIdQuery(Long id) {
+public record GetEvidenceByIdQuery(Long evidenceId) {
 }

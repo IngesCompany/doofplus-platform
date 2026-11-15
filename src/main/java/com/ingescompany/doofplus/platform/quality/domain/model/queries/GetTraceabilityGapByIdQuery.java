@@ -1,9 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
 /**
- * Query to get a TraceabilityGap by its identifier.
+ * Query of a traceability gap by its identifier.
  *
- * @param id identifier
+ * @param traceabilityGapId the identifier
  */
-public record GetTraceabilityGapByIdQuery(Long id) {
+public record GetTraceabilityGapByIdQuery(Long traceabilityGapId) {
 }

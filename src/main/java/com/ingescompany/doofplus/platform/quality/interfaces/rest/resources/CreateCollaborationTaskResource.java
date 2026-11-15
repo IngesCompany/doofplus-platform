@@ -1,13 +1,14 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDate;
-
+/**
+ * Body to create a collaboration task. Enums are accepted in kebab-case, PascalCase or UPPER_SNAKE_CASE;
+ * missing values take the defaults of the contract.
+ */
 public record CreateCollaborationTaskResource(
         String title,
-        String description,
-        Long assignedTo,
-        Long createdBy,
-        Long relatedDeviationId,
-        LocalDate dueDate
-) {
+        String recordCode,
+        String detail,
+        String owner,
+        String dueAt,
+        String status) {
 }

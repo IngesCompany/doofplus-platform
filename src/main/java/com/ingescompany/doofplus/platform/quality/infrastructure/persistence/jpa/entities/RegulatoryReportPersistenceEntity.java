@@ -1,19 +1,21 @@
 package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities;
 
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.RegulatoryReportStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ReportStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ReportType;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Row of the regulatory_reports table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "regulatory_reports")
 @Getter
@@ -21,26 +23,29 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RegulatoryReportPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "code", length = 30, nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false)
-    private String title;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 24, nullable = false)
+    private ReportType type;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "scope", length = 100, nullable = false)
+    private String scope;
 
-    private String regulatoryAuthority;
-
-    private String fileReference;
-
-    private LocalDate dueDate;
+    @Column(name = "owner", length = 100, nullable = false)
+    private String owner;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RegulatoryReportStatus status;
+    @Column(name = "status", length = 24, nullable = false)
+    private ReportStatus status;
 
-    private Long preparedBy;
+    @Column(name = "template", length = 100, nullable = false)
+    private String template;
 
-    private LocalDateTime submittedAt;
+    @Column(name = "format", length = 100, nullable = false)
+    private String format;
+
+    @Column(name = "created_on")
+    private LocalDate createdOn;
 }

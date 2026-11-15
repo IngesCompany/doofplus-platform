@@ -1,15 +1,18 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDateTime;
-
+/**
+ * Body to create a analytical result. Enums are accepted in kebab-case, PascalCase or UPPER_SNAKE_CASE;
+ * missing values take the defaults of the contract.
+ */
 public record CreateAnalyticalResultResource(
-        Long batchId,
-        String testName,
-        String parameter,
-        Double measuredValue,
-        Double minimumValue,
-        Double maximumValue,
-        String unit,
-        LocalDateTime testedAt
-) {
+        String batchCode,
+        String sampleCode,
+        String reportCode,
+        String test,
+        String protocol,
+        String result,
+        String specification,
+        String analyst,
+        String status,
+        String approval) {
 }

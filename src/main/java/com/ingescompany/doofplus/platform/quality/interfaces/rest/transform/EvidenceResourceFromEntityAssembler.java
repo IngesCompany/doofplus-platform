@@ -3,25 +3,26 @@ package com.ingescompany.doofplus.platform.quality.interfaces.rest.transform;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Evidence;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.EvidenceResource;
 
-public class EvidenceResourceFromEntityAssembler {
+/**
+ * Converts a evidence to its REST resource.
+ */
+public final class EvidenceResourceFromEntityAssembler {
 
-    public static EvidenceResource toResourceFromEntity(Evidence entity) {
-        if (entity == null) {
-            return null;
-        }
+    private EvidenceResourceFromEntityAssembler() {
+    }
 
+    /**
+     * Converts a evidence to its resource.
+     *
+     * @param evidence the evidence
+     * @return the resource
+     */
+    public static EvidenceResource toResourceFromEntity(Evidence evidence) {
         return new EvidenceResource(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getType() != null ? entity.getType().name() : null,
-                entity.getFileReference(),
-                entity.getDeviationId(),
-                entity.getDocumentId(),
-                entity.getUploadedBy(),
-                entity.getStatus() != null ? entity.getStatus().name() : null,
-                entity.getUploadedAt(),
-                entity.getVerifiedAt()
-        );
+                evidence.getId(),
+                evidence.getRecordCode(),
+                evidence.getFileName(),
+                evidence.getDetail(),
+                QualityValueParser.fromEnum(evidence.getStatus()));
     }
 }

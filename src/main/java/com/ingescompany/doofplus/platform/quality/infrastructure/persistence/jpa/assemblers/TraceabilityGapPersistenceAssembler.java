@@ -3,35 +3,37 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.TraceabilityGap;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.TraceabilityGapPersistenceEntity;
 
-public class TraceabilityGapPersistenceAssembler {
+/**
+ * Converts the traceability gaps between the domain and the persistence entity.
+ */
+public final class TraceabilityGapPersistenceAssembler {
 
-    public static TraceabilityGap toDomain(TraceabilityGapPersistenceEntity entity) {
-        return TraceabilityGap.reconstitute(
-                entity.getId(),
-                entity.getBatchId(),
-                entity.getDescription(),
-                entity.getMissingReference(),
-                entity.getAffectedProcess(),
-                entity.getStatus(),
-                entity.getReviewedBy(),
-                entity.getDetectedAt(),
-                entity.getResolvedAt()
-        );
+    private TraceabilityGapPersistenceAssembler() {
     }
 
-    public static TraceabilityGapPersistenceEntity toEntity(TraceabilityGap gap) {
-        TraceabilityGapPersistenceEntity entity = new TraceabilityGapPersistenceEntity();
-
-        entity.setId(gap.getId());
-        entity.setBatchId(gap.getBatchId());
-        entity.setDescription(gap.getDescription());
-        entity.setMissingReference(gap.getMissingReference());
-        entity.setAffectedProcess(gap.getAffectedProcess());
-        entity.setStatus(gap.getStatus());
-        entity.setReviewedBy(gap.getReviewedBy());
-        entity.setDetectedAt(gap.getDetectedAt());
-        entity.setResolvedAt(gap.getResolvedAt());
-
+    /**
+     * Copies the data of the traceability gap to a row.
+     *
+     * @param traceabilityGap    the traceability gap
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static TraceabilityGapPersistenceEntity toEntity(TraceabilityGap traceabilityGap, TraceabilityGapPersistenceEntity entity) {
+        entity.setBatchCode(traceabilityGap.getBatchCode());
+        entity.setProduct(traceabilityGap.getProduct());
+        entity.setMissingRecord(traceabilityGap.getMissingRecord());
+        entity.setDetail(traceabilityGap.getDetail());
+        entity.setStatus(traceabilityGap.getStatus());
         return entity;
+    }
+
+    /**
+     * Rebuilds the traceability gap of a row.
+     *
+     * @param entity the row
+     * @return the traceability gap
+     */
+    public static TraceabilityGap toDomain(TraceabilityGapPersistenceEntity entity) {
+        return TraceabilityGap.reconstitute(entity.getId(), entity.getBatchCode(), entity.getProduct(), entity.getMissingRecord(), entity.getDetail(), entity.getStatus());
     }
 }

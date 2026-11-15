@@ -8,43 +8,33 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the regulatory reports.
+ */
 @Service
 public class RegulatoryReportCommandServiceImpl implements RegulatoryReportCommandService {
 
-    private final IRegulatoryReportRepository regulatoryReportRepository;
+    private final IRegulatoryReportRepository repository;
 
-    public RegulatoryReportCommandServiceImpl(IRegulatoryReportRepository regulatoryReportRepository) {
-        this.regulatoryReportRepository = regulatoryReportRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the regulatory reports
+     */
+    public RegulatoryReportCommandServiceImpl(IRegulatoryReportRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<RegulatoryReport, ApplicationError> handle(CreateRegulatoryReportCommand command) {
         try {
-            if (regulatoryReportRepository.existsByCode(command.code())) {
-                return Result.failure(
-                        ApplicationError.conflict("regulatory report", "Report code already exists")
-                );
+            var regulatoryReport = new RegulatoryReport(command);
+            if (repository.existsByCode(regulatoryReport.getCode(), null)) {
+                return Result.failure(ApplicationError.conflict("RegulatoryReport", "quality.regulatoryReport.error.duplicate"));
             }
-
-            RegulatoryReport report = new RegulatoryReport(
-                    command.code(),
-                    command.title(),
-                    command.description(),
-                    command.regulatoryAuthority(),
-                    command.fileReference(),
-                    command.dueDate(),
-                    command.preparedBy()
-            );
-
-            return Result.success(regulatoryReportRepository.save(report));
-        } catch (IllegalArgumentException exception) {
-            return Result.failure(
-                    ApplicationError.validationError("regulatory report", exception.getMessage())
-            );
-        } catch (Exception exception) {
-            return Result.failure(
-                    ApplicationError.unexpected("creating regulatory report", exception.getMessage())
-            );
+            return Result.success(repository.save(regulatoryReport));
+        } catch (IllegalArgumentException e) {
+            return Result.failure(ApplicationError.validationError("RegulatoryReport", e.getMessage()));
         }
     }
 }

@@ -5,58 +5,48 @@ import com.ingescompany.doofplus.platform.quality.domain.repositories.IAuditFind
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.assemblers.AuditFindingPersistenceAssembler;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.AuditFindingPersistenceEntity;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.repositories.AuditFindingPersistenceRepository;
-import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Adapter of the domain repository of the audit findings on Spring Data JPA.
+ */
 @Repository
 public class AuditFindingRepositoryImpl implements IAuditFindingRepository {
 
     private final AuditFindingPersistenceRepository repository;
-    private final DomainEventPublisher domainEventPublisher;
 
-    public AuditFindingRepositoryImpl(
-            AuditFindingPersistenceRepository repository,
-            DomainEventPublisher domainEventPublisher) {
+    /**
+     * Creates the adapter.
+     *
+     * @param repository the Spring Data repository
+     */
+    public AuditFindingRepositoryImpl(AuditFindingPersistenceRepository repository) {
         this.repository = repository;
-        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
-    public AuditFinding save(AuditFinding finding) {
-        AuditFindingPersistenceEntity entity =
-                AuditFindingPersistenceAssembler.toEntity(finding);
-
-        AuditFindingPersistenceEntity savedEntity = repository.save(entity);
-        AuditFinding savedFinding =
-                AuditFindingPersistenceAssembler.toDomain(savedEntity);
-
-        domainEventPublisher.publishAndClearEvents(finding);
-
-        return savedFinding;
+    public AuditFinding save(AuditFinding auditFinding) {
+        var entity = auditFinding.getId() == null
+                ? new AuditFindingPersistenceEntity()
+                : repository.findById(auditFinding.getId()).orElseGet(AuditFindingPersistenceEntity::new);
+        return AuditFindingPersistenceAssembler.toDomain(repository.save(AuditFindingPersistenceAssembler.toEntity(auditFinding, entity)));
     }
 
     @Override
     public Optional<AuditFinding> findById(Long id) {
-        return repository.findById(id)
-                .map(AuditFindingPersistenceAssembler::toDomain);
+        return repository.findById(id).map(AuditFindingPersistenceAssembler::toDomain);
     }
 
     @Override
     public List<AuditFinding> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(AuditFindingPersistenceAssembler::toDomain)
-                .toList();
+        return repository.findAll().stream().map(AuditFindingPersistenceAssembler::toDomain).toList();
     }
 
     @Override
-    public List<AuditFinding> findByAuditId(Long auditId) {
-        return repository.findByAuditId(auditId)
-                .stream()
-                .map(AuditFindingPersistenceAssembler::toDomain)
-                .toList();
+    public List<AuditFinding> findByAuditCode(String auditCode) {
+        return repository.findByAuditCode(auditCode).stream().map(AuditFindingPersistenceAssembler::toDomain).toList();
     }
 }

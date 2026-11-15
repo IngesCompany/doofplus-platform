@@ -1,79 +1,152 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateQualityDocumentCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateQualityDocumentCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DocumentStatus;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.QualityDocumentStatus;
+import java.time.LocalDate;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Quality document of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class QualityDocument extends AbstractDomainAggregateRoot<QualityDocument> {
 
+    /**
+     * The identifier; null until the quality document is saved.
+     */
     private Long id;
+
+    /**
+     * The code.
+     */
     private String code;
-    private String title;
-    private String description;
-    private String documentType;
-    private String fileReference;
+
+    /**
+     * The version.
+     */
     private String version;
-    private QualityDocumentStatus status;
-    private Long ownerId;
-    private LocalDateTime approvedAt;
 
-    public QualityDocument(String code, String title, String description,
-                           String documentType, String fileReference,
-                           String version, Long ownerId) {
-        if (code == null || code.isBlank()) {
-            throw new IllegalArgumentException("Document code is required");
-        }
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Document title is required");
-        }
+    /**
+     * The title.
+     */
+    private String title;
 
-        this.code = code;
-        this.title = title;
-        this.description = description;
-        this.documentType = documentType;
-        this.fileReference = fileReference;
-        this.version = version;
-        this.ownerId = ownerId;
-        this.status = QualityDocumentStatus.DRAFT;
+    /**
+     * The status.
+     */
+    private DocumentStatus status;
+
+    /**
+     * The author.
+     */
+    private String author;
+
+    /**
+     * The technical reviewer.
+     */
+    private String technicalReviewer;
+
+    /**
+     * The approver.
+     */
+    private String approver;
+
+    /**
+     * The changed at.
+     */
+    private LocalDate changedAt;
+
+    /**
+     * The purpose.
+     */
+    private String purpose;
+
+    /**
+     * The scope.
+     */
+    private String scope;
+
+    /**
+     * The procedure.
+     */
+    private String procedure;
+
+    /**
+     * The revision summary.
+     */
+    private String revisionSummary;
+
+    /**
+     * The review cycle months.
+     */
+    private Integer reviewCycleMonths;
+
+    private QualityDocument() {
     }
 
-    public static QualityDocument reconstitute(
-            Long id, String code, String title, String description,
-            String documentType, String fileReference, String version,
-            QualityDocumentStatus status, Long ownerId, LocalDateTime approvedAt) {
-
-        QualityDocument document = new QualityDocument(
-                code, title, description, documentType,
-                fileReference, version, ownerId
-        );
-        document.id = id;
-        document.status = status;
-        document.approvedAt = approvedAt;
-        return document;
+    /**
+     * Creates the quality document from its command.
+     *
+     * @param command the data of the quality document
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public QualityDocument(CreateQualityDocumentCommand command) {
+        apply(command.code(), command.version(), command.title(), command.status(), command.author(), command.technicalReviewer(), command.approver(), command.changedAt(), command.purpose(), command.scope(), command.procedure(), command.revisionSummary(), command.reviewCycleMonths());
     }
 
-    public void submitForReview() {
-        if (status != QualityDocumentStatus.DRAFT) {
-            throw new IllegalStateException("Only draft documents can be submitted");
-        }
-        status = QualityDocumentStatus.UNDER_REVIEW;
+    /**
+     * Rebuilds a saved quality document without validating it again.
+     *
+     * @return the quality document
+     */
+    public static QualityDocument reconstitute(Long id, String code, String version, String title, DocumentStatus status, String author, String technicalReviewer, String approver, LocalDate changedAt, String purpose, String scope, String procedure, String revisionSummary, Integer reviewCycleMonths) {
+        var qualityDocument = new QualityDocument();
+        qualityDocument.id = id;
+        qualityDocument.code = code;
+        qualityDocument.version = version;
+        qualityDocument.title = title;
+        qualityDocument.status = status;
+        qualityDocument.author = author;
+        qualityDocument.technicalReviewer = technicalReviewer;
+        qualityDocument.approver = approver;
+        qualityDocument.changedAt = changedAt;
+        qualityDocument.purpose = purpose;
+        qualityDocument.scope = scope;
+        qualityDocument.procedure = procedure;
+        qualityDocument.revisionSummary = revisionSummary;
+        qualityDocument.reviewCycleMonths = reviewCycleMonths;
+        return qualityDocument;
     }
 
-    public void approve() {
-        if (status != QualityDocumentStatus.UNDER_REVIEW) {
-            throw new IllegalStateException("Document must be under review");
-        }
-        status = QualityDocumentStatus.APPROVED;
-        approvedAt = LocalDateTime.now();
+    /**
+     * Replaces the data of the quality document with the data of the command.
+     *
+     * @param command the new data
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public void update(UpdateQualityDocumentCommand command) {
+        apply(command.code(), command.version(), command.title(), command.status(), command.author(), command.technicalReviewer(), command.approver(), command.changedAt(), command.purpose(), command.scope(), command.procedure(), command.revisionSummary(), command.reviewCycleMonths());
     }
 
-    public void markObsolete() {
-        if (status != QualityDocumentStatus.APPROVED) {
-            throw new IllegalStateException("Only approved documents can become obsolete");
-        }
-        status = QualityDocumentStatus.OBSOLETE;
+    private void apply(String code, String version, String title, DocumentStatus status, String author, String technicalReviewer, String approver, LocalDate changedAt, String purpose, String scope, String procedure, String revisionSummary, Integer reviewCycleMonths) {
+        if (code == null || code.isBlank()) throw new IllegalArgumentException("quality.qualityDocument.error.code.notBlank");
+        this.code = code == null ? "" : code.trim();
+        if (version == null || version.isBlank()) throw new IllegalArgumentException("quality.qualityDocument.error.version.notBlank");
+        this.version = version == null ? "" : version.trim();
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("quality.qualityDocument.error.title.notBlank");
+        this.title = title == null ? "" : title.trim();
+        this.status = status != null ? status : DocumentStatus.DRAFT;
+        this.author = author == null ? "" : author.trim();
+        this.technicalReviewer = technicalReviewer == null ? "" : technicalReviewer.trim();
+        this.approver = approver == null ? "" : approver.trim();
+        this.changedAt = changedAt;
+        this.purpose = purpose == null ? "" : purpose.trim();
+        this.scope = scope == null ? "" : scope.trim();
+        this.procedure = procedure == null ? "" : procedure.trim();
+        this.revisionSummary = revisionSummary == null ? "" : revisionSummary.trim();
+        this.reviewCycleMonths = reviewCycleMonths != null ? reviewCycleMonths : 12;
     }
 }

@@ -2,13 +2,21 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CollaborationTaskPersistenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface CollaborationTaskPersistenceRepository
-        extends JpaRepository<CollaborationTaskPersistenceEntity, Long> {
+/**
+ * Spring Data repository of the collaboration_tasks table.
+ */
+@Repository
+public interface CollaborationTaskPersistenceRepository extends JpaRepository<CollaborationTaskPersistenceEntity, Long> {
 
-    List<CollaborationTaskPersistenceEntity> findByAssignedTo(Long assignedTo);
-
-    List<CollaborationTaskPersistenceEntity> findByRelatedDeviationId(Long relatedDeviationId);
+    /**
+     * Lists the rows with the given record code.
+     *
+     * @param recordCode the record code
+     * @return the rows
+     */
+    List<CollaborationTaskPersistenceEntity> findByRecordCode(String recordCode);
 }

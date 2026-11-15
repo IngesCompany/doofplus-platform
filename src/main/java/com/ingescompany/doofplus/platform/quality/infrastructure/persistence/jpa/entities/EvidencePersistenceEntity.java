@@ -1,7 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities;
 
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceStatus;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.EvidenceType;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Row of the evidence table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "evidence")
 @Getter
@@ -21,31 +21,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EvidencePersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false)
-    private String title;
+    @Column(name = "record_code", length = 60, nullable = false)
+    private String recordCode;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "file_name", length = 255, nullable = false)
+    private String fileName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EvidenceType type;
-
-    @Column(nullable = false)
-    private String fileReference;
-
-    private Long deviationId;
-
-    private Long documentId;
-
-    private Long uploadedBy;
+    @Column(name = "detail", length = 255, nullable = false)
+    private String detail;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", length = 24, nullable = false)
     private EvidenceStatus status;
-
-    @Column(nullable = false)
-    private LocalDateTime uploadedAt;
-
-    private LocalDateTime verifiedAt;
 }

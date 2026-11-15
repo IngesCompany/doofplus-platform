@@ -1,12 +1,12 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
+/**
+ * Body to create a evidence. Enums are accepted in kebab-case, PascalCase or UPPER_SNAKE_CASE;
+ * missing values take the defaults of the contract.
+ */
 public record CreateEvidenceResource(
-        String title,
-        String description,
-        String type,
-        String fileReference,
-        Long deviationId,
-        Long documentId,
-        Long uploadedBy
-) {
+        String recordCode,
+        String fileName,
+        String detail,
+        String status) {
 }

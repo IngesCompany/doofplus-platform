@@ -8,34 +8,30 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the traceability gaps.
+ */
 @Service
 public class TraceabilityGapCommandServiceImpl implements TraceabilityGapCommandService {
 
-    private final ITraceabilityGapRepository traceabilityGapRepository;
+    private final ITraceabilityGapRepository repository;
 
-    public TraceabilityGapCommandServiceImpl(ITraceabilityGapRepository traceabilityGapRepository) {
-        this.traceabilityGapRepository = traceabilityGapRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the traceability gaps
+     */
+    public TraceabilityGapCommandServiceImpl(ITraceabilityGapRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<TraceabilityGap, ApplicationError> handle(CreateTraceabilityGapCommand command) {
         try {
-            TraceabilityGap traceabilityGap = new TraceabilityGap(
-                    command.batchId(),
-                    command.description(),
-                    command.missingReference(),
-                    command.affectedProcess()
-            );
-
-            return Result.success(traceabilityGapRepository.save(traceabilityGap));
-        } catch (IllegalArgumentException exception) {
-            return Result.failure(
-                    ApplicationError.validationError("traceability gap", exception.getMessage())
-            );
-        } catch (Exception exception) {
-            return Result.failure(
-                    ApplicationError.unexpected("creating traceability gap", exception.getMessage())
-            );
+            var traceabilityGap = new TraceabilityGap(command);
+            return Result.success(repository.save(traceabilityGap));
+        } catch (IllegalArgumentException e) {
+            return Result.failure(ApplicationError.validationError("TraceabilityGap", e.getMessage()));
         }
     }
 }
