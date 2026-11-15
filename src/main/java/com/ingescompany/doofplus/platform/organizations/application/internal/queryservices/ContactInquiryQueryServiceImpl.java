@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.organizations.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetContactInquiryByIdQuery;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.ContactInquiryQueryService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.ContactInquiry;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllContactInquiriesQuery;
@@ -19,5 +21,10 @@ public class ContactInquiryQueryServiceImpl implements ContactInquiryQueryServic
     @Override
     public List<ContactInquiry> handle(GetAllContactInquiriesQuery query) {
         return contactInquiryRepository.findAll();
+    }
+
+    @Override
+    public Optional<ContactInquiry> handle(GetContactInquiryByIdQuery query) {
+        return contactInquiryRepository.findById(query.id());
     }
 }

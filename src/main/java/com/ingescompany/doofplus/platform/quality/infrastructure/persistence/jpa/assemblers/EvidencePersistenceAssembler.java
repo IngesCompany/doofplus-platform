@@ -3,38 +3,36 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.Evidence;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.EvidencePersistenceEntity;
 
-public class EvidencePersistenceAssembler {
+/**
+ * Converts the evidence between the domain and the persistence entity.
+ */
+public final class EvidencePersistenceAssembler {
 
-    public static Evidence toDomain(EvidencePersistenceEntity entity) {
-        return Evidence.reconstitute(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getType(),
-                entity.getFileReference(),
-                entity.getDeviationId(),
-                entity.getDocumentId(),
-                entity.getUploadedBy(),
-                entity.getStatus(),
-                entity.getUploadedAt(),
-                entity.getVerifiedAt()
-        );
+    private EvidencePersistenceAssembler() {
     }
 
-    public static EvidencePersistenceEntity toEntity(Evidence evidence) {
-        EvidencePersistenceEntity entity = new EvidencePersistenceEntity();
-
-        entity.setTitle(evidence.getTitle());
-        entity.setDescription(evidence.getDescription());
-        entity.setType(evidence.getType());
-        entity.setFileReference(evidence.getFileReference());
-        entity.setDeviationId(evidence.getDeviationId());
-        entity.setDocumentId(evidence.getDocumentId());
-        entity.setUploadedBy(evidence.getUploadedBy());
+    /**
+     * Copies the data of the evidence to a row.
+     *
+     * @param evidence    the evidence
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static EvidencePersistenceEntity toEntity(Evidence evidence, EvidencePersistenceEntity entity) {
+        entity.setRecordCode(evidence.getRecordCode());
+        entity.setFileName(evidence.getFileName());
+        entity.setDetail(evidence.getDetail());
         entity.setStatus(evidence.getStatus());
-        entity.setUploadedAt(evidence.getUploadedAt());
-        entity.setVerifiedAt(evidence.getVerifiedAt());
-
         return entity;
+    }
+
+    /**
+     * Rebuilds the evidence of a row.
+     *
+     * @param entity the row
+     * @return the evidence
+     */
+    public static Evidence toDomain(EvidencePersistenceEntity entity) {
+        return Evidence.reconstitute(entity.getId(), entity.getRecordCode(), entity.getFileName(), entity.getDetail(), entity.getStatus());
     }
 }

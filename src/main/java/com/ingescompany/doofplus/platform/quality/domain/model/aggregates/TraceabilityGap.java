@@ -1,71 +1,83 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateTraceabilityGapCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.GapStatus;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.TraceabilityGapStatus;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Traceability gap of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class TraceabilityGap extends AbstractDomainAggregateRoot<TraceabilityGap> {
 
+    /**
+     * The identifier; null until the traceability gap is saved.
+     */
     private Long id;
-    private Long batchId;
-    private String description;
-    private String missingReference;
-    private String affectedProcess;
-    private TraceabilityGapStatus status;
-    private Long reviewedBy;
-    private LocalDateTime detectedAt;
-    private LocalDateTime resolvedAt;
 
-    public TraceabilityGap(Long batchId, String description,
-                           String missingReference, String affectedProcess) {
-        if (batchId == null) {
-            throw new IllegalArgumentException("Batch identifier is required");
-        }
-        if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Gap description is required");
-        }
+    /**
+     * The batch code.
+     */
+    private String batchCode;
 
-        this.batchId = batchId;
-        this.description = description;
-        this.missingReference = missingReference;
-        this.affectedProcess = affectedProcess;
-        this.status = TraceabilityGapStatus.OPEN;
-        this.detectedAt = LocalDateTime.now();
+    /**
+     * The product.
+     */
+    private String product;
+
+    /**
+     * The missing record.
+     */
+    private String missingRecord;
+
+    /**
+     * The detail.
+     */
+    private String detail;
+
+    /**
+     * The status.
+     */
+    private GapStatus status;
+
+    private TraceabilityGap() {
     }
 
-    public static TraceabilityGap reconstitute(
-            Long id, Long batchId, String description,
-            String missingReference, String affectedProcess,
-            TraceabilityGapStatus status, Long reviewedBy,
-            LocalDateTime detectedAt, LocalDateTime resolvedAt) {
-
-        TraceabilityGap gap = new TraceabilityGap(
-                batchId, description, missingReference, affectedProcess
-        );
-        gap.id = id;
-        gap.status = status;
-        gap.reviewedBy = reviewedBy;
-        gap.detectedAt = detectedAt;
-        gap.resolvedAt = resolvedAt;
-        return gap;
+    /**
+     * Creates the traceability gap from its command.
+     *
+     * @param command the data of the traceability gap
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public TraceabilityGap(CreateTraceabilityGapCommand command) {
+        apply(command.batchCode(), command.product(), command.missingRecord(), command.detail(), command.status());
     }
 
-    public void startReview() {
-        if (status != TraceabilityGapStatus.OPEN) {
-            throw new IllegalStateException("Only open gaps can be reviewed");
-        }
-        status = TraceabilityGapStatus.UNDER_REVIEW;
+    /**
+     * Rebuilds a saved traceability gap without validating it again.
+     *
+     * @return the traceability gap
+     */
+    public static TraceabilityGap reconstitute(Long id, String batchCode, String product, String missingRecord, String detail, GapStatus status) {
+        var traceabilityGap = new TraceabilityGap();
+        traceabilityGap.id = id;
+        traceabilityGap.batchCode = batchCode;
+        traceabilityGap.product = product;
+        traceabilityGap.missingRecord = missingRecord;
+        traceabilityGap.detail = detail;
+        traceabilityGap.status = status;
+        return traceabilityGap;
     }
 
-    public void resolve(Long reviewerId) {
-        if (status != TraceabilityGapStatus.UNDER_REVIEW) {
-            throw new IllegalStateException("Gap must be under review before resolution");
-        }
-        status = TraceabilityGapStatus.RESOLVED;
-        reviewedBy = reviewerId;
-        resolvedAt = LocalDateTime.now();
+    private void apply(String batchCode, String product, String missingRecord, String detail, GapStatus status) {
+        if (batchCode == null || batchCode.isBlank()) throw new IllegalArgumentException("quality.traceabilityGap.error.batchCode.notBlank");
+        this.batchCode = batchCode == null ? "" : batchCode.trim();
+        this.product = product == null ? "" : product.trim();
+        if (missingRecord == null || missingRecord.isBlank()) throw new IllegalArgumentException("quality.traceabilityGap.error.missingRecord.notBlank");
+        this.missingRecord = missingRecord == null ? "" : missingRecord.trim();
+        this.detail = detail == null ? "" : detail.trim();
+        this.status = status != null ? status : GapStatus.OPEN;
     }
 }

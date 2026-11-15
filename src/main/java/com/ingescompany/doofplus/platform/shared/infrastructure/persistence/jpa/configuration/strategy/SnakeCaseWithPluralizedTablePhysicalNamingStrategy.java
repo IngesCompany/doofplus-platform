@@ -3,6 +3,8 @@ package com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import io.github.encryptorcode.pluralize.Pluralize;
+
 import static io.github.encryptorcode.pluralize.Pluralize.pluralize;
 
 /**
@@ -13,6 +15,12 @@ import static io.github.encryptorcode.pluralize.Pluralize.pluralize;
  * @since 1.0.0
  */
 public class SnakeCaseWithPluralizedTablePhysicalNamingStrategy implements PhysicalNamingStrategy {
+
+    static {
+        // "evidence" is uncountable: its table is evidence, as in db-06-quality and the Quality contract
+        Pluralize.addUncountableRule("evidence");
+    }
+
     @Override
     public Identifier toPhysicalCatalogName(Identifier identifier, JdbcEnvironment jdbcEnvironment) {
         return null;

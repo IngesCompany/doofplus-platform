@@ -1,88 +1,107 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.aggregates;
 
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.CreateRegulatoryReportCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ReportStatus;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.ReportType;
 import com.ingescompany.doofplus.platform.shared.domain.model.aggregates.AbstractDomainAggregateRoot;
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.RegulatoryReportStatus;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import lombok.Getter;
 
+/**
+ * Regulatory report of the Quality and Compliance bounded context, as in class-06-quality.
+ * People are kept by their name and related records by their code, as the Web Application shows them.
+ */
 @Getter
 public class RegulatoryReport extends AbstractDomainAggregateRoot<RegulatoryReport> {
 
+    /**
+     * The identifier; null until the regulatory report is saved.
+     */
     private Long id;
+
+    /**
+     * The code.
+     */
     private String code;
-    private String title;
-    private String description;
-    private String regulatoryAuthority;
-    private String fileReference;
-    private LocalDate dueDate;
-    private RegulatoryReportStatus status;
-    private Long preparedBy;
-    private LocalDateTime submittedAt;
 
-    public RegulatoryReport(String code, String title, String description,
-                            String regulatoryAuthority, String fileReference,
-                            LocalDate dueDate, Long preparedBy) {
-        if (code == null || code.isBlank()) {
-            throw new IllegalArgumentException("Report code is required");
-        }
-        if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Report title is required");
-        }
+    /**
+     * The type.
+     */
+    private ReportType type;
 
-        this.code = code;
-        this.title = title;
-        this.description = description;
-        this.regulatoryAuthority = regulatoryAuthority;
-        this.fileReference = fileReference;
-        this.dueDate = dueDate;
-        this.preparedBy = preparedBy;
-        this.status = RegulatoryReportStatus.DRAFT;
+    /**
+     * The scope.
+     */
+    private String scope;
+
+    /**
+     * The owner.
+     */
+    private String owner;
+
+    /**
+     * The status.
+     */
+    private ReportStatus status;
+
+    /**
+     * The template.
+     */
+    private String template;
+
+    /**
+     * The format.
+     */
+    private String format;
+
+    /**
+     * The created at.
+     */
+    private LocalDate createdAt;
+
+    private RegulatoryReport() {
     }
 
-    public static RegulatoryReport reconstitute(
-            Long id, String code, String title, String description,
-            String regulatoryAuthority, String fileReference,
-            LocalDate dueDate, RegulatoryReportStatus status,
-            Long preparedBy, LocalDateTime submittedAt) {
-
-        RegulatoryReport report = new RegulatoryReport(
-                code, title, description, regulatoryAuthority,
-                fileReference, dueDate, preparedBy
-        );
-        report.id = id;
-        report.status = status;
-        report.submittedAt = submittedAt;
-        return report;
+    /**
+     * Creates the regulatory report from its command.
+     *
+     * @param command the data of the regulatory report
+     * @throws IllegalArgumentException with a message key when a required value is blank
+     */
+    public RegulatoryReport(CreateRegulatoryReportCommand command) {
+        apply(command.code(), command.type(), command.scope(), command.owner(), command.status(), command.template(), command.format(), command.createdAt());
     }
 
-    public void submitForReview() {
-        if (status != RegulatoryReportStatus.DRAFT) {
-            throw new IllegalStateException("Only draft reports can be submitted for review");
-        }
-        status = RegulatoryReportStatus.UNDER_REVIEW;
+    /**
+     * Rebuilds a saved regulatory report without validating it again.
+     *
+     * @return the regulatory report
+     */
+    public static RegulatoryReport reconstitute(Long id, String code, ReportType type, String scope, String owner, ReportStatus status, String template, String format, LocalDate createdAt) {
+        var regulatoryReport = new RegulatoryReport();
+        regulatoryReport.id = id;
+        regulatoryReport.code = code;
+        regulatoryReport.type = type;
+        regulatoryReport.scope = scope;
+        regulatoryReport.owner = owner;
+        regulatoryReport.status = status;
+        regulatoryReport.template = template;
+        regulatoryReport.format = format;
+        regulatoryReport.createdAt = createdAt;
+        return regulatoryReport;
     }
 
-    public void approve() {
-        if (status != RegulatoryReportStatus.UNDER_REVIEW) {
-            throw new IllegalStateException("Report must be under review");
-        }
-        status = RegulatoryReportStatus.APPROVED;
-    }
-
-    public void submit() {
-        if (status != RegulatoryReportStatus.APPROVED) {
-            throw new IllegalStateException("Only approved reports can be submitted");
-        }
-        status = RegulatoryReportStatus.SUBMITTED;
-        submittedAt = LocalDateTime.now();
-    }
-
-    public void reject() {
-        if (status != RegulatoryReportStatus.UNDER_REVIEW) {
-            throw new IllegalStateException("Only reports under review can be rejected");
-        }
-        status = RegulatoryReportStatus.REJECTED;
+    private void apply(String code, ReportType type, String scope, String owner, ReportStatus status, String template, String format, LocalDate createdAt) {
+        if (code == null || code.isBlank()) throw new IllegalArgumentException("quality.regulatoryReport.error.code.notBlank");
+        this.code = code == null ? "" : code.trim();
+        this.type = type != null ? type : ReportType.QUALITY_REVIEW;
+        this.scope = scope == null ? "" : scope.trim();
+        this.owner = owner == null ? "" : owner.trim();
+        this.status = status != null ? status : ReportStatus.DRAFT;
+        this.template = template == null ? "" : template.trim();
+        this.format = format == null ? "" : format.trim();
+        this.createdAt = createdAt != null ? createdAt : LocalDate.now(ZoneOffset.UTC);
     }
 }

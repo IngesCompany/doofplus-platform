@@ -3,6 +3,7 @@ package com.ingescompany.doofplus.platform.subscriptions.application.commandserv
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.aggregates.Subscription;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ActivateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CancelSubscriptionCommand;
+import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.ChangeSubscriptionPlanCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.CreateSubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.PaySubscriptionCommand;
 import com.ingescompany.doofplus.platform.subscriptions.domain.model.commands.RenewSubscriptionCommand;
@@ -57,4 +58,13 @@ public interface SubscriptionCommandService {
      * @return the cancelled subscription, or a failure when it does not exist or is not active
      */
     Result<Subscription, ApplicationError> handle(CancelSubscriptionCommand command);
+
+    /**
+     * Changes the plan and the billing cycle of a pending or active subscription (US53).
+     *
+     * @param command the change plan command
+     * @return the updated subscription, or not found when the subscription or the plan do not exist,
+     * or a conflict when the subscription is not pending or active
+     */
+    Result<Subscription, ApplicationError> handle(ChangeSubscriptionPlanCommand command);
 }

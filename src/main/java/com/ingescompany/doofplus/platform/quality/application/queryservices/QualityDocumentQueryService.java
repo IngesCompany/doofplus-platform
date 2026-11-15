@@ -7,8 +7,24 @@ import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetQualit
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Query service of the quality documents.
+ */
 public interface QualityDocumentQueryService {
-    Optional<QualityDocument> handle(GetQualityDocumentByIdQuery query);
 
+    /**
+     * Lists the quality documents, filtered when the query has a value.
+     *
+     * @param query the query
+     * @return the quality documents
+     */
     List<QualityDocument> handle(GetAllQualityDocumentsQuery query);
+
+    /**
+     * Finds a quality document by its identifier.
+     *
+     * @param query the query
+     * @return the quality document, if it exists
+     */
+    Optional<QualityDocument> handle(GetQualityDocumentByIdQuery query);
 }

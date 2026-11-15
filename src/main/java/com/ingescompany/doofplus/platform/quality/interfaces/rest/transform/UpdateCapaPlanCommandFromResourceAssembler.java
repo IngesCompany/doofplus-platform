@@ -1,0 +1,36 @@
+package com.ingescompany.doofplus.platform.quality.interfaces.rest.transform;
+
+import com.ingescompany.doofplus.platform.quality.domain.model.commands.UpdateCapaPlanCommand;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.CapaStatus;
+import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.UpdateCapaPlanResource;
+
+/**
+ * Converts the body to replace a capa plan to its command.
+ */
+public final class UpdateCapaPlanCommandFromResourceAssembler {
+
+    private UpdateCapaPlanCommandFromResourceAssembler() {
+    }
+
+    /**
+     * Converts the body to its command.
+     *
+     * @param capaPlanId the identifier of the capa plan
+     * @param resource the body
+     * @return the command
+     * @throws IllegalArgumentException with a message key when an enum or a date is not valid
+     */
+    public static UpdateCapaPlanCommand toCommandFromResource(Long capaPlanId, UpdateCapaPlanResource resource) {
+        return new UpdateCapaPlanCommand(
+                capaPlanId,
+                resource.code(),
+                resource.title(),
+                resource.sourceDeviation(),
+                resource.owner(),
+                resource.reviewer(),
+                resource.rootCause(),
+                resource.acceptanceCriterion(),
+                QualityValueParser.toDate(resource.effectivenessCheckAt(), "quality.capaPlan.error.effectivenessCheckAt.invalid"),
+                QualityValueParser.toEnum(CapaStatus.class, resource.status(), "quality.capaPlan.error.status.invalid"));
+    }
+}

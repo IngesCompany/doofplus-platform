@@ -11,9 +11,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Row of the audits table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "audits")
 @Getter
@@ -21,25 +21,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AuditPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "code", length = 30, nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false)
+    @Column(name = "title", length = 255, nullable = false)
     private String title;
 
-    private String scope;
+    @Column(name = "period", length = 40, nullable = false)
+    private String period;
 
-    private String auditType;
+    @Column(name = "areas_reviewed", nullable = false)
+    private Integer areasReviewed;
 
-    private Long auditorId;
-
-    private LocalDate plannedDate;
-
-    private LocalDateTime startedAt;
-
-    private LocalDateTime completedAt;
+    @Column(name = "areas_total", nullable = false)
+    private Integer areasTotal;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", length = 24, nullable = false)
     private AuditStatus status;
 }

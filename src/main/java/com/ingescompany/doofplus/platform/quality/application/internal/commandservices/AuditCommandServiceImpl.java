@@ -8,44 +8,33 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the audits.
+ */
 @Service
 public class AuditCommandServiceImpl implements AuditCommandService {
 
-    private final IAuditRepository auditRepository;
+    private final IAuditRepository repository;
 
-    public AuditCommandServiceImpl(IAuditRepository auditRepository) {
-        this.auditRepository = auditRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the audits
+     */
+    public AuditCommandServiceImpl(IAuditRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<Audit, ApplicationError> handle(CreateAuditCommand command) {
-        if (auditRepository.existsByCode(command.code())) {
-            return Result.failure(
-                    ApplicationError.conflict("Audit", "Audit code already exists")
-            );
-        }
-
         try {
-            Audit audit = new Audit(
-                    command.code(),
-                    command.title(),
-                    command.scope(),
-                    command.auditType(),
-                    command.auditorId(),
-                    command.plannedDate()
-            );
-
-            Audit savedAudit = auditRepository.save(audit);
-            return Result.success(savedAudit);
-
+            var audit = new Audit(command);
+            if (repository.existsByCode(audit.getCode(), null)) {
+                return Result.failure(ApplicationError.conflict("Audit", "quality.audit.error.duplicate"));
+            }
+            return Result.success(repository.save(audit));
         } catch (IllegalArgumentException e) {
-            return Result.failure(
-                    ApplicationError.validationError("Audit", e.getMessage())
-            );
-        } catch (Exception e) {
-            return Result.failure(
-                    ApplicationError.unexpected("create-audit", e.getMessage())
-            );
+            return Result.failure(ApplicationError.validationError("Audit", e.getMessage()));
         }
     }
 }

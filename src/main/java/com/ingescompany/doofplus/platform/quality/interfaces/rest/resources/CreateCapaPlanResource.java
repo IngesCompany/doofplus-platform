@@ -1,12 +1,17 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDate;
-
+/**
+ * Body to create a capa plan. Enums are accepted in kebab-case, PascalCase or UPPER_SNAKE_CASE;
+ * missing values take the defaults of the contract.
+ */
 public record CreateCapaPlanResource(
-        Long deviationId,
+        String code,
         String title,
-        String description,
-        LocalDate dueDate,
-        Long responsible
-) {
+        String sourceDeviation,
+        String owner,
+        String reviewer,
+        String rootCause,
+        String acceptanceCriterion,
+        String effectivenessCheckAt,
+        String status) {
 }

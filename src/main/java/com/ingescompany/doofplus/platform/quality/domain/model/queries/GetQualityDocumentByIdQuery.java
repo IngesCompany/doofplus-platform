@@ -1,4 +1,9 @@
 package com.ingescompany.doofplus.platform.quality.domain.model.queries;
 
-public record GetQualityDocumentByIdQuery(Long documentId) {
+/**
+ * Query of a quality document by its identifier.
+ *
+ * @param qualityDocumentId the identifier
+ */
+public record GetQualityDocumentByIdQuery(Long qualityDocumentId) {
 }

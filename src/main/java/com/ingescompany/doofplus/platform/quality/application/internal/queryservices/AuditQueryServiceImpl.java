@@ -10,22 +10,30 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the query service of the audits.
+ */
 @Service
 public class AuditQueryServiceImpl implements AuditQueryService {
 
-    private final IAuditRepository auditRepository;
+    private final IAuditRepository repository;
 
-    public AuditQueryServiceImpl(IAuditRepository auditRepository) {
-        this.auditRepository = auditRepository;
-    }
-
-    @Override
-    public Optional<Audit> handle(GetAuditByIdQuery query) {
-        return auditRepository.findById(query.auditId());
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the audits
+     */
+    public AuditQueryServiceImpl(IAuditRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public List<Audit> handle(GetAllAuditsQuery query) {
-        return auditRepository.findAll();
+        return repository.findAll();
+    }
+
+    @Override
+    public Optional<Audit> handle(GetAuditByIdQuery query) {
+        return repository.findById(query.auditId());
     }
 }

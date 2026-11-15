@@ -3,41 +3,37 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.TaskComment;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.TaskCommentPersistenceEntity;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+/**
+ * Converts the task comments between the domain and the persistence entity.
+ */
+public final class TaskCommentPersistenceAssembler {
 
-public class TaskCommentPersistenceAssembler {
-
-    public static TaskComment toDomain(TaskCommentPersistenceEntity entity) {
-        return TaskComment.reconstitute(
-                entity.getId(),
-                entity.getTaskId(),
-                entity.getAuthorId(),
-                entity.getContent(),
-                toLocalDateTime(entity.getCreatedAt()),
-                toLocalDateTime(entity.getUpdatedAt())
-        );
+    private TaskCommentPersistenceAssembler() {
     }
 
-    public static TaskCommentPersistenceEntity toEntity(TaskComment comment) {
-        TaskCommentPersistenceEntity entity = new TaskCommentPersistenceEntity();
-
-        entity.setId(comment.getId());
-        entity.setTaskId(comment.getTaskId());
-        entity.setAuthorId(comment.getAuthorId());
-        entity.setContent(comment.getContent());
-
+    /**
+     * Copies the data of the task comment to a row.
+     *
+     * @param taskComment    the task comment
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static TaskCommentPersistenceEntity toEntity(TaskComment taskComment, TaskCommentPersistenceEntity entity) {
+        entity.setRecordCode(taskComment.getRecordCode());
+        entity.setAuthor(taskComment.getAuthor());
+        entity.setInitials(taskComment.getInitials());
+        entity.setPostedAt(taskComment.getPostedAt());
+        entity.setText(taskComment.getText());
         return entity;
     }
 
-    private static LocalDateTime toLocalDateTime(Date date) {
-        if (date == null) {
-            return null;
-        }
-
-        return date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+    /**
+     * Rebuilds the task comment of a row.
+     *
+     * @param entity the row
+     * @return the task comment
+     */
+    public static TaskComment toDomain(TaskCommentPersistenceEntity entity) {
+        return TaskComment.reconstitute(entity.getId(), entity.getRecordCode(), entity.getAuthor(), entity.getInitials(), entity.getPostedAt(), entity.getText());
     }
 }

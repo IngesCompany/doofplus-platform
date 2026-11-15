@@ -8,37 +8,30 @@ import com.ingescompany.doofplus.platform.shared.application.result.ApplicationE
 import com.ingescompany.doofplus.platform.shared.application.result.Result;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of the command service of the collaboration tasks.
+ */
 @Service
 public class CollaborationTaskCommandServiceImpl implements CollaborationTaskCommandService {
 
-    private final ICollaborationTaskRepository collaborationTaskRepository;
+    private final ICollaborationTaskRepository repository;
 
-    public CollaborationTaskCommandServiceImpl(ICollaborationTaskRepository collaborationTaskRepository) {
-        this.collaborationTaskRepository = collaborationTaskRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the collaboration tasks
+     */
+    public CollaborationTaskCommandServiceImpl(ICollaborationTaskRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Result<CollaborationTask, ApplicationError> handle(CreateCollaborationTaskCommand command) {
         try {
-            CollaborationTask collaborationTask = new CollaborationTask(
-                    command.title(),
-                    command.description(),
-                    command.assignedTo(),
-                    command.createdBy(),
-                    command.relatedDeviationId(),
-                    command.dueDate()
-            );
-
-            return Result.success(collaborationTaskRepository.save(collaborationTask));
-
+            var collaborationTask = new CollaborationTask(command);
+            return Result.success(repository.save(collaborationTask));
         } catch (IllegalArgumentException e) {
-            return Result.failure(
-                    ApplicationError.validationError("CollaborationTask", e.getMessage())
-            );
-        } catch (Exception e) {
-            return Result.failure(
-                    ApplicationError.unexpected("create-collaboration-task", e.getMessage())
-            );
+            return Result.failure(ApplicationError.validationError("CollaborationTask", e.getMessage()));
         }
     }
 }

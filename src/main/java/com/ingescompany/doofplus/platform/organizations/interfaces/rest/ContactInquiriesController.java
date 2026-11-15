@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetContactInquiryByIdQuery;
 import com.ingescompany.doofplus.platform.organizations.application.commandservices.ContactInquiryCommandService;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.ContactInquiryQueryService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllContactInquiriesQuery;
@@ -53,5 +54,13 @@ public class ContactInquiriesController {
                 .map(ContactInquiryResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a contact inquiry by its identifier")
+    public ResponseEntity<ContactInquiryResource> getContactInquiryById(@PathVariable Long id) {
+        return queryService.handle(new GetContactInquiryByIdQuery(id))
+                .map(found -> ResponseEntity.ok(ContactInquiryResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

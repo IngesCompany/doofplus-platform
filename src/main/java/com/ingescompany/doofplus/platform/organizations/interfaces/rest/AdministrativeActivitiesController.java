@@ -1,5 +1,6 @@
 package com.ingescompany.doofplus.platform.organizations.interfaces.rest;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.AdministrativeActivityQueryService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllAdministrativeActivitiesQuery;
 import com.ingescompany.doofplus.platform.organizations.interfaces.rest.resources.AdministrativeActivityResource;
@@ -30,8 +31,10 @@ public class AdministrativeActivitiesController {
 
     @GetMapping
     @Operation(summary = "Get the administrative activities, the most recent first")
-    public ResponseEntity<List<AdministrativeActivityResource>> getAllAdministrativeActivities() {
+    public ResponseEntity<List<AdministrativeActivityResource>> getAllAdministrativeActivities(
+            @RequestParam(required = false) Long organizationId) {
         var resources = queryService.handle(new GetAllAdministrativeActivitiesQuery()).stream()
+                .filter(activity -> organizationId == null || organizationId.equals(activity.getOrganizationId()))
                 .map(activity -> new AdministrativeActivityResource(
                         activity.getId(),
                         activity.getOrganizationId(),

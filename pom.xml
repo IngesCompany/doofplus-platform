@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ingescompany.doofplus</groupId>
 	<artifactId>platform</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 	<name>IngesCompany-Backend</name>
 	<description>RESTful API of DoofPlus, the quality management and batch traceability platform for pharmaceutical laboratories.</description>
 	<url/>
@@ -31,6 +31,7 @@
 		<lombok.version>1.18.48</lombok.version>
 		<pluralize.version>1.0.0</pluralize.version>
 		<springdoc-openapi.version>3.1.0</springdoc-openapi.version>
+		<jjwt.version>0.13.0</jjwt.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -89,6 +90,27 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>

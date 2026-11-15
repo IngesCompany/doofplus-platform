@@ -5,63 +5,53 @@ import com.ingescompany.doofplus.platform.quality.domain.repositories.IEvidenceR
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.assemblers.EvidencePersistenceAssembler;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.EvidencePersistenceEntity;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.repositories.EvidencePersistenceRepository;
-import com.ingescompany.doofplus.platform.shared.infrastructure.events.DomainEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Adapter of the domain repository of the evidence on Spring Data JPA.
+ */
 @Repository
 public class EvidenceRepositoryImpl implements IEvidenceRepository {
 
     private final EvidencePersistenceRepository repository;
-    private final DomainEventPublisher domainEventPublisher;
 
-    public EvidenceRepositoryImpl(
-            EvidencePersistenceRepository repository,
-            DomainEventPublisher domainEventPublisher) {
+    /**
+     * Creates the adapter.
+     *
+     * @param repository the Spring Data repository
+     */
+    public EvidenceRepositoryImpl(EvidencePersistenceRepository repository) {
         this.repository = repository;
-        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
     public Evidence save(Evidence evidence) {
-        EvidencePersistenceEntity entity = EvidencePersistenceAssembler.toEntity(evidence);
-        EvidencePersistenceEntity savedEntity = repository.save(entity);
-        Evidence savedEvidence = EvidencePersistenceAssembler.toDomain(savedEntity);
-
-        domainEventPublisher.publishAndClearEvents(evidence);
-
-        return savedEvidence;
+        var entity = evidence.getId() == null
+                ? new EvidencePersistenceEntity()
+                : repository.findById(evidence.getId()).orElseGet(EvidencePersistenceEntity::new);
+        return EvidencePersistenceAssembler.toDomain(repository.save(EvidencePersistenceAssembler.toEntity(evidence, entity)));
     }
 
     @Override
     public Optional<Evidence> findById(Long id) {
-        return repository.findById(id)
-                .map(EvidencePersistenceAssembler::toDomain);
+        return repository.findById(id).map(EvidencePersistenceAssembler::toDomain);
     }
 
     @Override
     public List<Evidence> findAll() {
-        return repository.findAll()
-                .stream()
-                .map(EvidencePersistenceAssembler::toDomain)
-                .toList();
+        return repository.findAll().stream().map(EvidencePersistenceAssembler::toDomain).toList();
     }
 
     @Override
-    public List<Evidence> findByDeviationId(Long deviationId) {
-        return repository.findByDeviationId(deviationId)
-                .stream()
-                .map(EvidencePersistenceAssembler::toDomain)
-                .toList();
+    public List<Evidence> findByRecordCode(String recordCode) {
+        return repository.findByRecordCode(recordCode).stream().map(EvidencePersistenceAssembler::toDomain).toList();
     }
 
     @Override
-    public List<Evidence> findByDocumentId(Long documentId) {
-        return repository.findByDocumentId(documentId)
-                .stream()
-                .map(EvidencePersistenceAssembler::toDomain)
-                .toList();
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 }

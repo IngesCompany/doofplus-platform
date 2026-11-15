@@ -67,6 +67,14 @@ public class ProductionBatchesController {
                 .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @GetMapping("/by-number/{batchNumber}")
+    @Operation(summary = "Get a production batch by its batch number")
+    public ResponseEntity<?> getBatchByNumber(@PathVariable String batchNumber) {
+        return queryService.handle(new GetBatchByNumberQuery(new BatchNumber(batchNumber)))
+                .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @GetMapping
     @Operation(summary = "Get all production batches or filter by batch number")
     public ResponseEntity<?> getBatches(@RequestParam(required = false) String batchNumber) {

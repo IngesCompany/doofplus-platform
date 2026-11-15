@@ -17,6 +17,29 @@ class SubscriptionTest {
     }
 
     @Test
+    void changePlanShouldKeepThePeriodAndChangeThePlanAndCycle() {
+        var subscription = pendingSubscription(BillingCycle.MONTHLY);
+        subscription.activate();
+        var paidUntil = subscription.getCurrentPeriodEnd();
+
+        subscription.changePlan(2L, BillingCycle.ANNUAL);
+
+        assertThat(subscription.getPlanId()).isEqualTo(2L);
+        assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.ANNUAL);
+        assertThat(subscription.getCurrentPeriodEnd()).isEqualTo(paidUntil);
+    }
+
+    @Test
+    void changePlanShouldFailWhenTheSubscriptionIsCancelled() {
+        var subscription = pendingSubscription(BillingCycle.MONTHLY);
+        subscription.activate();
+        subscription.cancel();
+
+        assertThatThrownBy(() -> subscription.changePlan(2L, BillingCycle.ANNUAL))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void newSubscriptionShouldBePendingWithAutoRenew() {
         var subscription = pendingSubscription(BillingCycle.MONTHLY);
 

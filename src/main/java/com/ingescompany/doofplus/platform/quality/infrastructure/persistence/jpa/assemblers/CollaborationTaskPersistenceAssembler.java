@@ -3,35 +3,38 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CollaborationTask;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CollaborationTaskPersistenceEntity;
 
-public class CollaborationTaskPersistenceAssembler {
+/**
+ * Converts the collaboration tasks between the domain and the persistence entity.
+ */
+public final class CollaborationTaskPersistenceAssembler {
 
-    public static CollaborationTask toDomain(CollaborationTaskPersistenceEntity entity) {
-        return CollaborationTask.reconstitute(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getAssignedTo(),
-                entity.getCreatedBy(),
-                entity.getRelatedDeviationId(),
-                entity.getDueDate(),
-                entity.getStatus(),
-                entity.getCompletedAt()
-        );
+    private CollaborationTaskPersistenceAssembler() {
     }
 
-    public static CollaborationTaskPersistenceEntity toEntity(CollaborationTask task) {
-        CollaborationTaskPersistenceEntity entity = new CollaborationTaskPersistenceEntity();
-
-        entity.setId(task.getId());
-        entity.setTitle(task.getTitle());
-        entity.setDescription(task.getDescription());
-        entity.setAssignedTo(task.getAssignedTo());
-        entity.setCreatedBy(task.getCreatedBy());
-        entity.setRelatedDeviationId(task.getRelatedDeviationId());
-        entity.setDueDate(task.getDueDate());
-        entity.setStatus(task.getStatus());
-        entity.setCompletedAt(task.getCompletedAt());
-
+    /**
+     * Copies the data of the collaboration task to a row.
+     *
+     * @param collaborationTask    the collaboration task
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static CollaborationTaskPersistenceEntity toEntity(CollaborationTask collaborationTask, CollaborationTaskPersistenceEntity entity) {
+        entity.setTitle(collaborationTask.getTitle());
+        entity.setRecordCode(collaborationTask.getRecordCode());
+        entity.setDetail(collaborationTask.getDetail());
+        entity.setOwner(collaborationTask.getOwner());
+        entity.setDueAt(collaborationTask.getDueAt());
+        entity.setStatus(collaborationTask.getStatus());
         return entity;
+    }
+
+    /**
+     * Rebuilds the collaboration task of a row.
+     *
+     * @param entity the row
+     * @return the collaboration task
+     */
+    public static CollaborationTask toDomain(CollaborationTaskPersistenceEntity entity) {
+        return CollaborationTask.reconstitute(entity.getId(), entity.getTitle(), entity.getRecordCode(), entity.getDetail(), entity.getOwner(), entity.getDueAt(), entity.getStatus());
     }
 }

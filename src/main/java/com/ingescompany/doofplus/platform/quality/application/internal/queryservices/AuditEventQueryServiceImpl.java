@@ -2,30 +2,40 @@ package com.ingescompany.doofplus.platform.quality.application.internal.queryser
 
 import com.ingescompany.doofplus.platform.quality.application.queryservices.AuditEventQueryService;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AuditEvent;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAllAuditEventsQuery;
+import com.ingescompany.doofplus.platform.quality.domain.model.queries.GetAuditEventByIdQuery;
 import com.ingescompany.doofplus.platform.quality.domain.repositories.IAuditEventRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Implementation of the query service of the audit events.
+ */
 @Service
 public class AuditEventQueryServiceImpl implements AuditEventQueryService {
 
-    private final IAuditEventRepository auditEventRepository;
+    private final IAuditEventRepository repository;
 
-    public AuditEventQueryServiceImpl(IAuditEventRepository auditEventRepository) {
-        this.auditEventRepository = auditEventRepository;
+    /**
+     * Creates the service.
+     *
+     * @param repository the repository of the audit events
+     */
+    public AuditEventQueryServiceImpl(IAuditEventRepository repository) {
+        this.repository = repository;
     }
 
     @Override
-    public List<AuditEvent> getAll() {
-        return auditEventRepository.findAll();
+    public List<AuditEvent> handle(GetAllAuditEventsQuery query) {
+        return query.record() == null || query.record().isBlank()
+                ? repository.findAll()
+                : repository.findByRecord(query.record().trim());
     }
 
     @Override
-    public List<AuditEvent> getByAggregate(String aggregateType, Long aggregateId) {
-        return auditEventRepository.findByAggregateTypeAndAggregateId(
-                aggregateType,
-                aggregateId
-        );
+    public Optional<AuditEvent> handle(GetAuditEventByIdQuery query) {
+        return repository.findById(query.auditEventId());
     }
 }

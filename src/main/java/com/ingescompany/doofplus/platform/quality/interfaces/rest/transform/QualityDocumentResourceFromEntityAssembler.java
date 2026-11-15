@@ -3,24 +3,35 @@ package com.ingescompany.doofplus.platform.quality.interfaces.rest.transform;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.QualityDocument;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.QualityDocumentResource;
 
-public class QualityDocumentResourceFromEntityAssembler {
+/**
+ * Converts a quality document to its REST resource.
+ */
+public final class QualityDocumentResourceFromEntityAssembler {
 
-    public static QualityDocumentResource toResourceFromEntity(QualityDocument entity) {
-        if (entity == null) {
-            return null;
-        }
+    private QualityDocumentResourceFromEntityAssembler() {
+    }
 
+    /**
+     * Converts a quality document to its resource.
+     *
+     * @param qualityDocument the quality document
+     * @return the resource
+     */
+    public static QualityDocumentResource toResourceFromEntity(QualityDocument qualityDocument) {
         return new QualityDocumentResource(
-                entity.getId(),
-                entity.getCode(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getDocumentType(),
-                entity.getFileReference(),
-                entity.getVersion(),
-                entity.getStatus() != null ? entity.getStatus().name() : null,
-                entity.getOwnerId(),
-                entity.getApprovedAt()
-        );
+                qualityDocument.getId(),
+                qualityDocument.getCode(),
+                qualityDocument.getVersion(),
+                qualityDocument.getTitle(),
+                QualityValueParser.fromEnum(qualityDocument.getStatus()),
+                qualityDocument.getAuthor(),
+                qualityDocument.getTechnicalReviewer(),
+                qualityDocument.getApprover(),
+                QualityValueParser.fromDate(qualityDocument.getChangedAt()),
+                qualityDocument.getPurpose(),
+                qualityDocument.getScope(),
+                qualityDocument.getProcedure(),
+                qualityDocument.getRevisionSummary(),
+                qualityDocument.getReviewCycleMonths());
     }
 }

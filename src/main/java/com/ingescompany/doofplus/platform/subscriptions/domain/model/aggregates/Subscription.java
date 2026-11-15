@@ -19,6 +19,7 @@ import java.util.List;
 @Getter
 public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
     private static final String NOT_PENDING_MESSAGE = "Only a pending subscription can be activated";
+    private static final String NOT_CURRENT_MESSAGE = "Only a pending or active subscription can change its plan";
     private static final String NOT_ACTIVE_MESSAGE = "Only an active subscription can be renewed or cancelled";
 
     private Long id;
@@ -102,6 +103,19 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
      *
      * @throws IllegalStateException when the subscription is not active
      */
+    /**
+     * Changes the plan and the billing cycle; the new price is charged in the next payment (US53).
+     *
+     * @param planId       identifier of the new plan
+     * @param billingCycle new billing cycle
+     * @throws IllegalStateException when the subscription is not pending or active
+     */
+    public void changePlan(Long planId, BillingCycle billingCycle) {
+        if (!isCurrent()) throw new IllegalStateException(NOT_CURRENT_MESSAGE);
+        this.planId = planId;
+        this.billingCycle = billingCycle;
+    }
+
     public void cancel() {
         if (status != SubscriptionStatus.ACTIVE) throw new IllegalStateException(NOT_ACTIVE_MESSAGE);
         status = SubscriptionStatus.CANCELLED;

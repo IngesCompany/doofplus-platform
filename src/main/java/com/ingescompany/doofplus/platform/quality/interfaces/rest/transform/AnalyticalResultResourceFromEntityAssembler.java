@@ -3,26 +3,32 @@ package com.ingescompany.doofplus.platform.quality.interfaces.rest.transform;
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.AnalyticalResult;
 import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.AnalyticalResultResource;
 
-public class AnalyticalResultResourceFromEntityAssembler {
+/**
+ * Converts a analytical result to its REST resource.
+ */
+public final class AnalyticalResultResourceFromEntityAssembler {
 
-    public static AnalyticalResultResource toResourceFromEntity(AnalyticalResult entity) {
-        if (entity == null) {
-            return null;
-        }
+    private AnalyticalResultResourceFromEntityAssembler() {
+    }
 
+    /**
+     * Converts a analytical result to its resource.
+     *
+     * @param analyticalResult the analytical result
+     * @return the resource
+     */
+    public static AnalyticalResultResource toResourceFromEntity(AnalyticalResult analyticalResult) {
         return new AnalyticalResultResource(
-                entity.getId(),
-                entity.getBatchId(),
-                entity.getTestName(),
-                entity.getParameter(),
-                entity.getMeasuredValue(),
-                entity.getMinimumValue(),
-                entity.getMaximumValue(),
-                entity.getUnit(),
-                entity.getStatus() != null ? entity.getStatus().name() : null,
-                entity.getReviewedBy(),
-                entity.getTestedAt(),
-                entity.getReviewedAt()
-        );
+                analyticalResult.getId(),
+                analyticalResult.getBatchCode(),
+                analyticalResult.getSampleCode(),
+                analyticalResult.getReportCode(),
+                analyticalResult.getTest(),
+                analyticalResult.getProtocol(),
+                analyticalResult.getResult(),
+                analyticalResult.getSpecification(),
+                analyticalResult.getAnalyst(),
+                QualityValueParser.fromEnum(analyticalResult.getStatus()),
+                QualityValueParser.fromEnum(analyticalResult.getApproval()));
     }
 }

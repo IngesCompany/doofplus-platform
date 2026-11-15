@@ -1,5 +1,7 @@
 package com.ingescompany.doofplus.platform.organizations.application.internal.queryservices;
 
+import java.util.Optional;
+import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetUserProfileByIdQuery;
 import com.ingescompany.doofplus.platform.organizations.application.queryservices.UserProfileQueryService;
 import com.ingescompany.doofplus.platform.organizations.domain.model.aggregates.UserProfile;
 import com.ingescompany.doofplus.platform.organizations.domain.model.queries.GetAllUserProfilesQuery;
@@ -19,5 +21,10 @@ public class UserProfileQueryServiceImpl implements UserProfileQueryService {
     @Override
     public List<UserProfile> handle(GetAllUserProfilesQuery query) {
         return userProfileRepository.findAll();
+    }
+
+    @Override
+    public Optional<UserProfile> handle(GetUserProfileByIdQuery query) {
+        return userProfileRepository.findById(query.id());
     }
 }

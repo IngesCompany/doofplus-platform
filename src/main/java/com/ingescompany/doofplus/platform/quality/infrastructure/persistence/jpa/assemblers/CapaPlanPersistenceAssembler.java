@@ -3,51 +3,41 @@ package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jp
 import com.ingescompany.doofplus.platform.quality.domain.model.aggregates.CapaPlan;
 import com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities.CapaPlanPersistenceEntity;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+/**
+ * Converts the capa plans between the domain and the persistence entity.
+ */
+public final class CapaPlanPersistenceAssembler {
 
-public class CapaPlanPersistenceAssembler {
-
-    public static CapaPlan toDomain(CapaPlanPersistenceEntity entity) {
-        return CapaPlan.reconstitute(
-                entity.getId(),
-                entity.getDeviationId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getStatus(),
-                entity.getDueDate(),
-                entity.getResponsible(),
-                toLocalDateTime(entity.getCreatedAt()),
-                entity.getCompletedAt()
-        );
+    private CapaPlanPersistenceAssembler() {
     }
 
-    public static CapaPlanPersistenceEntity toEntity(CapaPlan domain) {
-        CapaPlanPersistenceEntity entity = new CapaPlanPersistenceEntity();
-
-        entity.setId(domain.getId());
-        entity.setDeviationId(domain.getDeviationId());
-        entity.setTitle(domain.getTitle());
-        entity.setDescription(domain.getDescription());
-        entity.setStatus(domain.getStatus());
-        entity.setDueDate(domain.getDueDate());
-        entity.setResponsible(domain.getResponsible());
-        entity.setCompletedAt(domain.getCompletedAt());
-
+    /**
+     * Copies the data of the capa plan to a row.
+     *
+     * @param capaPlan    the capa plan
+     * @param entity the row, new or already loaded
+     * @return the same row
+     */
+    public static CapaPlanPersistenceEntity toEntity(CapaPlan capaPlan, CapaPlanPersistenceEntity entity) {
+        entity.setCode(capaPlan.getCode());
+        entity.setTitle(capaPlan.getTitle());
+        entity.setSourceDeviation(capaPlan.getSourceDeviation());
+        entity.setOwner(capaPlan.getOwner());
+        entity.setReviewer(capaPlan.getReviewer());
+        entity.setRootCause(capaPlan.getRootCause());
+        entity.setAcceptanceCriterion(capaPlan.getAcceptanceCriterion());
+        entity.setEffectivenessCheckAt(capaPlan.getEffectivenessCheckAt());
+        entity.setStatus(capaPlan.getStatus());
         return entity;
     }
 
     /**
-     * The creation date comes from the audit column of the base persistence entity.
+     * Rebuilds the capa plan of a row.
+     *
+     * @param entity the row
+     * @return the capa plan
      */
-    private static LocalDateTime toLocalDateTime(Date date) {
-        if (date == null) {
-            return null;
-        }
-
-        return date.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+    public static CapaPlan toDomain(CapaPlanPersistenceEntity entity) {
+        return CapaPlan.reconstitute(entity.getId(), entity.getCode(), entity.getTitle(), entity.getSourceDeviation(), entity.getOwner(), entity.getReviewer(), entity.getRootCause(), entity.getAcceptanceCriterion(), entity.getEffectivenessCheckAt(), entity.getStatus());
     }
 }

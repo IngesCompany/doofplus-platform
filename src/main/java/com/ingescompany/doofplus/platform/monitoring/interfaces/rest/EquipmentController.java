@@ -56,12 +56,14 @@ public class EquipmentController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Equipment inventory retrieved successfully")
     })
-    public ResponseEntity<List<EquipmentResource>> getAllEquipment() {
+    public ResponseEntity<List<EquipmentResource>> getAllEquipment(@RequestParam(required = false) String code) {
         var query = new GetAllEquipmentQuery();
         var equipmentList = equipmentQueryService.handle(query);
         var resources = equipmentList.stream()
+                .filter(equipment -> code == null || code.isBlank() || equipment.getCode().value().equalsIgnoreCase(code.trim()))
                 .map(EquipmentResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
+        if (code != null && !code.isBlank() && resources.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(resources);
     }
 

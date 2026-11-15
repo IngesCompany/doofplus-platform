@@ -1,16 +1,17 @@
 package com.ingescompany.doofplus.platform.quality.interfaces.rest.resources;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
+/**
+ * Capa action answered by the API. Enums in UPPER_SNAKE_CASE, dates in yyyy-MM-dd and date-times in ISO 8601 UTC.
+ */
 public record CapaActionResource(
         Long id,
-        Long capaPlanId,
+        String capaCode,
+        String code,
+        String type,
         String title,
-        String description,
-        String assignedTo,
-        LocalDate dueDate,
+        String owner,
+        String dueAt,
         String status,
-        LocalDateTime completedAt
-) {
+        String evidence,
+        Boolean evidenceAttached) {
 }

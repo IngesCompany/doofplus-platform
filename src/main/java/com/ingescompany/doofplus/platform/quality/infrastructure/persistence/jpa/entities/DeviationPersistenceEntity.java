@@ -1,6 +1,6 @@
 package com.ingescompany.doofplus.platform.quality.infrastructure.persistence.jpa.entities;
 
-import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DeviationSeverity;
+import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.Classification;
 import com.ingescompany.doofplus.platform.quality.domain.model.valueobjects.DeviationStatus;
 import com.ingescompany.doofplus.platform.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;
@@ -8,12 +8,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+/**
+ * Row of the deviations table, as in db-06-quality.
+ */
 @Entity
 @Table(name = "deviations")
 @Getter
@@ -21,30 +23,56 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class DeviationPersistenceEntity extends AuditableAbstractPersistenceEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "code", length = 30, nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false)
+    @Column(name = "title", length = 255, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "batch_code", length = 30, nullable = false)
+    private String batchCode;
+
+    @Column(name = "order_code", length = 30, nullable = false)
+    private String orderCode;
+
+    @Column(name = "summary", columnDefinition = "TEXT", nullable = false)
+    private String summary;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DeviationSeverity severity;
+    @Column(name = "classification", length = 24, nullable = false)
+    private Classification classification;
+
+    @Column(name = "containment", columnDefinition = "TEXT", nullable = false)
+    private String containment;
+
+    @Column(name = "severity", nullable = false)
+    private Integer severity;
+
+    @Column(name = "likelihood", nullable = false)
+    private Integer likelihood;
+
+    @Column(name = "detectability", nullable = false)
+    private Integer detectability;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", length = 24, nullable = false)
     private DeviationStatus status;
 
-    private Long batchId;
+    @Column(name = "root_cause", length = 150, nullable = false)
+    private String rootCause;
 
-    @Column(name = "assigned_to")
-    private Long assignedTo;
+    @Column(name = "capa_code", length = 30, nullable = false)
+    private String capaCode;
 
-    @Column(nullable = false)
-    private LocalDateTime detectedAt;
+    @Column(name = "reported_by", length = 100, nullable = false)
+    private String reportedBy;
 
-    private LocalDateTime closedAt;
+    @Column(name = "reported_at")
+    private LocalDateTime reportedAt;
+
+    @Column(name = "owner", length = 100, nullable = false)
+    private String owner;
+
+    @Column(name = "due_at")
+    private LocalDateTime dueAt;
 }
