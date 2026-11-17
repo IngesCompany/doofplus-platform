@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-17
+### Added
+- Contributing.md: instructions to run the API with Docker Compose and to run the tests with Gradle.
+- License.md: MIT License and copyright notice.
+
+### Changed
+- README.md: the URL of the deployed API and Swagger UI, and the environment variables of production.
+
 ## [1.3.0] - 2026-11-15
 ### Added
 - IAM: invitations of new members for administrators (`POST /api/v1/invitations`, `GET /api/v1/invitations?organizationId=`, `GET /api/v1/invitations/{id}`); 409 when the email belongs to a user who is no longer invited or to a pending invitation.
