@@ -174,9 +174,9 @@ public class SubscriptionsController {
             @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not active",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PostMapping("{id}/renewal")
+    @PostMapping("{id}/renewals")
     public ResponseEntity<?> renewSubscription(@PathVariable Long id) {
-        log.debug("POST /api/v1/subscriptions/{}/renewal", id);
+        log.debug("POST /api/v1/subscriptions/{}/renewals", id);
         var result = subscriptionCommandService.handle(new RenewSubscriptionCommand(id));
         return ResponseEntityAssembler.toResponseEntityFromResult(result, SubscriptionResourceFromEntityAssembler::toResourceFromEntity, HttpStatus.OK);
     }
