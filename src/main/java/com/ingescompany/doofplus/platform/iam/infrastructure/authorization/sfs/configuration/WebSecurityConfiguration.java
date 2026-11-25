@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -84,6 +85,18 @@ public class WebSecurityConfiguration {
     }
 
     /**
+     * Matches the RUC lookup of the registration form ({@code GET /api/v1/organizations?ruc=}), so that a visitor can
+     * check whether a laboratory is already registered without listing every organization.
+     *
+     * @return the request matcher of the RUC lookup
+     */
+    private static RequestMatcher isRucLookup() {
+        return request -> HttpMethod.GET.matches(request.getMethod())
+                && "/api/v1/organizations".equals(request.getRequestURI().substring(request.getContextPath().length()))
+                && request.getParameter("ruc") != null;
+    }
+
+    /**
      * This method creates the security filter chain.
      * It also configures the http security.
      *
@@ -119,8 +132,16 @@ public class WebSecurityConfiguration {
                         .requestMatchers("/api/v1/invitations", "/api/v1/invitations/**").hasRole("ADMINISTRATOR")
                         // TS12, scenario 3: only the administrators read the contact inquiries.
                         .requestMatchers(HttpMethod.GET, "/api/v1/contact-inquiries", "/api/v1/contact-inquiries/**").hasRole("ADMINISTRATOR")
-                        // The other bounded contexts stay open while the Web Application adopts the token.
-                        .anyRequest().permitAll());
+                        // Public zone of the Web Application: contact form and registration of a new laboratory,
+                        // which happens before its first administrator has an account.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contact-inquiries").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/plans", "/api/v1/plans/**").permitAll()
+                        .requestMatchers(isRucLookup()).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/organizations", "/api/v1/facilities", "/api/v1/subscriptions").permitAll()
+                        // ThingsBoard has no user: the telemetry endpoint checks its own API key.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/telemetry").permitAll()
+                        // Every other endpoint needs the JWT of a signed-in user.
+                        .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authorizationRequestFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

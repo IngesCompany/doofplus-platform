@@ -69,6 +69,32 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleIllegalStateExceptionReturnsConflictWithLocalizedDetails() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+        var handler = new GlobalExceptionHandler();
+        var response = handler.handleIllegalStateException(
+                new IllegalStateException("manufacturing.error.batch.cannotStart")
+        );
+        var problemDetail = Objects.requireNonNull(response.getBody());
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals(409, problemDetail.getStatus());
+        assertEquals("RESOURCE_STATE_CONFLICT", problemDetail.getProperties().get("code"));
+        assertEquals("El lote no se puede iniciar en su estado actual", problemDetail.getProperties().get("details"));
+    }
+
+    @Test
+    void handleIllegalStateExceptionKeepsFreeTextMessage() {
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+        var handler = new GlobalExceptionHandler();
+        var response = handler.handleIllegalStateException(new IllegalStateException("Lot is not approved"));
+        var problemDetail = Objects.requireNonNull(response.getBody());
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("Lot is not approved", problemDetail.getProperties().get("details"));
+    }
+
+    @Test
     void handleIllegalArgumentExceptionKeepsFreeTextMessage() {
         LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
         var handler = new GlobalExceptionHandler();
