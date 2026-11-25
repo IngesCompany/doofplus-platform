@@ -96,6 +96,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles operations that the current status of a resource does not allow, such as starting a batch that is
+     * already in progress. Aggregates throw the message key; the details carry its localized text.
+     *
+     * @param ex the illegal state exception
+     * @return error response with CONFLICT status
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ProblemDetail> handleIllegalStateException(IllegalStateException ex) {
+        var applicationError = ApplicationError.invalidState(
+                "Resource",
+                ex.getMessage() != null
+                        ? resolveMessageOrDefault(ex.getMessage(), ex.getMessage())
+                        : "The current status does not allow this operation"
+        );
+        return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(applicationError);
+    }
+
+    /**
      * Handles requests that leave out a required query parameter.
      *
      * @param ex the missing parameter exception
