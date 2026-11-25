@@ -67,30 +67,19 @@ public class ProductionBatchesController {
                 .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    @GetMapping("/by-number/{batchNumber}")
-    @Operation(summary = "Get a production batch by its batch number")
-    public ResponseEntity<?> getBatchByNumber(@PathVariable String batchNumber) {
-        return queryService.handle(new GetBatchByNumberQuery(new BatchNumber(batchNumber)))
-                .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
     @GetMapping
-    @Operation(summary = "Get all production batches or filter by batch number")
-    public ResponseEntity<?> getBatches(@RequestParam(required = false) String batchNumber) {
-        if (batchNumber != null && !batchNumber.isBlank()) {
-            var batchOptional = queryService.handle(new GetBatchByNumberQuery(new BatchNumber(batchNumber)));
-            return batchOptional
-                    .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        }
-        List<ProductionBatchResource> batches = queryService.handle(new GetAllBatchesQuery())
-                .stream()
+    @Operation(summary = "Get all production batches or filter them by batch number")
+    public ResponseEntity<List<ProductionBatchResource>> getBatches(@RequestParam(required = false) String batchNumber) {
+        var batches = batchNumber != null && !batchNumber.isBlank()
+                ? queryService.handle(new GetBatchByNumberQuery(new BatchNumber(batchNumber))).stream()
+                : queryService.handle(new GetAllBatchesQuery()).stream();
+        List<ProductionBatchResource> resources = batches
                 .map(ProductionBatchResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
-        return ResponseEntity.ok(batches);
+        return ResponseEntity.ok(resources);
     }
-    @PostMapping("/{batchId}/close")
+
+    @PostMapping("/{batchId}/closure")
     @Operation(summary = "Close a production batch")
     public ResponseEntity<?> closeBatch(
             @PathVariable Long batchId,
@@ -150,7 +139,7 @@ public class ProductionBatchesController {
      * @param batchId the batch ID
      * @return the batch in progress, 404 when it does not exist, or 409 when it is not planned
      */
-    @PostMapping("/{batchId}/start")
+    @PostMapping("/{batchId}/execution")
     @Operation(summary = "Start a planned production batch")
     public ResponseEntity<?> startBatch(@PathVariable Long batchId) {
         var result = commandService.handle(new StartBatchCommand(batchId));
@@ -164,7 +153,7 @@ public class ProductionBatchesController {
      * @param batchId the batch ID
      * @return the batch in progress, 404 when it does not exist, or 409 when it is not on hold
      */
-    @PostMapping("/{batchId}/resume")
+    @PostMapping("/{batchId}/resumption")
     @Operation(summary = "Resume a production batch that is on hold")
     public ResponseEntity<?> resumeBatch(@PathVariable Long batchId) {
         var result = commandService.handle(new ResumeBatchCommand(batchId));
@@ -180,7 +169,7 @@ public class ProductionBatchesController {
      * @return the released batch, 400 without releasedBy, 404 when it does not exist,
      *         or 409 when the release was not requested
      */
-    @PostMapping("/{batchId}/release")
+    @PostMapping("/{batchId}/distribution-release")
     @Operation(summary = "Release a production batch for distribution")
     public ResponseEntity<?> releaseBatch(@PathVariable Long batchId,
                                           @RequestBody ReleaseProductionBatchResource resource) {
