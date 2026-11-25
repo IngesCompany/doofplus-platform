@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-24
+### Changed
+- **Breaking:** the state transitions of production batches are noun sub-resources: `POST /api/v1/production-batches/{id}/execution`, `/resumption`, `/closure` and `/distribution-release` replace `/start`, `/resume`, `/close` and `/release`.
+- **Breaking:** batch release decisions are `POST /api/v1/batch-releases/{id}/approval` and `/rejection` instead of `PUT /approve` and `/reject`; the release id is taken from the path, not from the body.
+- **Breaking:** `GET /api/v1/production-batches?batchNumber=` and `GET /api/v1/batch-releases?batchId=` replace `/by-number/{batchNumber}` and `/by-batch/{batchId}`; collections always answer a list.
+- **Breaking:** subscription renewals are `POST /api/v1/subscriptions/{id}/renewals` instead of `/renewal`.
+
+### Fixed
+- Production batches: registering an incident, updating the progress or consuming materials when the batch status does not allow it answers 409 with a translated message instead of 500.
+
 ## [1.3.1] - 2026-11-17
 ### Added
 - Contributing.md: instructions to run the API with Docker Compose and to run the tests with Gradle.
