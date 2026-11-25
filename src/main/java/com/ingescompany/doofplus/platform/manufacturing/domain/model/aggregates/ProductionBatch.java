@@ -228,11 +228,15 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      *
      * @param command the command containing the incident details.
      * @return the registered incident.
+     * @throws IllegalStateException if the release of the batch was requested or the batch was released
      */
     public Incident registerIncident(RegisterIncidentCommand command) {
+        if (this.status == BatchStatus.RELEASE_REQUESTED || this.status == BatchStatus.RELEASED) {
+            throw new IllegalStateException("manufacturing.error.batch.productionFinished");
+        }
         Incident incident = new Incident(command.description(), command.severity());
         this.incidents.add(incident);
-        if (command.severity() == IncidentSeverity.CRITICAL) {
+        if (command.severity() == IncidentSeverity.CRITICAL && this.status == BatchStatus.IN_PROGRESS) {
             this.status = BatchStatus.ON_HOLD;
         }
         EventTone tone = switch (command.severity()) {
@@ -249,8 +253,13 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      *
      * @param rawMaterialLotId the identifier of the raw material lot.
      * @param quantity the quantity of materials consumed.
+     *
+     * @throws IllegalStateException if the batch is neither planned nor in progress
      */
     public void consumeMaterial(Long rawMaterialLotId, Quantity quantity) {
+        if (this.status != BatchStatus.PLANNED && this.status != BatchStatus.IN_PROGRESS) {
+            throw new IllegalStateException("manufacturing.error.batch.cannotConsume");
+        }
         this.consumptions.add(new MaterialConsumption(rawMaterialLotId, quantity));
         this.recordEvent("MATERIAL_CONSUMED", "Raw material lot " + rawMaterialLotId + " consumed", EventTone.NORMAL, null);
     }
@@ -268,11 +277,15 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
     }
 
     /**
-     * Returns an unmodifiable view of the list of material consumptions for the production batch.
+     * Updates the progress of the production batch.
      *
-     * @return an unmodifiable list of MaterialConsumption.
+     * @param command the command with the new progress (0 to 100).
+     * @throws IllegalStateException if the release of the batch was requested or the batch was released
      */
     public void updateProgress(UpdateBatchProgressCommand command) {
+        if (this.status == BatchStatus.RELEASE_REQUESTED || this.status == BatchStatus.RELEASED) {
+            throw new IllegalStateException("manufacturing.error.batch.productionFinished");
+        }
         this.progress = command.progress();
     }
 

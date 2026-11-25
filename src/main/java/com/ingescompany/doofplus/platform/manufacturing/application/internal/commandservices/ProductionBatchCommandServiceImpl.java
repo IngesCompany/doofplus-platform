@@ -70,6 +70,8 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
             batch.registerIncident(command);
             var savedBatch = productionBatchRepository.save(batch);
             return Result.success(savedBatch.getIncidents().getLast());
+        } catch (IllegalStateException e) {
+            return Result.failure(ApplicationError.invalidState("ProductionBatch", e.getMessage()));
         } catch (Exception e) {
             return Result.failure(ApplicationError.unexpected("register-incident", e.getMessage()));
         }
@@ -77,13 +79,7 @@ public class ProductionBatchCommandServiceImpl implements ProductionBatchCommand
 
     @Override
     public Result<ProductionBatch, ApplicationError> handle(UpdateBatchProgressCommand command) {
-        var batchOptional = productionBatchRepository.findById(command.batchId());
-        if (batchOptional.isEmpty()) {
-            return Result.failure(ApplicationError.notFound("ProductionBatch", command.batchId().toString()));
-        }
-        var batch = batchOptional.get();
-        batch.updateProgress(command);
-        return Result.success(productionBatchRepository.save(batch));
+        return transition(command.batchId(), "update-batch-progress", batch -> batch.updateProgress(command));
     }
 
     @Override

@@ -6,10 +6,11 @@ import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.Appr
 public class ApproveBatchReleaseCommandFromResourceAssembler {
 
     public static ApproveBatchReleaseCommand toCommandFromResource(
+            Long releaseId,
             ApproveBatchReleaseResource resource) {
 
         return new ApproveBatchReleaseCommand(
-                resource.releaseId(),
+                releaseId,
                 resource.signedBy(),
                 resource.signatureReference(),
                 resource.decision()
