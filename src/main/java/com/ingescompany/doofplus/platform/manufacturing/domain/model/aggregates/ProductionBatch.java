@@ -228,6 +228,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      *
      * @param command the command containing the incident details.
      * @return the registered incident.
+     * @throws IllegalStateException if the release of the batch was requested or the batch was released
      */
     public Incident registerIncident(RegisterIncidentCommand command) {
         if (this.status == BatchStatus.RELEASE_REQUESTED || this.status == BatchStatus.RELEASED) {
@@ -253,7 +254,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
      * @param rawMaterialLotId the identifier of the raw material lot.
      * @param quantity the quantity of materials consumed.
      *
-     * @throws IllegalStateException if the batch status is planned or in progress
+     * @throws IllegalStateException if the batch is neither planned nor in progress
      */
     public void consumeMaterial(Long rawMaterialLotId, Quantity quantity) {
         if (this.status != BatchStatus.PLANNED && this.status != BatchStatus.IN_PROGRESS) {
@@ -276,9 +277,10 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
     }
 
     /**
-     * Returns an unmodifiable view of the list of material consumptions for the production batch.
+     * Updates the progress of the production batch.
      *
-     * @throws IllegalStateException if the batch status is released or requested to release
+     * @param command the command with the new progress (0 to 100).
+     * @throws IllegalStateException if the release of the batch was requested or the batch was released
      */
     public void updateProgress(UpdateBatchProgressCommand command) {
         if (this.status == BatchStatus.RELEASE_REQUESTED || this.status == BatchStatus.RELEASED) {
@@ -286,6 +288,7 @@ public class ProductionBatch extends AbstractDomainAggregateRoot<ProductionBatch
         }
         this.progress = command.progress();
     }
+
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
