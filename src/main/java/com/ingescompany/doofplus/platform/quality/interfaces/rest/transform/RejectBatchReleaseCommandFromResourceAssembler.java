@@ -6,10 +6,11 @@ import com.ingescompany.doofplus.platform.quality.interfaces.rest.resources.Reje
 public class RejectBatchReleaseCommandFromResourceAssembler {
 
     public static RejectBatchReleaseCommand toCommandFromResource(
+            Long releaseId,
             RejectBatchReleaseResource resource) {
 
         return new RejectBatchReleaseCommand(
-                resource.releaseId(),
+                releaseId,
                 resource.signedBy(),
                 resource.decision()
         );
