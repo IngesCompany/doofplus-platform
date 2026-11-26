@@ -63,7 +63,6 @@ public class EquipmentController {
                 .filter(equipment -> code == null || code.isBlank() || equipment.getCode().value().equalsIgnoreCase(code.trim()))
                 .map(EquipmentResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
-        if (code != null && !code.isBlank() && resources.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(resources);
     }
 
