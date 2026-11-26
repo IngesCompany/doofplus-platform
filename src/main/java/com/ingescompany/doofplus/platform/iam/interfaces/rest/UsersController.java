@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * REST controller that exposes IAM user resources.
@@ -136,7 +138,7 @@ public class UsersController {
             @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<UserResource> getUserById(
+    public ResponseEntity<?> getUserById(
             @PathVariable
             @Parameter(
                 description = "Unique user identifier",
@@ -148,7 +150,8 @@ public class UsersController {
         var getUserByIdQuery = new GetUserByIdQuery(userId);
         var user = userQueryService.handle(getUserByIdQuery);
         if (user.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("User", userId.toString()));
         }
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
         return ResponseEntity.ok(userResource);

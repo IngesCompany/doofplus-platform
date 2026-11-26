@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * REST controller that exposes the Organizations resources.
@@ -64,10 +66,11 @@ public class OrganizationsController {
 
     @GetMapping("/{organizationId}")
     @Operation(summary = "Get an organization by id")
-    public ResponseEntity<OrganizationResource> getOrganizationById(@PathVariable Long organizationId) {
+    public ResponseEntity<?> getOrganizationById(@PathVariable Long organizationId) {
         return queryService.handle(new GetOrganizationByIdQuery(organizationId))
-                .map(organization -> ResponseEntity.ok(
+                .<ResponseEntity<?>>map(organization -> ResponseEntity.ok(
                         OrganizationResourceFromEntityAssembler.toResourceFromEntity(organization)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("Organization", organizationId.toString())));
     }
 }
