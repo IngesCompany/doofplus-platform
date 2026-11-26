@@ -217,7 +217,8 @@ The API is available at `http://localhost:8080/api/v1` and Swagger UI at `http:/
 | `DATABASE_NAME` | Database name | `doofplus-os` | ✅ |
 | `DATABASE_USER` | MySQL user | `root` | ✅ |
 | `DATABASE_PASSWORD` | MySQL password | `password` | ✅ |
-| `JWT_SECRET` | JWT signing secret (**at least 32 characters**) | Development value | ✅ |
+| `JWT_SECRET` | JWT signing secret (**at least 32 characters**) | Development value | ✅ (the `prod` profile does not start without it) |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated origins allowed to call the API | Web App on Firebase, Website on GitHub Pages and `http://localhost:4200` | — |
 | `NIUBIZ_BASE_URL` | Niubiz base URL | Niubiz sandbox | ✅ |
 | `NIUBIZ_MERCHANT_ID` | Niubiz merchant ID | — | ✅ |
 | `NIUBIZ_USERNAME` | Niubiz API user | — | ✅ |

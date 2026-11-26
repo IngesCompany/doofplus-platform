@@ -27,3 +27,5 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 # - DATABASE_USER: database user.
 # - DATABASE_PASSWORD: database password.
 # - PORT: port where the application listens (default 8080).
+# - JWT_SECRET: signing secret of the JSON Web Tokens (required: the prod profile has no default).
+# - CORS_ALLOWED_ORIGINS: optional, comma-separated origins allowed to call the API.
