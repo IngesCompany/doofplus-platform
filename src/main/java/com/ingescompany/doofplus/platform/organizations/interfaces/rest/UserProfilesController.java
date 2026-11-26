@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * REST controller that exposes the profiles of the users of an organization.
@@ -73,9 +75,10 @@ public class UserProfilesController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a user profile by its identifier")
-    public ResponseEntity<UserProfileResource> getUserProfileById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserProfileById(@PathVariable Long id) {
         return queryService.handle(new GetUserProfileByIdQuery(id))
-                .map(found -> ResponseEntity.ok(UserProfileResourceFromEntityAssembler.toResourceFromEntity(found)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(found -> ResponseEntity.ok(UserProfileResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("UserProfile", id.toString())));
     }
 }

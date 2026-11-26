@@ -30,6 +30,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * REST controller that exposes the Production Batches resources and administration endpoints
@@ -61,11 +63,12 @@ public class ProductionBatchesController {
     }
     @GetMapping("/{batchId}")
     @Operation(summary = "Get production batch by ID")
-    public ResponseEntity<ProductionBatchResource> getBatchById(@PathVariable Long batchId) {
+    public ResponseEntity<?> getBatchById(@PathVariable Long batchId) {
         var batchOptional = queryService.handle(new GetBatchByIdQuery(batchId));
         return batchOptional
-                .map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(batch -> ResponseEntity.ok(ProductionBatchResourceFromEntityAssembler.toResourceFromEntity(batch)))
+                .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("ProductionBatch", batchId.toString())));
     }
     @GetMapping
     @Operation(summary = "Get all production batches or filter them by batch number")

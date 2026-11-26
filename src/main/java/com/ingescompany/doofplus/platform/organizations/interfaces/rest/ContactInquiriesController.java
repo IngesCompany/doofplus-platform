@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * REST controller that exposes the contact inquiries sent from the public contact us page.
@@ -58,9 +60,10 @@ public class ContactInquiriesController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a contact inquiry by its identifier")
-    public ResponseEntity<ContactInquiryResource> getContactInquiryById(@PathVariable Long id) {
+    public ResponseEntity<?> getContactInquiryById(@PathVariable Long id) {
         return queryService.handle(new GetContactInquiryByIdQuery(id))
-                .map(found -> ResponseEntity.ok(ContactInquiryResourceFromEntityAssembler.toResourceFromEntity(found)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(found -> ResponseEntity.ok(ContactInquiryResourceFromEntityAssembler.toResourceFromEntity(found)))
+                .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("ContactInquiry", id.toString())));
     }
 }

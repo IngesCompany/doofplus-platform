@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import com.ingescompany.doofplus.platform.shared.application.result.ApplicationError;
+import com.ingescompany.doofplus.platform.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 
 /**
  * Invitations of new members (US55). Only for administrators.
@@ -75,10 +77,11 @@ public class InvitationsController {
             @ApiResponse(responseCode = "200", description = "Invitation found"),
             @ApiResponse(responseCode = "404", description = "Invitation not found")
     })
-    public ResponseEntity<InvitationResource> getInvitationById(@PathVariable Long invitationId) {
+    public ResponseEntity<?> getInvitationById(@PathVariable Long invitationId) {
         return invitationQueryService.handle(new GetInvitationByIdQuery(invitationId))
                 .map(InvitationResourceFromEntityAssembler::toResourceFromEntity)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ProblemDetailFromApplicationErrorAssembler.toResponseFromApplicationError(
+                        ApplicationError.notFound("Invitation", invitationId.toString())));
     }
 }
