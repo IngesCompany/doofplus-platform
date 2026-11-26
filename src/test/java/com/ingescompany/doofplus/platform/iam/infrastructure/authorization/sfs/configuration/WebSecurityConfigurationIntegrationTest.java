@@ -9,7 +9,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -63,5 +65,24 @@ class WebSecurityConfigurationIntegrationTest {
         mockMvc.perform(post("/api/v1/telemetry").contentType(MediaType.APPLICATION_JSON).content("{}")
                         .header("X-Api-Key", "wrong-key"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void corsAllowsTheWebApplicationOrigin() throws Exception {
+        mockMvc.perform(options("/api/v1/deviations")
+                        .header("Origin", "https://doofplus-webapp.web.app")
+                        .header("Access-Control-Request-Method", "GET")
+                        .header("Access-Control-Request-Headers", "Authorization"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "https://doofplus-webapp.web.app"));
+    }
+
+    @Test
+    void corsRejectsAnUnknownOrigin() throws Exception {
+        mockMvc.perform(options("/api/v1/deviations")
+                        .header("Origin", "https://unknown.example.com")
+                        .header("Access-Control-Request-Method", "GET"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
     }
 }
