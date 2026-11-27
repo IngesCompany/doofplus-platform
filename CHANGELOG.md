@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- **Breaking:** the sub-resources that record an event are plural nouns: production batches `POST /executions`, `/resumptions`, `/closures` and `/distribution-releases`; batch releases `POST /approvals` and `/rejections`; raw material lots `POST /inspections` (was `PUT /inspection`), `/approvals`, `/rejections` and `/allocations`; master formulas `POST /approvals`; subscriptions `POST /activations` and `/cancellations`.
+- `PUT /subscriptions/{id}/plan`, `PUT /production-orders/{id}/status` and `PATCH /production-batches/{id}/progress` stay singular: each resource has only one plan, status or progress, which is updated in place.
 
 ## [2.0.0] - 2026-11-24
 ### Changed

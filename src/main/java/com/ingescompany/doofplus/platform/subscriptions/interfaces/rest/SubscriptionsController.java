@@ -126,7 +126,7 @@ public class SubscriptionsController {
             @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not pending",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PostMapping("{id}/activation")
+    @PostMapping("{id}/activations")
     public ResponseEntity<?> activateSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/activation", id);
         var result = subscriptionCommandService.handle(new ActivateSubscriptionCommand(id));
@@ -196,7 +196,7 @@ public class SubscriptionsController {
             @ApiResponse(responseCode = "409", description = "Conflict - the subscription is not active",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PostMapping("{id}/cancellation")
+    @PostMapping("{id}/cancellations")
     public ResponseEntity<?> cancelSubscription(@PathVariable Long id) {
         log.debug("POST /api/v1/subscriptions/{}/cancellation", id);
         var result = subscriptionCommandService.handle(new CancelSubscriptionCommand(id));

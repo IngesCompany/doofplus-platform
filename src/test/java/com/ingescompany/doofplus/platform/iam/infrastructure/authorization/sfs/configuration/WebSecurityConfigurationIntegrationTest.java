@@ -29,7 +29,7 @@ class WebSecurityConfigurationIntegrationTest {
     void privateEndpointWithoutTokenAnswersUnauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/deviations")).andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/v1/production-batches")).andExpect(status().isUnauthorized());
-        mockMvc.perform(post("/api/v1/production-batches/1/execution")).andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/v1/production-batches/1/executions")).andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -62,7 +62,7 @@ public class MasterFormulasController {
     /**
      * Approves a draft or pending formula; the version approved before becomes locked.
      */
-    @PostMapping("/{masterFormulaId}/approval")
+    @PostMapping("/{masterFormulaId}/approvals")
     @Operation(summary = "Approve a master formula")
     public ResponseEntity<?> approveMasterFormula(@PathVariable Long masterFormulaId,
                                                   @RequestBody ApproveMasterFormulaResource resource) {

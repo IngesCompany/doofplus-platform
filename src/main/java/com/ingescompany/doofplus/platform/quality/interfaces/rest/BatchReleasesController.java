@@ -58,7 +58,7 @@ public class BatchReleasesController {
         );
     }
 
-    @PostMapping("/{releaseId}/approval")
+    @PostMapping("/{releaseId}/approvals")
     @Operation(summary = "Approve a batch release")
     public ResponseEntity<?> approveBatchRelease(
             @PathVariable Long releaseId,
@@ -76,7 +76,7 @@ public class BatchReleasesController {
         );
     }
 
-    @PostMapping("/{releaseId}/rejection")
+    @PostMapping("/{releaseId}/rejections")
     @Operation(summary = "Reject a batch release")
     public ResponseEntity<?> rejectBatchRelease(
             @PathVariable Long releaseId,
