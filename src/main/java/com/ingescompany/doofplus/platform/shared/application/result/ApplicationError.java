@@ -84,6 +84,16 @@ public record ApplicationError(
     }
 
     /**
+     * Forbidden error: the caller is known but the operation is not allowed for it
+     */
+    public static ApplicationError forbidden(String context, String reason) {
+        return new ApplicationError(
+                "FORBIDDEN",
+                "Forbidden: %s".formatted(context),
+                reason);
+    }
+
+    /**
      * Service unavailable error: an external service needed by the operation did not answer
      */
     public static ApplicationError serviceUnavailable(String service, String reason) {

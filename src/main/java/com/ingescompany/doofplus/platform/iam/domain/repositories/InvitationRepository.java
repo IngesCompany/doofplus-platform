@@ -17,5 +17,7 @@ public interface InvitationRepository {
 
     boolean existsPendingByEmail(String email);
 
+    Optional<Invitation> findPendingByEmail(String email);
+
     Invitation save(Invitation invitation);
 }

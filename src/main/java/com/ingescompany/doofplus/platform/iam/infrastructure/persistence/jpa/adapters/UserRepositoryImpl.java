@@ -53,5 +53,10 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existsByEmail(String email) {
         return userPersistenceRepository.existsByEmail(email);
     }
+
+    @Override
+    public boolean existsByOrganizationId(Long organizationId) {
+        return userPersistenceRepository.existsByOrganizationId(organizationId);
+    }
 }
 

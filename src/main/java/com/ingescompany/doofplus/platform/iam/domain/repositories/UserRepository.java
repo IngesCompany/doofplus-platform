@@ -18,5 +18,7 @@ public interface UserRepository {
     User save(User user);
 
     boolean existsByEmail(String email);
+
+    boolean existsByOrganizationId(Long organizationId);
 }
 

@@ -44,6 +44,12 @@ public class InvitationRepositoryImpl implements InvitationRepository {
     }
 
     @Override
+    public Optional<Invitation> findPendingByEmail(String email) {
+        return repository.findFirstByEmailAndStatus(email, InvitationStatus.PENDING.name())
+                .map(InvitationPersistenceAssembler::toDomainFromPersistence);
+    }
+
+    @Override
     public Invitation save(Invitation invitation) {
         var saved = repository.save(InvitationPersistenceAssembler.toPersistenceFromDomain(invitation));
         return InvitationPersistenceAssembler.toDomainFromPersistence(saved);

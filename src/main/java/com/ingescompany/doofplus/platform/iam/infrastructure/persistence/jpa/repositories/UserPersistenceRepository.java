@@ -26,5 +26,7 @@ public interface UserPersistenceRepository extends JpaRepository<UserPersistence
      */
     boolean existsByEmail(String email);
 
+    boolean existsByOrganizationId(Long organizationId);
+
 }
 

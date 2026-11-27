@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data repository of the invitation rows.
@@ -14,4 +15,6 @@ public interface InvitationPersistenceRepository extends JpaRepository<Invitatio
     List<InvitationPersistenceEntity> findAllByOrganizationId(Long organizationId);
 
     boolean existsByEmailAndStatus(String email, String status);
+
+    Optional<InvitationPersistenceEntity> findFirstByEmailAndStatus(String email, String status);
 }

@@ -182,6 +182,7 @@ public final class ProblemDetailFromApplicationErrorAssembler {
             case String s when s.endsWith("_CONFLICT") -> HttpStatus.CONFLICT;
             case "SERVICE_UNAVAILABLE" -> HttpStatus.SERVICE_UNAVAILABLE;
             case "UNAUTHORIZED" -> HttpStatus.UNAUTHORIZED;
+            case "FORBIDDEN" -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
