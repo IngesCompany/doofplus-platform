@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-27
+### Security
+- IAM: `POST /api/v1/authentication/sign-up` and `POST /api/v1/users` no longer take the role, the privilege or the organization from the client. The first user of an organization becomes its administrator, an invited user takes the role, organization and facility of the pending invitation, and any other sign-up to an organization that already has users answers 403.
+
+
 ## [2.0.0] - 2026-11-24
 ### Changed
 - **Breaking:** the state transitions of production batches are noun sub-resources: `POST /api/v1/production-batches/{id}/execution`, `/resumption`, `/closure` and `/distribution-release` replace `/start`, `/resume`, `/close` and `/release`.
