@@ -61,7 +61,7 @@ public class RawMaterialLotsController {
                         ApplicationError.notFound("RawMaterialLot", rawMaterialLotId.toString())));
     }
 
-    @PutMapping("/{rawMaterialLotId}/inspection")
+    @PostMapping("/{rawMaterialLotId}/inspections")
     @Operation(summary = "Record the QC inspection of a lot")
     public ResponseEntity<?> inspectLot(@PathVariable Long rawMaterialLotId,
                                         @RequestBody InspectRawMaterialLotResource resource) {
@@ -69,21 +69,21 @@ public class RawMaterialLotsController {
         return ResponseEntityAssembler.toResponseEntityFromResult(result, CatalogResourceAssembler::toResource, HttpStatus.OK);
     }
 
-    @PostMapping("/{rawMaterialLotId}/approval")
+    @PostMapping("/{rawMaterialLotId}/approvals")
     @Operation(summary = "Approve a lot in inspection")
     public ResponseEntity<?> approveLot(@PathVariable Long rawMaterialLotId) {
         var result = commandService.handle(new ApproveRawMaterialLotCommand(rawMaterialLotId));
         return ResponseEntityAssembler.toResponseEntityFromResult(result, CatalogResourceAssembler::toResource, HttpStatus.OK);
     }
 
-    @PostMapping("/{rawMaterialLotId}/rejection")
+    @PostMapping("/{rawMaterialLotId}/rejections")
     @Operation(summary = "Reject a lot in inspection")
     public ResponseEntity<?> rejectLot(@PathVariable Long rawMaterialLotId) {
         var result = commandService.handle(new RejectRawMaterialLotCommand(rawMaterialLotId));
         return ResponseEntityAssembler.toResponseEntityFromResult(result, CatalogResourceAssembler::toResource, HttpStatus.OK);
     }
 
-    @PostMapping("/{rawMaterialLotId}/allocation")
+    @PostMapping("/{rawMaterialLotId}/allocations")
     @Operation(summary = "Allocate an approved lot to a batch")
     public ResponseEntity<?> allocateLot(@PathVariable Long rawMaterialLotId,
                                          @RequestBody AllocateRawMaterialLotResource resource) {

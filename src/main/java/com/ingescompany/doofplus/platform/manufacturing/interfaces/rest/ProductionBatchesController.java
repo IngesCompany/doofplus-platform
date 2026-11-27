@@ -82,7 +82,7 @@ public class ProductionBatchesController {
         return ResponseEntity.ok(resources);
     }
 
-    @PostMapping("/{batchId}/closure")
+    @PostMapping("/{batchId}/closures")
     @Operation(summary = "Close a production batch")
     public ResponseEntity<?> closeBatch(
             @PathVariable Long batchId,
@@ -142,7 +142,7 @@ public class ProductionBatchesController {
      * @param batchId the batch ID
      * @return the batch in progress, 404 when it does not exist, or 409 when it is not planned
      */
-    @PostMapping("/{batchId}/execution")
+    @PostMapping("/{batchId}/executions")
     @Operation(summary = "Start a planned production batch")
     public ResponseEntity<?> startBatch(@PathVariable Long batchId) {
         var result = commandService.handle(new StartBatchCommand(batchId));
@@ -156,7 +156,7 @@ public class ProductionBatchesController {
      * @param batchId the batch ID
      * @return the batch in progress, 404 when it does not exist, or 409 when it is not on hold
      */
-    @PostMapping("/{batchId}/resumption")
+    @PostMapping("/{batchId}/resumptions")
     @Operation(summary = "Resume a production batch that is on hold")
     public ResponseEntity<?> resumeBatch(@PathVariable Long batchId) {
         var result = commandService.handle(new ResumeBatchCommand(batchId));
@@ -172,7 +172,7 @@ public class ProductionBatchesController {
      * @return the released batch, 400 without releasedBy, 404 when it does not exist,
      *         or 409 when the release was not requested
      */
-    @PostMapping("/{batchId}/distribution-release")
+    @PostMapping("/{batchId}/distribution-releases")
     @Operation(summary = "Release a production batch for distribution")
     public ResponseEntity<?> releaseBatch(@PathVariable Long batchId,
                                           @RequestBody ReleaseProductionBatchResource resource) {
